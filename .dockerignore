@@ -1,0 +1,5 @@
+.dart_tool/
+build/
+.git/
+ios/Pods/
+android/.gradle/

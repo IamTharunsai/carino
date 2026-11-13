@@ -83,6 +83,12 @@ class VerificationService {
   /// onboarding can complete end-to-end (MOCK MODE only).
   Future<VerificationStatus> runDemoFlow() async {
     _status = VerificationStatus.pending;
+    // Live builds never self-grant layers: open the vendor session and stay
+    // pending until the server writes verification_records (badge_state).
+    if (!Env.useMockBackend) {
+      await startLiveSession();
+      return _status;
+    }
     for (final layer in VerificationLayer.values) {
       await Future<void>.delayed(const Duration(milliseconds: 250));
       _completedLayers.add(layer);

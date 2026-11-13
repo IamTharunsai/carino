@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../config/env.dart';
 
 /// Subscriptions (blueprint S-054 / S-054B).
 ///
@@ -18,6 +19,8 @@ class PaymentsService {
   /// `plus` entitlement from the RevenueCat customer info, mirrored
   /// server-side for cross-device consistency.
   Future<bool> purchaseDemoPlus() async {
+    // Live builds never grant Plus without a real store purchase (Guideline 3.1.1).
+    if (!Env.useMockBackend) return false;
     await Future<void>.delayed(const Duration(milliseconds: 500));
     _isPlus = true;
     debugPrint('[PaymentsService] demo Plus entitlement granted (stub)');

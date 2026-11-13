@@ -119,7 +119,15 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
                     // PRODUCTION: BackendService deletion job + revoke all
                     // sessions + sign out (the RootFlow gate then drops to
                     // Welcome). Scaffold: sign out of the demo session.
-                    await Services.auth.signOut();
+                    try {
+                      await Services.auth.deleteAccount();
+                    } catch (_) {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                          content: Text(
+                              "Couldn't delete your account. Nothing was removed — try again.")));
+                      return;
+                    }
                     if (!context.mounted) return;
                     Navigator.of(context).popUntil((r) => r.isFirst);
                   }

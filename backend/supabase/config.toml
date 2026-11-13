@@ -38,3 +38,5 @@ verify_jwt = false
 verify_jwt = false
 [functions.verification-session]
 verify_jwt = true
+[functions.delete-account]
+verify_jwt = true

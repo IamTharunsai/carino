@@ -1,7 +1,7 @@
-// Cariño · Edge Function: match-expiry (scheduled job)
+// CariÃ±o Â· Edge Function: match-expiry (scheduled job)
 // Runs every ~15 minutes (pg_cron / Supabase scheduled functions):
-//   1. MATCH EXPIRY (REA §5.1): matches whose expires_at passed with NO
-//      conversation activity move to 'archived' — never deleted. Once a
+//   1. MATCH EXPIRY (REA Â§5.1): matches whose expires_at passed with NO
+//      conversation activity move to 'archived' â€” never deleted. Once a
 //      conversation exists, expiry no longer applies (expires_at cleared
 //      by the messaging layer on first message).
 //   2. MOMENTS: rows past expires_at are deleted with their media objects
@@ -12,7 +12,12 @@
 // deno-lint-ignore-file no-explicit-any
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-Deno.serve(async (_req: Request) => {
+Deno.serve(async (req: Request) => {
+  // Only the DB webhook / scheduler may call this (verify_jwt=false). Fail closed.
+  const secret = Deno.env.get("JOB_SECRET");
+  if (!secret || req.headers.get("x-job-secret") !== secret) {
+    return new Response("forbidden", { status: 403 });
+  }
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
@@ -64,7 +69,7 @@ Deno.serve(async (_req: Request) => {
   // 3. Dissolve due vanish messages.
   const { data: due } = await supabase
     .from("messages")
-    .update({ dissolved_at: now })
+    .update({ dissolved_at: now, body: null, media_id: null })
     .lt("expires_at", now)
     .is("dissolved_at", null)
     .select("id");

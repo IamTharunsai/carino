@@ -9,6 +9,11 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 Deno.serve(async (req: Request) => {
+  // Only the DB webhook / scheduler may call this (verify_jwt=false). Fail closed.
+  const secret = Deno.env.get("JOB_SECRET");
+  if (!secret || req.headers.get("x-job-secret") !== secret) {
+    return new Response("forbidden", { status: 403 });
+  }
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,

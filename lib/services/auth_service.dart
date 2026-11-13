@@ -119,4 +119,15 @@ class AuthService {
     sessionChanges.value = false;
     debugPrint('[AuthService] signed out');
   }
+
+  /// S-055: permanently deletes the account server-side (delete-account
+  /// Edge Function), then signs out. Throws if the server refuses, so the
+  /// screen never claims a deletion that didn't happen.
+  Future<void> deleteAccount() async {
+    if (!Env.useMockBackend) {
+      final res = await _client.functions.invoke('delete-account');
+      if (res.status != 200) throw Exception('delete failed (${res.status})');
+    }
+    await signOut();
+  }
 }
