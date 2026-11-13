@@ -1,0 +1,35 @@
+name: carino
+description: "Cariño — a 21+, verified-first dating app. Video-first profiles, stated intentions, mutual Spark video sessions, and plans over endless chat. (Working name — see AppConfig.appName.)"
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+  flutter: ">=3.19.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  # Backend SDK (Supabase) — wired behind the Services interfaces with a
+  # mock fallback (lib/config/env.dart). Live only when --dart-define
+  # supplies SUPABASE_URL + SUPABASE_ANON_KEY; see backend/ + .env.example.
+  supabase_flutter: ^2.9.0
+  # --- Remaining production integrations (hosting phase; accounts needed) ---
+  # revenuecat (purchases_flutter): ^8.x  # PaymentsService (RevenueCat)
+  # Persona / Veriff: native SDKs bridged via platform channels (VerificationService)
+  # WebRTC provider (Daily / Agora class): Spark Sessions (VideoService)
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/hero_welcome.jpg
+    - assets/images/backdrop_discover.jpg
+    - assets/images/backdrop_match.jpg
+    - assets/images/logo.png
+    - assets/images/app_icon.png

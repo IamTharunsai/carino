@@ -1,0 +1,40 @@
+# Cariño Supabase project config (local development defaults).
+# The hosting phase sets the real project ref via `supabase link`;
+# no production values live in this file.
+project_id = "carino"
+
+[api]
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 15
+
+[auth]
+site_url = "http://localhost:3000"
+enable_signup = true
+# Passkey-first, phone/email OTP fallback (blueprint S-003).
+[auth.email]
+enable_signup = true
+[auth.sms]
+enable_signup = true
+
+[storage]
+enabled = true
+file_size_limit = "50MiB"
+
+[functions.ai-proxy]
+verify_jwt = true
+[functions.moderation-intake]
+verify_jwt = false
+[functions.match-expiry]
+verify_jwt = false
+[functions.report-sla]
+verify_jwt = false
+[functions.remote-config]
+verify_jwt = false
+[functions.verification-session]
+verify_jwt = true
