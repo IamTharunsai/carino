@@ -98,6 +98,32 @@ class AuthService {
     }
   }
 
+  /// Returning members: username (email or phone) + password.
+  /// Returns null on success, or a plain error message.
+  Future<String?> signInWithPassword(String username, String password) async {
+    final u = username.trim();
+    if (u.isEmpty || password.isEmpty) return 'Enter your username and password.';
+    if (Env.useMockBackend) {
+      await Future<void>.delayed(const Duration(milliseconds: 400));
+      _signedIn = true;
+      sessionChanges.value = true;
+      debugPrint('[AuthService] demo password sign-in (mock backend)');
+      return null;
+    }
+    try {
+      if (u.contains('@')) {
+        await _client.auth.signInWithPassword(email: u, password: password);
+      } else {
+        await _client.auth.signInWithPassword(phone: u, password: password);
+      }
+      return null;
+    } on AuthException catch (e) {
+      // Never reveal whether the username exists.
+      debugPrint('[AuthService] password sign-in failed: ${e.message}');
+      return 'That username and password don\'t match.';
+    }
+  }
+
   // --- Sessions (S-050) ----------------------------------------------------
 
   /// Active sessions for the Settings list. The device list comes from the

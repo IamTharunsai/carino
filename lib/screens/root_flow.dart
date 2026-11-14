@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import '../widgets/glass_card.dart';
 import '../services/services.dart';
 import 'home_shell.dart';
 import 'onboarding/age_gate_screen.dart';
@@ -9,6 +10,7 @@ import 'onboarding/intentions_screen.dart';
 import 'onboarding/permission_primers_screen.dart';
 import 'onboarding/privacy_setup_screen.dart';
 import 'onboarding/profile_creation_screen.dart';
+import 'onboarding/sign_in_screen.dart';
 import 'onboarding/taste_quiz_screen.dart';
 import 'onboarding/verification_flow_screen.dart';
 import 'onboarding/verification_intro_screen.dart';
@@ -22,6 +24,7 @@ import 'onboarding/welcome_screen.dart';
 enum _Stage {
   welcome,
   ageGate,
+  signIn,
   auth,
   verificationIntro,
   verificationProvider,
@@ -47,6 +50,13 @@ class _RootFlowState extends State<RootFlow> {
   _Stage _stage = _Stage.welcome;
   bool _completedOnboarding = false;
 
+  /// Steps visited, for the back button on every onboarding page.
+  final List<_Stage> _history = [];
+
+  /// Came in through "I already have an account": a code sign-in should
+  /// land on Home, not restart verification.
+  bool _returning = false;
+
   @override
   void initState() {
     super.initState();
@@ -66,10 +76,39 @@ class _RootFlowState extends State<RootFlow> {
     }
   }
 
-  void _go(_Stage stage) => setState(() => _stage = stage);
+  void _go(_Stage stage) => setState(() {
+        if (stage == _Stage.home || stage == _Stage.welcome) {
+          _history.clear();
+        } else {
+          _history.add(_stage);
+        }
+        _stage = stage;
+      });
+
+  void _back() {
+    if (_history.isEmpty) return;
+    setState(() => _stage = _history.removeLast());
+  }
 
   @override
   Widget build(BuildContext context) {
+    final page = _page();
+    if (_history.isEmpty || _stage == _Stage.home) return page;
+    // Every onboarding page: on-screen back (via GlassScaffold) + the
+    // Android system back gesture go one step back.
+    return OnboardingBack(
+      onBack: _back,
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (!didPop) _back();
+        },
+        child: page,
+      ),
+    );
+  }
+
+  Widget _page() {
     switch (_stage) {
       case _Stage.welcome:
         return WelcomeScreen(
@@ -78,14 +117,33 @@ class _RootFlowState extends State<RootFlow> {
           // check that the account is verified and not restricted. The
           // scaffold honours an existing demo session; otherwise it still
           // requires the full gate chain.
-          onSignIn: () => _go(
-              Services.auth.isSignedIn ? _Stage.home : _Stage.auth),
+          onSignIn: () {
+            _returning = true;
+            _go(Services.auth.isSignedIn ? _Stage.home : _Stage.signIn);
+          },
+        );
+      case _Stage.signIn:
+        return SignInScreen(
+          onSignedIn: () {
+            _completedOnboarding = true;
+            _go(_Stage.home);
+          },
+          onUseCode: () => _go(_Stage.auth),
         );
       case _Stage.ageGate:
-        return AgeGateScreen(onPassed: () => _go(_Stage.auth));
+        return AgeGateScreen(onPassed: () {
+          _returning = false;
+          _go(_Stage.auth);
+        });
       case _Stage.auth:
-        return AuthScreen(
-            onAuthenticated: () => _go(_Stage.verificationIntro));
+        return AuthScreen(onAuthenticated: () {
+          if (_returning) {
+            _completedOnboarding = true;
+            _go(_Stage.home);
+          } else {
+            _go(_Stage.verificationIntro);
+          }
+        });
       case _Stage.verificationIntro:
         return VerificationIntroScreen(
           onStart: () => _go(_Stage.verificationProvider),
@@ -135,7 +193,10 @@ class _RootFlowState extends State<RootFlow> {
               ? const HomeShell()
               : WelcomeScreen(
                   onContinue: () => _go(_Stage.ageGate),
-                  onSignIn: () => _go(_Stage.auth),
+                  onSignIn: () {
+                    _returning = true;
+                    _go(_Stage.signIn);
+                  },
                 ),
         );
     }

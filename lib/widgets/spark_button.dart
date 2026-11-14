@@ -11,6 +11,7 @@ class SparkButton extends StatelessWidget {
     required this.onPressed,
     this.icon,
     this.secondary = false,
+    this.iconAtEnd = false,
   });
 
   final String label;
@@ -20,6 +21,9 @@ class SparkButton extends StatelessWidget {
   /// Secondary = glass style with hairline border.
   final bool secondary;
 
+  /// Put the icon after the label (e.g. a forward arrow).
+  final bool iconAtEnd;
+
   @override
   Widget build(BuildContext context) {
     if (secondary) {
@@ -27,6 +31,7 @@ class SparkButton extends StatelessWidget {
         onPressed: onPressed,
         icon: Icon(icon ?? Icons.arrow_forward, size: 18),
         label: Text(label),
+        iconAlignment: iconAtEnd ? IconAlignment.end : IconAlignment.start,
         style: OutlinedButton.styleFrom(
           minimumSize: const Size.fromHeight(50),
           side: BorderSide(color: AppColors.glassBorder(Theme.of(context).brightness)),
@@ -38,6 +43,7 @@ class SparkButton extends StatelessWidget {
       onPressed: onPressed,
       icon: Icon(icon ?? Icons.arrow_forward, size: 18),
       label: Text(label),
+      iconAlignment: iconAtEnd ? IconAlignment.end : IconAlignment.start,
     );
   }
 }

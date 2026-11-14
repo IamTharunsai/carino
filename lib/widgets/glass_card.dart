@@ -60,6 +60,20 @@ class GlassContainer extends StatelessWidget {
   }
 }
 
+/// Provides "go back one step" to onboarding pages, which are swapped by
+/// RootFlow rather than pushed (so Navigator alone can't pop them).
+class OnboardingBack extends InheritedWidget {
+  const OnboardingBack({super.key, required this.onBack, required super.child});
+
+  final VoidCallback onBack;
+
+  static VoidCallback? maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<OnboardingBack>()?.onBack;
+
+  @override
+  bool updateShouldNotify(OnboardingBack oldWidget) => onBack != oldWidget.onBack;
+}
+
 /// Scaffold with a full-bleed photographic background (approved imagery)
 /// under a soft theme scrim — the "first-eye" look of the brand.
 /// Text over photography keeps a scrim so contrast passes WCAG AA.
@@ -82,8 +96,21 @@ class GlassScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    // Every page gets a back button: onboarding steps via OnboardingBack,
+    // pushed pages via the Navigator. Tab roots (nothing to go back to)
+    // stay clean.
+    final onboardingBack = OnboardingBack.maybeOf(context);
+    final canPop = ModalRoute.of(context)?.canPop ?? false;
+    final bar = appBar ??
+        (onboardingBack != null || canPop
+            ? AppBar(
+                leading: BackButton(
+                  onPressed: onboardingBack ?? () => Navigator.of(context).maybePop(),
+                ),
+              )
+            : null);
     return Scaffold(
-      appBar: appBar,
+      appBar: bar,
       extendBody: true,
       extendBodyBehindAppBar: true,
       body: Stack(
