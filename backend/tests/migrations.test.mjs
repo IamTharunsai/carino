@@ -107,6 +107,49 @@ try {
   equal(await count('group_messages'), 0);
   equal(await count('trust_meetings'), 0);
   equal(await count('trust_vouches'), 0);
+  // --- 0006 social writes ---------------------------------------------------
+  const c = '00000000-0000-0000-0000-00000000000c';
+  const d = '00000000-0000-0000-0000-00000000000d';
+  const e = '00000000-0000-0000-0000-00000000000e';
+  await db.exec('reset role');
+  await db.exec(`
+    insert into auth.users(id) values ('${c}'),('${d}'),('${e}');
+    insert into public.verification_records(user_id, badge_state) values ('${c}','active'),('${d}','active')
+      on conflict (user_id) do update set badge_state = excluded.badge_state;
+    insert into public.friendships(user_a,user_b) values ('${c}','${d}');
+    insert into public.guilds(name) values ('Run Club');
+  `);
+  await as(c);
+  await db.exec(`insert into public.chat_groups(name) values ('Weekend crew')`);
+  const g2 = (await db.query(`select id, owner from public.chat_groups where name = 'Weekend crew'`)).rows[0];
+  equal(g2.owner, c); // owner forced to the caller
+  equal(await count('group_members'), 1); // owner auto-joined
+  await db.exec(`insert into public.group_members(group_id,user_id) values ('${g2.id}','${d}')`);
+  await denied(`insert into public.group_members(group_id,user_id) values ('${g2.id}','${e}')`); // not a friend
+  await db.exec(`insert into public.group_messages(group_id,sender,body) values ('${g2.id}','${c}','Saturday?')`);
+  const msg = (await db.query(`select expires_at from public.group_messages where body='Saturday?'`)).rows[0];
+  equal(msg.expires_at, null); // vanish not enabled -> kept
+  await denied(`insert into public.group_messages(group_id,sender,body) values ('${g2.id}','${d}','Forged')`);
+  await denied(`insert into public.group_messages(group_id,sender,body,kind) values ('${g2.id}','${c}','x','system')`);
+  await denied(`insert into public.group_messages(group_id,sender,body,expires_at) values ('${g2.id}','${c}','x',now())`);
+  await db.exec(`insert into public.plan_polls(group_id,creator,place_type,options) values ('${g2.id}','${c}','Bowling',array['Fri','Sat'])`);
+  const p2 = (await db.query(`select id from public.plan_polls where place_type='Bowling'`)).rows[0].id;
+  await denied(`insert into public.plan_poll_votes values ('${p2}','${c}','Sunday')`); // not an option
+  await db.exec(`insert into public.plan_poll_votes values ('${p2}','${c}','Fri')`);
+  equal((await db.query(`select closed_at from public.plan_polls where id='${p2}'`)).rows[0].closed_at, null);
+  await as(d);
+  await db.exec(`insert into public.plan_poll_votes values ('${p2}','${d}','Fri')`);
+  equal((await db.query(`select winning_option from public.plan_polls where id='${p2}'`)).rows[0].winning_option, 'Fri');
+  await denied(`update public.plan_poll_votes set option_text='Sat' where poll_id='${p2}' and user_id='${d}'`); // closed
+  equal(await count('guilds'), 1);
+  const guild = (await db.query(`select id from public.guilds`)).rows[0].id;
+  await db.exec(`insert into public.guild_members(guild_id,user_id,dating_opt_in) values ('${guild}','${d}',true)`);
+  await as(e); // unverified
+  equal(await count('guilds'), 0);
+  await denied(`insert into public.guild_members(guild_id,user_id) values ('${guild}','${e}')`);
+  await denied(`insert into public.group_messages(group_id,sender,body) values ('${g2.id}','${e}','hi')`);
+  await denied(`insert into public.chat_groups(name) values ('Unverified group')`);
+
   await db.exec('reset role; set role anon');
   await denied('select * from public.social_preferences');
   await denied('select public.is_social_group_member(null)');
