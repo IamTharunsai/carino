@@ -29,4 +29,17 @@ class Env {
 
   /// Mock mode = explicit override OR backend not configured yet.
   static bool get useMockBackend => _mockOverride || !isConfigured;
+
+  /// A RELEASE build with no backend and no explicit demo flag is a
+  /// mistake: it would ship sample people to real users. main() refuses to
+  /// start the app in that case. Demo/preview builds opt in with
+  /// --dart-define=USE_MOCK_BACKEND=true.
+  static bool releaseMisconfigured({
+    required bool isRelease,
+    required bool configured,
+    required bool demoOverride,
+  }) =>
+      isRelease && !configured && !demoOverride;
+
+  static bool get isDemoOverride => _mockOverride;
 }

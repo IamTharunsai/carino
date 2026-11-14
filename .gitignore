@@ -50,3 +50,9 @@ app.*.map.json
 
 # Supabase CLI local state
 **/supabase/.temp/
+
+# Release secrets (never commit)
+android/key.properties
+*.jks
+*.keystore
+.env

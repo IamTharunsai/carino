@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'config/app_config.dart';
+import 'config/env.dart';
 import 'screens/root_flow.dart';
 import 'services/services.dart';
 import 'theme/app_theme.dart';
@@ -7,6 +9,14 @@ import 'widgets/app_lock_gate.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (Env.releaseMisconfigured(
+    isRelease: kReleaseMode,
+    configured: Env.isConfigured,
+    demoOverride: Env.isDemoOverride,
+  )) {
+    runApp(const _MisconfiguredApp());
+    return;
+  }
   await Services.backend.initialize();
   // Server-driven UI config — falls back to compiled defaults offline/mock;
   // can never hide safety surfaces (see RemoteConfigService hard limits).
@@ -48,4 +58,28 @@ class CarinoApp extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Shown instead of the app when a release build was made without the
+/// backend settings (see DEPLOYMENT.md -> Release builds).
+class _MisconfiguredApp extends StatelessWidget {
+  const _MisconfiguredApp();
+
+  @override
+  Widget build(BuildContext context) => const MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          body: Padding(
+            padding: EdgeInsets.all(32),
+            child: Center(
+              child: Text(
+                "This build is missing its server settings and can't start. "
+                'Rebuild with SUPABASE_URL and SUPABASE_ANON_KEY '
+                '(or USE_MOCK_BACKEND=true for a demo build).',
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        ),
+      );
 }

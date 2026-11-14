@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:carino/config/env.dart';
 import 'package:carino/data/mock_data.dart';
 import 'package:carino/screens/discover/discover_screen.dart';
 import 'package:carino/screens/experience/experience_screens.dart';
@@ -200,5 +201,14 @@ void main() {
     expect(SecureScreen.depth, 1);
     await tester.pumpWidget(const SecureScreen(enabled: false, child: SizedBox()));
     expect(SecureScreen.depth, 0);
+  });
+
+  // Release safety: a store build must never silently run on sample data.
+  test('release build without a backend is refused; debug/demo is allowed', () {
+    expect(Env.releaseMisconfigured(isRelease: true, configured: false, demoOverride: false), isTrue);
+    expect(Env.releaseMisconfigured(isRelease: true, configured: true, demoOverride: false), isFalse);
+    expect(Env.releaseMisconfigured(isRelease: false, configured: false, demoOverride: false), isFalse);
+    expect(Env.releaseMisconfigured(isRelease: true, configured: false, demoOverride: true), isFalse,
+        reason: 'explicit USE_MOCK_BACKEND=true demo/preview builds are allowed');
   });
 }
