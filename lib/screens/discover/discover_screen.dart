@@ -9,6 +9,7 @@ import '../../theme/app_colors.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/match_celebration.dart';
 import '../../widgets/spark_button.dart';
+import '../experience/experience_screens.dart';
 import '../you/notifications_screen.dart';
 import 'filters_screen.dart';
 import 'profile_detail_screen.dart';
@@ -76,11 +77,40 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     return h > 0 ? 'Next drop in ${h}h ${m}m' : 'Next drop in ${m}m';
   }
 
-  void _commit({required bool like}) {
+  Future<void> _likeOptions(Member member) async {
+    final choice = await showLikeOptions(context, member);
+    if (choice == null || !mounted) return;
+    if (choice.kind == LikeKind.gift) {
+      final gift = await showGlassSheet<String>(
+        context,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Pick a gift for ${member.firstName}',
+                style: Theme.of(context).textTheme.titleLarge),
+            for (final g in MockData.gifts)
+              ListTile(
+                leading: Text(g.emoji, style: const TextStyle(fontSize: 26)),
+                title: Text(g.name),
+                subtitle: Text(g.priceLabel),
+                onTap: () => Navigator.of(context).pop(g.name),
+              ),
+          ],
+        ),
+      );
+      if (gift == null || !mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('$gift sent with your like (demo — no charge).')));
+    }
+    _commit(like: true, spark: choice.kind == LikeKind.spark, note: choice.note);
+  }
+
+  void _commit({required bool like, bool spark = false, String? note}) {
     final deck = _visibleDeck;
     if (deck.isEmpty) return;
     final member = deck.first;
     _sound.tapHaptic();
+    Services.analytics.action(like ? (spark ? 'spark' : (note != null ? 'like_note' : 'like')) : 'pass');
     setState(() {
       _deck.remove(member);
       _drag = Offset.zero;
@@ -88,10 +118,14 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
       _lastPassed = like ? null : member;
     });
     if (like) {
+      // Cinematic beat: hearts (or Spark flames) bloom, THEN the match.
+      showHeartBurst(context, spark: spark);
       // Scaffold rule: every like on the demo deck celebrates so the flow is
       // visible. PRODUCTION: BackendService returns a match ONLY on a real
       // mutual like — never fake a match (AI honesty rules).
-      _showMatch(member);
+      Future<void>.delayed(const Duration(milliseconds: 750), () {
+        if (mounted) _showMatch(member);
+      });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -139,22 +173,9 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
             child: Row(
               children: [
                 Expanded(
-                  child: Text(_showDrop ? 'Daily Drop' : 'Discover',
+                  child: Text(_showDrop ? 'Daily Drop' : 'Dates',
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.titleLarge),
-                ),
-                // S-016: finite curated set, truthful count.
-                Flexible(
-                  flex: 2,
-                  child: TextButton.icon(
-                  onPressed: () => setState(() => _showDrop = !_showDrop),
-                  icon: const Icon(Icons.local_fire_department_outlined, size: 18),
-                  label: Text(
-                      _showDrop
-                          ? 'All nearby'
-                          : 'Drop · ${MockData.dailyDrop.where(fitsMe).length} today',
-                      overflow: TextOverflow.ellipsis),
-                  ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.public),
@@ -176,6 +197,30 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                   icon: const Icon(Icons.tune),
                   tooltip: 'Filters (S-017)',
                   onPressed: _openFilters,
+                ),
+              ],
+            ),
+          ),
+          // Drop vs everyone nearby: its own row so nothing truncates.
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 6,
+              children: [
+                ChoiceChip(
+                  avatar: const Icon(Icons.explore_outlined, size: 16),
+                  label: const Text('Nearby'),
+                  selected: !_showDrop,
+                  selectedColor: AppColors.emberCrimson,
+                  onSelected: (_) => setState(() => _showDrop = false),
+                ),
+                ChoiceChip(
+                  avatar: const Icon(Icons.local_fire_department_outlined, size: 16),
+                  label: Text('Daily Drop · ${MockData.dailyDrop.where(fitsMe).length}'),
+                  selected: _showDrop,
+                  selectedColor: AppColors.emberCrimson,
+                  onSelected: (_) => setState(() => _showDrop = true),
                 ),
               ],
             ),
@@ -325,6 +370,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                         ),
                       ),
                       onLike: () => _commit(like: true),
+                      onLikeOptions: () => _likeOptions(top),
                       onPass: () => _commit(like: false),
                     ),
                     if (likeGlow > 0.05)
@@ -400,10 +446,14 @@ class _MemberCard extends StatelessWidget {
     this.onLike,
     this.onPass,
     this.onReactPrompt,
+    this.onLikeOptions,
   });
 
   final Member member;
   final bool interactive;
+
+  /// Long-press Like: note, gift or Spark.
+  final VoidCallback? onLikeOptions;
   final VoidCallback? onOpen;
   final VoidCallback? onLike;
   final VoidCallback? onPass;
@@ -569,11 +619,15 @@ class _MemberCard extends StatelessWidget {
                           semanticLabel: 'View full profile',
                           onPressed: onOpen ?? () {},
                         ),
-                        GlassIconButton(
-                          icon: Icons.favorite,
-                          semanticLabel: 'Like',
-                          filled: true,
-                          onPressed: onLike ?? () {},
+                        Tooltip(
+                          message: 'Tap to like · hold for note, gift or Spark',
+                          child: GlassIconButton(
+                            icon: Icons.favorite,
+                            semanticLabel: 'Like. Long-press for note, gift or Spark',
+                            filled: true,
+                            onPressed: onLike ?? () {},
+                            onLongPress: onLikeOptions,
+                          ),
                         ),
                       ],
                     ),

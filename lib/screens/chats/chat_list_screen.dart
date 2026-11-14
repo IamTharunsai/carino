@@ -3,6 +3,7 @@ import '../../data/mock_data.dart';
 import '../../models/experience.dart';
 import '../../models/message.dart';
 import '../../models/social.dart';
+import '../../services/services.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/glass_card.dart';
 import 'conversation_screen.dart';
@@ -92,7 +93,13 @@ class _ChatListScreenState extends State<ChatListScreen> {
       group.removeExpired();
     }
     var conversations =
-        MockData.conversations().where((c) => !_closed.contains(c.id)).toList();
+        MockData.conversations()
+            .where((c) => !_closed.contains(c.id))
+            .where((c) => !Services.prefs.hiddenChats.contains(c.id))
+            .toList()
+          // Pinned chats first.
+          ..sort((a, b) => (Services.prefs.pinnedChats.contains(b.id) ? 1 : 0)
+              .compareTo(Services.prefs.pinnedChats.contains(a.id) ? 1 : 0));
     if (_query.trim().isNotEmpty) {
       final q = _query.trim().toLowerCase();
       conversations = conversations.where((c) {
@@ -234,7 +241,10 @@ class _ChatListScreenState extends State<ChatListScreen> {
             Builder(builder: (context) {
               final member = MockData.memberById(conv.memberId);
               final last = conv.messages.isEmpty ? null : conv.messages.last;
-              return GlassContainer(
+              final pinned = Services.prefs.pinnedChats.contains(conv.id);
+              return GestureDetector(
+                onLongPress: () => _chatMenu(conv.id, member.firstName),
+                child: GlassContainer(
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     builder: (_) => ConversationScreen(conversation: conv),
@@ -253,6 +263,11 @@ class _ChatListScreenState extends State<ChatListScreen> {
                         children: [
                           Row(
                             children: [
+                              if (pinned)
+                                const Padding(
+                                  padding: EdgeInsets.only(right: 4),
+                                  child: Icon(Icons.push_pin, size: 14, color: AppColors.sparkCoral),
+                                ),
                               Flexible(
                                 child: Text(member.firstName,
                                     overflow: TextOverflow.ellipsis,
@@ -316,10 +331,89 @@ class _ChatListScreenState extends State<ChatListScreen> {
                       ),
                   ],
                 ),
-              );
+              ));
             }),
             const SizedBox(height: 10),
           ],
+          if (Services.prefs.hiddenChats.isNotEmpty)
+            ListTile(
+              leading: const Icon(Icons.lock_outline),
+              title: Text('Hidden chats (${Services.prefs.hiddenChats.length})'),
+              subtitle: const Text('Unlock with Face, fingerprint or PIN'),
+              onTap: _openHidden,
+            ),
+          Text('Tip: press and hold a chat to pin or hide it.',
+              style: Theme.of(context).textTheme.bodySmall,
+              textAlign: TextAlign.center),
+        ],
+      ),
+    );
+  }
+
+  void _chatMenu(String id, String name) {
+    final prefs = Services.prefs;
+    final pinned = prefs.pinnedChats.contains(id);
+    showGlassSheet<void>(
+      context,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: Icon(pinned ? Icons.push_pin : Icons.push_pin_outlined),
+            title: Text(pinned ? 'Unpin $name' : 'Pin $name to the top'),
+            onTap: () {
+              Navigator.of(context).pop();
+              setState(() => pinned ? prefs.pinnedChats.remove(id) : prefs.pinnedChats.add(id));
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.visibility_off_outlined),
+            title: Text('Hide chat with $name'),
+            subtitle: const Text("Moves it behind your app lock. They're not told."),
+            onTap: () {
+              Navigator.of(context).pop();
+              setState(() => prefs.hiddenChats.add(id));
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _openHidden() async {
+    final ok = await Services.biometric.unlock('Show hidden chats');
+    if (!mounted) return;
+    if (!ok) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("Couldn't unlock. Set up Face, fingerprint or a screen lock on this phone.")));
+      return;
+    }
+    final hidden = MockData.conversations()
+        .where((c) => Services.prefs.hiddenChats.contains(c.id))
+        .toList();
+    await showGlassSheet<void>(
+      context,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (final c in hidden)
+            ListTile(
+              leading: CircleAvatar(
+                  backgroundImage: AssetImage(MockData.memberById(c.memberId).photoAsset)),
+              title: Text(MockData.memberById(c.memberId).firstName),
+              trailing: TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  setState(() => Services.prefs.hiddenChats.remove(c.id));
+                },
+                child: const Text('Unhide'),
+              ),
+              onTap: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(MaterialPageRoute<void>(
+                    builder: (_) => ConversationScreen(conversation: c)));
+              },
+            ),
         ],
       ),
     );

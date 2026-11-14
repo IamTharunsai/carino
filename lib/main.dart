@@ -18,12 +18,15 @@ class CarinoApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    // Theme switch (Settings → Appearance): Midnight / Porcelain / System.
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: Services.prefs.themeMode,
+      builder: (context, mode, _) => MaterialApp(
       title: AppConfig.appName,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(), // Porcelain
       darkTheme: AppTheme.dark(), // Midnight — the brand default
-      themeMode: ThemeMode.dark,
+      themeMode: mode,
       // Calm mode (Settings / You): app-wide reduced motion, layered on top
       // of the OS setting — screens already honour disableAnimations.
       builder: (context, child) => ValueListenableBuilder<bool>(
@@ -38,6 +41,7 @@ class CarinoApp extends StatelessWidget {
         },
       ),
       home: const RootFlow(),
+      ),
     );
   }
 }

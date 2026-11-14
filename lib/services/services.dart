@@ -1,8 +1,10 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import '../data/mock_data.dart';
 import '../models/platform.dart';
 import '../models/social.dart';
 import 'ai_service.dart';
+import 'analytics_service.dart';
+import 'biometric_service.dart';
 import 'auth_service.dart';
 import 'backend_service.dart';
 import 'payments_service.dart';
@@ -30,6 +32,8 @@ class Services {
   static final SoundService sound = SoundService();
   static final RemoteConfigService remoteConfig = RemoteConfigService();
   static final UserPrefs prefs = UserPrefs();
+  static final BiometricService biometric = BiometricService();
+  static final AnalyticsService analytics = AnalyticsService();
   static final SocialGraph social = SocialGraph(MockData.initialCircles);
   static final TrustGraph trust = MockData.initialTrust();
 }
@@ -94,6 +98,36 @@ class UserPrefs {
 
   /// Moments pinned to your profile as Highlights (max 3).
   final List<String> highlights = [];
+
+  // --- Experience upgrade (Nov 14) ------------------------------------------
+  /// App theme: Midnight (dark, brand default), Porcelain (light), System.
+  final ValueNotifier<ThemeMode> themeMode = ValueNotifier(ThemeMode.dark);
+
+  /// Relationship status + who may see it. In a relationship, Dates pauses
+  /// itself (Honest Status): you can't be discoverable and "taken" at once.
+  String relationshipStatus = 'Single'; // Single | Dating | In a relationship | Married | It's complicated
+  String relationshipVisibility = 'hidden'; // everyone | matches | hidden
+
+  /// Couples mode: linked partner (by mutual invite code).
+  String? partnerName;
+  final List<String> coupleMemories = [];
+  final List<(String, String)> coupleCalendar = []; // (when, what)
+
+  /// Chats: pinned, hidden (behind app lock), and per-chat theme index.
+  final Set<String> pinnedChats = {};
+  final Set<String> hiddenChats = {};
+  final Map<String, int> chatThemes = {};
+
+  /// Super Like ("Spark"): 1 a day free, Plus gets 5 — honest count.
+  int sparksLeftToday = 1;
+
+  /// AI Away Assistant — replies ONLY with a visible "assistant" label,
+  /// only when you're away, never pretending to be you.
+  bool awayAssistant = false;
+
+  /// Referral: your code; promo redeemed state.
+  final String referralCode = 'CARINO-YOU7';
+  String? redeemedPromo;
 
   /// Plans you created via Post → Plan or Host a plan (demo store).
   final List<String> myPlans = [];

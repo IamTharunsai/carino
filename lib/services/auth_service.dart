@@ -124,6 +124,27 @@ class AuthService {
     }
   }
 
+  /// Sign in with Google / Apple. LIVE: Supabase OAuth in the system
+  /// browser, returning via the carino:// deep link (configure the
+  /// redirect URL in Supabase Auth settings). Returns an error or null.
+  Future<String?> signInWithProvider(OAuthProvider provider) async {
+    if (Env.useMockBackend) {
+      await Future<void>.delayed(const Duration(milliseconds: 400));
+      _signedIn = true;
+      sessionChanges.value = true;
+      return null;
+    }
+    try {
+      final ok = await _client.auth.signInWithOAuth(
+        provider,
+        redirectTo: 'carino://login-callback',
+      );
+      return ok ? null : 'Sign-in was cancelled.';
+    } on AuthException catch (e) {
+      return e.message;
+    }
+  }
+
   // --- Sessions (S-050) ----------------------------------------------------
 
   /// Active sessions for the Settings list. The device list comes from the

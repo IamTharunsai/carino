@@ -150,6 +150,7 @@ class _AgeGateScreenState extends State<AgeGateScreen> {
     }
 
     final pickerText = TextStyle(
+      fontFamily: Theme.of(context).textTheme.bodyLarge?.fontFamily ?? 'Poppins',
       fontSize: 20,
       color: text.bodyLarge?.color,
       fontWeight: FontWeight.w500,

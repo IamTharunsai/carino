@@ -20,11 +20,12 @@ import 'privacy_centre_screen.dart';
 import 'settings_screen.dart';
 import 'trust_safety_screen.dart';
 import 'wingperson_screen.dart';
+import '../experience/experience_screens.dart';
 import 'facets_screen.dart';
 import 'work_facet_screen.dart';
 import 'trust_graph_screen.dart';
 
-/// S-043 My Profile (You tab) â€” hub to Edit (S-044), Intentions (S-045),
+/// S-043 My Profile (You tab) — hub to Edit (S-044), Intentions (S-045),
 /// Verification Centre (S-046), Privacy Centre (S-047), Trust & Safety
 /// Centre (S-052), Plus (S-054), Settings (S-050) and Delete (S-055).
 class YouScreen extends StatelessWidget {
@@ -77,7 +78,7 @@ class YouScreen extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           // Profile Aura: a glow that grows with EFFORT (verified, video,
-          // photos, prompts, voice, boundaries) â€” never looks, never
+          // photos, prompts, voice, boundaries) — never looks, never
           // popularity, and only you see the meter.
           Builder(builder: (context) {
             final items = auraChecklist(me);
@@ -110,7 +111,7 @@ class YouScreen extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Profile aura Â· ${(strength * 100).round()}%',
+                            Text('Profile aura · ${(strength * 100).round()}%',
                                 style: Theme.of(context).textTheme.titleMedium),
                             Text(
                                 'Glows brighter as your profile gets more real.',
@@ -140,7 +141,7 @@ class YouScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                      'Measures effort only â€” never looks. Only you see this.',
+                      'Measures effort only — never looks. Only you see this.',
                       style: Theme.of(context).textTheme.bodySmall),
                 ],
               ),
@@ -184,7 +185,7 @@ class YouScreen extends StatelessWidget {
             icon: Icons.edit_outlined,
             title: 'Edit profile & media',
             subtitle:
-                'Photos, video intro, prompts â€” AI Coach lives here too',
+                'Photos, video intro, prompts — AI Coach lives here too',
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
                 builder: (_) => ProfileCreationScreen(
@@ -223,7 +224,7 @@ class YouScreen extends StatelessWidget {
             context,
             icon: Icons.quiz_outlined,
             title: 'Taste quiz',
-            subtitle: 'Tune your Daily Drop â€” answers stay editable',
+            subtitle: 'Tune your Daily Drop — answers stay editable',
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
                 builder: (_) =>
@@ -277,7 +278,7 @@ class YouScreen extends StatelessWidget {
             context,
             icon: Icons.verified_user_outlined,
             title: 'Verification Centre',
-            subtitle: 'All 3 layers passed Â· badge active',
+            subtitle: 'All 3 layers passed · badge active',
             onTap: () => _verificationCentre(context),
           ),
           _row(
@@ -306,7 +307,7 @@ class YouScreen extends StatelessWidget {
             context,
             icon: Icons.notifications_outlined,
             title: 'Notifications',
-            subtitle: 'Matches, messages, plans â€” real events only',
+            subtitle: 'Matches, messages, plans — real events only',
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
                 builder: (_) => const NotificationsScreen(),
@@ -329,7 +330,7 @@ class YouScreen extends StatelessWidget {
             icon: Icons.workspace_premium_outlined,
             title: AppConfig.plusName,
             subtitle: Services.payments.isPlus
-                ? 'Active â€” manage subscription'
+                ? 'Active — manage subscription'
                 : 'See who likes you, read receipts, spark sooner',
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
@@ -337,6 +338,33 @@ class YouScreen extends StatelessWidget {
                     ? const SubscriptionScreen()
                     : const PaywallScreen(),
               ),
+            ),
+          ),
+          _row(
+            context,
+            icon: Icons.favorite_outline,
+            title: 'Relationship & couples',
+            subtitle: 'Honest Status, Couples mode, date-night bookings',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const CoupleScreen()),
+            ),
+          ),
+          _row(
+            context,
+            icon: Icons.card_giftcard_outlined,
+            title: 'Invite & offers',
+            subtitle: 'Give a week of Plus, get a week · promo codes',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const ReferralScreen()),
+            ),
+          ),
+          _row(
+            context,
+            icon: Icons.insights_outlined,
+            title: 'Your activity',
+            subtitle: 'What you use most — on this phone only',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const InsightsScreen()),
             ),
           ),
           _row(
@@ -385,7 +413,7 @@ class YouScreen extends StatelessWidget {
                     ? 'Connected (demo). Your top artists show on your profile; '
                         'shared artists become conversation starters.'
                     : 'Connect Spotify or Apple Music to show your top artists '
-                        'and an anthem. We read artist names only â€” never your '
+                        'and an anthem. We read artist names only — never your '
                         'listening history.',
                 style: Theme.of(ctx).textTheme.bodyMedium,
               ),
@@ -487,11 +515,11 @@ class YouScreen extends StatelessWidget {
               leading: const Icon(Icons.check_circle_outline,
                   color: AppColors.sparkCoral),
               title: Text(layer.label),
-              subtitle: Text('${layer.tagline} Â· Ref VN-DEMO'),
+              subtitle: Text('${layer.tagline} · Ref VN-DEMO'),
             ),
           const SizedBox(height: 8),
           Text(
-            'We store results + references only â€” never your ID images. '
+            'We store results + references only — never your ID images. '
             'If a check ever fails, you get the reason and a human appeal path.',
             style: Theme.of(context).textTheme.bodySmall,
           ),

@@ -135,3 +135,10 @@ overflow — keep adding new screens to it.
 - Migration `0006_social_writes.sql` enables real client writes for groups, group messages, plan polls and guild joins (48 RLS assertions in `backend/tests`).
 - **Next priority:** wire Flutter Chats (groups, messages, polls) to Supabase in live mode; screens still use demo data.
 - Research: see `docs/RESEARCH-SYNTHESIS.md`.
+
+## Update (Nov 14) — experience upgrade
+- Read `docs/EXPERIENCE-STRATEGY.md` first (scenarios, psychology, 2050 vision, legal, AI policy).
+- Screenshots of all screens: `CAPTURE=1 flutter test test/screenshots/capture_test.dart` -> `build/screens/` (54 shots, real fonts). Run it after any UI change and look for "LAYOUT ISSUE".
+- Brand fonts bundled: DM Serif Display (headlines) + Poppins (UI) in `assets/fonts` (OFL).
+- New: biometric app lock + passkey prompt (`local_auth`, Android FlutterFragmentActivity), Google/Apple sign-in (Supabase OAuth, redirect `carino://login-callback` must be configured), theme switch, heart burst + like options, chat themes/stickers/+ menu, pin/hide chats, Honest Status + Couples mode + bookings (`url_launcher`), referrals/promo, on-device analytics (`Services.analytics`).
+- Policy: AI never chats as the user; only labelled drafts and the labelled Away assistant.

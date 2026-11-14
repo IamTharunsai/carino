@@ -13,6 +13,7 @@ import '../connect/plan_detail_screen.dart';
 import 'conversation_settings_screen.dart';
 import 'games_screen.dart';
 import 'media_viewer_screen.dart';
+import '../experience/experience_screens.dart';
 
 /// S-035 Conversation (Keep) / S-036 (Vanish) / S-036B Mode Switch.
 ///
@@ -110,6 +111,65 @@ class _ConversationScreenState extends State<ConversationScreen> {
   }
 
   bool get _vanish => widget.conversation.mode == ChatMode.vanish;
+
+  /// This chat's bubble colour (Chat theme, per conversation).
+  Color get _myBubble =>
+      chatThemes[Services.prefs.chatThemes[widget.conversation.id] ?? 0].$2;
+
+  Future<void> _pickTheme() async {
+    final i = await showChatThemeSheet(
+        context, Services.prefs.chatThemes[widget.conversation.id] ?? 0);
+    if (i == null || !mounted) return;
+    setState(() => Services.prefs.chatThemes[widget.conversation.id] = i);
+    Services.analytics.action('chat_theme');
+  }
+
+  void _attachMenu() {
+    Widget item(IconData icon, String label, VoidCallback onTap) => ListTile(
+          leading: Icon(icon, color: AppColors.sparkCoral),
+          title: Text(label),
+          onTap: () {
+            Navigator.of(context).pop();
+            onTap();
+          },
+        );
+    showGlassSheet<void>(
+      context,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          item(Icons.photo_outlined, 'Photo', () {
+            _viewOnceNext = false;
+            _sendMedia();
+          }),
+          item(Icons.visibility_outlined, 'View-once photo', () {
+            _viewOnceNext = true;
+            _sendMedia();
+          }),
+          item(Icons.emoji_emotions_outlined, 'Sticker', _sendSticker),
+          item(Icons.mic_none_outlined, 'Voice note', _sendVoiceNote),
+          item(Icons.sports_esports_outlined, 'Play a game', () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => GamesScreen(member: _member)),
+              )),
+          item(Icons.calendar_month_outlined, 'Suggest a plan', () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => PlanComposerScreen(member: _member)),
+              )),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _sendSticker() async {
+    final st = await showStickerTray(context);
+    if (st == null || !mounted) return;
+    setState(() => widget.conversation.messages.add(ChatMessage(
+          id: 'sticker-${DateTime.now().millisecondsSinceEpoch}',
+          text: st,
+          fromMe: true,
+          timeLabel: 'now',
+        )));
+    Services.analytics.action('sticker');
+  }
 
   Future<void> _send() async {
     final text = _composer.text.trim();
@@ -245,6 +305,11 @@ class _ConversationScreenState extends State<ConversationScreen> {
             icon: const Icon(Icons.videocam_outlined),
             tooltip: 'Spark video (connections only)',
             onPressed: () {},
+          ),
+          IconButton(
+            icon: const Icon(Icons.palette_outlined),
+            tooltip: 'Chat theme',
+            onPressed: _pickTheme,
           ),
           IconButton(
             icon: const Icon(Icons.more_horiz),
@@ -448,42 +513,11 @@ class _ConversationScreenState extends State<ConversationScreen> {
             padding: const EdgeInsets.fromLTRB(12, 4, 12, 14),
             child: Row(
               children: [
+                // One "+" for attachments keeps the composer roomy.
                 IconButton(
-                  icon: const Icon(Icons.sports_esports_outlined),
-                  tooltip: 'Play a game',
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => GamesScreen(member: _member),
-                    ),
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.photo_outlined),
-                  tooltip: _viewOnceNext
-                      ? 'Send a view-once photo'
-                      : 'Send a photo',
-                  color: _viewOnceNext ? AppColors.sparkCoral : null,
-                  onPressed: _sendMedia,
-                ),
-                IconButton(
-                  icon: Icon(_viewOnceNext
-                      ? Icons.visibility_outlined
-                      : Icons.visibility_off_outlined),
-                  tooltip: 'View-once for next media',
-                  onPressed: () =>
-                      setState(() => _viewOnceNext = !_viewOnceNext),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.mic_none_outlined),
-                  tooltip: 'Voice note',
-                  onPressed: _sendVoiceNote,
-                ),
-                IconButton(
-                  icon: Icon(
-                    _aiLoading ? Icons.hourglass_top : Icons.auto_awesome_outlined,
-                  ),
-                  tooltip: 'Suggest replies (AI drafts)',
-                  onPressed: _aiLoading ? null : _loadAiDrafts,
+                  icon: const Icon(Icons.add_circle_outline),
+                  tooltip: 'Add photo, sticker, voice, game',
+                  onPressed: _attachMenu,
                 ),
                 Expanded(
                   child: TextField(
@@ -497,6 +531,13 @@ class _ConversationScreenState extends State<ConversationScreen> {
                           const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                     ),
                   ),
+                ),
+                IconButton(
+                  icon: Icon(
+                    _aiLoading ? Icons.hourglass_top : Icons.auto_awesome_outlined,
+                  ),
+                  tooltip: 'Suggest replies (AI drafts)',
+                  onPressed: _aiLoading ? null : _loadAiDrafts,
                 ),
                 IconButton(
                   icon: const Icon(Icons.send, color: AppColors.emberCrimson),
@@ -564,7 +605,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
         constraints: const BoxConstraints(maxWidth: 280),
         decoration: BoxDecoration(
           color: mine
-              ? AppColors.emberCrimson
+              ? _myBubble
               : Theme.of(context).colorScheme.surface.withValues(alpha: 0.75),
           borderRadius: BorderRadius.circular(18),
         ),

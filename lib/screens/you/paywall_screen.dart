@@ -4,6 +4,7 @@ import '../../services/services.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/spark_button.dart';
+import '../experience/experience_screens.dart';
 
 /// S-054 Paywall — ${AppConfig.plusName}, and S-054B management entry.
 ///
@@ -156,6 +157,13 @@ class _PaywallScreenState extends State<PaywallScreen> {
             onPressed: _busy ? null : _subscribe,
           ),
           const SizedBox(height: 8),
+          TextButton.icon(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const ReferralScreen()),
+            ),
+            icon: const Icon(Icons.local_offer_outlined, size: 18),
+            label: const Text('Have a promo code? · Invite friends for free weeks'),
+          ),
           SparkButton(
             label: 'Restore purchases',
             icon: Icons.restore,

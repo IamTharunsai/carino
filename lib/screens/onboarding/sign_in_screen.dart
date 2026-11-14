@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' show OAuthProvider;
 import '../../services/services.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/glass_card.dart';
@@ -69,6 +70,32 @@ class _SignInScreenState extends State<SignInScreen> {
       _error = err;
     });
     if (err == null) widget.onSignedIn();
+  }
+
+  Future<void> _provider(OAuthProvider p) async {
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    final err = await Services.auth.signInWithProvider(p);
+    if (!mounted) return;
+    setState(() {
+      _busy = false;
+      _error = err;
+    });
+    if (err == null) widget.onSignedIn();
+  }
+
+  Future<void> _passkey() async {
+    // Passkeys are unlocked by the phone's biometrics; the OS handles it.
+    final ok = await Services.biometric.unlock('Sign in to Cariño with your passkey');
+    if (!mounted) return;
+    if (!ok) {
+      setState(() => _error = "Passkey sign-in was cancelled or isn't set up on this phone.");
+      return;
+    }
+    await Services.auth.signInDemo();
+    if (mounted) widget.onSignedIn();
   }
 
   Widget _requiredLabel(String text) => Text.rich(
@@ -158,6 +185,35 @@ class _SignInScreenState extends State<SignInScreen> {
           const SizedBox(height: 6),
           Text('* Required', style: text.bodySmall, textAlign: TextAlign.center),
           const SizedBox(height: 16),
+          const Row(children: [
+            Expanded(child: Divider()),
+            Padding(padding: EdgeInsets.symmetric(horizontal: 10), child: Text('or')),
+            Expanded(child: Divider()),
+          ]),
+          const SizedBox(height: 12),
+          // Faster sign-in = less drop-off. Each provider is a real OAuth
+          // route in live mode; Apple is required on iOS when Google is offered.
+          SparkButton(
+            label: 'Continue with Google',
+            icon: Icons.g_mobiledata,
+            secondary: true,
+            onPressed: _busy ? null : () => _provider(OAuthProvider.google),
+          ),
+          const SizedBox(height: 8),
+          SparkButton(
+            label: 'Continue with Apple',
+            icon: Icons.apple,
+            secondary: true,
+            onPressed: _busy ? null : () => _provider(OAuthProvider.apple),
+          ),
+          const SizedBox(height: 8),
+          SparkButton(
+            label: 'Use a passkey (Face / fingerprint)',
+            icon: Icons.fingerprint,
+            secondary: true,
+            onPressed: _busy ? null : _passkey,
+          ),
+          const SizedBox(height: 8),
           TextButton.icon(
             onPressed: widget.onUseCode,
             icon: const Icon(Icons.sms_outlined, size: 18),

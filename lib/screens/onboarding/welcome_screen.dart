@@ -88,6 +88,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     return Scaffold(
       backgroundColor: AppColors.midnight,
       body: Stack(
+        fit: StackFit.expand,
         children: [
           // A1 hero sits at the TOP (faces + string lights stay in view);
           // the panel layers over its lower part from mid-screen down.
@@ -135,11 +136,13 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             ),
           ),
           SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-              // Transparent logo: the mark floats on the photo, no box.
-              child: Image.asset(AppConfig.assetLogo,
-                  height: 56, alignment: Alignment.centerLeft),
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                // Transparent logo: the mark floats on the photo, no box.
+                child: Image.asset(AppConfig.assetLogo, height: 56),
+              ),
             ),
           ),
           Positioned(

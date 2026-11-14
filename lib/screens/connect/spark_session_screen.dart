@@ -115,7 +115,10 @@ class _SparkPreCallScreenState extends State<SparkPreCallScreen> {
                     Icon(Icons.check_circle_outline,
                         size: 16, color: AppColors.sparkCoral),
                     SizedBox(width: 6),
-                    Text('You\'re eligible: verified · 21+ · no open restrictions'),
+                    Expanded(
+                      child: Text(
+                          'You\'re eligible: verified · 21+ · no open restrictions'),
+                    ),
                   ],
                 ),
                 SwitchListTile(
@@ -196,7 +199,8 @@ class _SparkPreCallScreenState extends State<SparkPreCallScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Your preview', style: Theme.of(context).textTheme.titleMedium),
+                Text('Your preview',
+                    style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 10),
                 if (_showDenied)
                   const PermissionDeniedState(
@@ -278,8 +282,7 @@ class _SparkPreCallScreenState extends State<SparkPreCallScreen> {
                   alignment: Alignment.centerLeft,
                   child: TextButton(
                     // Scaffold affordance: preview the S-059 denied state.
-                    onPressed: () =>
-                        setState(() => _showDenied = !_showDenied),
+                    onPressed: () => setState(() => _showDenied = !_showDenied),
                     child: Text(_showDenied
                         ? 'Back to preview'
                         : 'Preview the permission-denied state'),
@@ -358,7 +361,8 @@ class _SparkCallScreenState extends State<SparkCallScreen> {
     _video.joinDemoSession().then((_) {
       if (!mounted) return;
       setState(() => _connecting = false);
-      Services.sound.tapHaptic(); // haptic-led connect cue; no ringtone imitation
+      Services.sound
+          .tapHaptic(); // haptic-led connect cue; no ringtone imitation
       _timer = Timer.periodic(const Duration(seconds: 1), (_) {
         if (mounted) setState(() => _seconds++);
       });
@@ -476,16 +480,18 @@ class _SparkCallScreenState extends State<SparkCallScreen> {
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
-                      Text(
-                        _connecting
-                            ? 'Connecting…'
-                            : '${widget.member.firstName} · $_clock',
-                        style: const TextStyle(
-                            color: AppColors.warmIvory,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600),
+                      Expanded(
+                        child: Text(
+                          _connecting
+                              ? 'Connecting…'
+                              : '${widget.member.firstName} · $_clock',
+                          style: const TextStyle(
+                              color: AppColors.warmIvory,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                      const Spacer(),
                       // Quality indicator — from the RTC stats stream in
                       // production; labelled sample state in the scaffold.
                       const Chip(
@@ -497,8 +503,8 @@ class _SparkCallScreenState extends State<SparkCallScreen> {
                       const SizedBox(width: 4),
                       // Block + Report stay reachable DURING the call (S-029).
                       IconButton(
-                        icon: const Icon(Icons.block,
-                            color: AppColors.warmIvory),
+                        icon:
+                            const Icon(Icons.block, color: AppColors.warmIvory),
                         tooltip: 'Block',
                         onPressed: () => SafetyActions.showBlockConfirmation(
                           context,
@@ -579,16 +585,14 @@ class _SparkCallScreenState extends State<SparkCallScreen> {
                       GlassIconButton(
                         icon: _cameraOn ? Icons.videocam : Icons.videocam_off,
                         semanticLabel: _cameraOn ? 'Camera off' : 'Camera on',
-                        onPressed: () =>
-                            setState(() => _cameraOn = !_cameraOn),
+                        onPressed: () => setState(() => _cameraOn = !_cameraOn),
                       ),
                       GlassIconButton(
                         icon: Icons.sports_esports_outlined,
                         semanticLabel: 'Play a game on the call',
                         onPressed: () => Navigator.of(context).push(
                           MaterialPageRoute<void>(
-                            builder: (_) =>
-                                GamesScreen(member: widget.member),
+                            builder: (_) => GamesScreen(member: widget.member),
                           ),
                         ),
                       ),

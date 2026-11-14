@@ -36,7 +36,7 @@ class ConnectScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 110),
         children: [
-          Text('Connect', style: Theme.of(context).textTheme.titleLarge),
+          Text('Plans', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 12),
           // --- Spark Sessions ---
           GlassContainer(

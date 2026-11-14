@@ -106,8 +106,57 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       'Passkey management opens the platform credential UI (integration point).')),
             ),
           ),
-          _toggle('App lock (biometric on open)', _prefs.appLock,
-              (v) => _prefs.appLock = v),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            secondary: const Icon(Icons.lock_outline),
+            title: const Text('App lock'),
+            subtitle: const Text(
+                'Face / fingerprint (or your phone PIN) on open and when you come back.'),
+            value: _prefs.appLock,
+            onChanged: (v) async {
+              if (v) {
+                // Enabling must prove the person can unlock — never lock
+                // someone out of their own app.
+                final ok = await Services.biometric.unlock('Turn on app lock');
+                if (!context.mounted) return;
+                if (!ok) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text(
+                          'App lock needs Face, fingerprint or a screen lock set up on this phone.')));
+                  return;
+                }
+              }
+              setState(() => _prefs.appLock = v);
+            },
+          ),
+          const Divider(),
+          Text('AI', style: text.titleMedium),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            secondary: const Icon(Icons.smart_toy_outlined),
+            title: const Text('Away assistant'),
+            subtitle: const Text(
+                "When you're busy, a clearly labelled 'Your assistant' message tells matches "
+                "when you'll be back. It never pretends to be you or flirts for you."),
+            value: _prefs.awayAssistant,
+            onChanged: (v) => setState(() => _prefs.awayAssistant = v),
+          ),
+          const Divider(),
+          Text('Appearance', style: text.titleMedium),
+          const SizedBox(height: 8),
+          ValueListenableBuilder<ThemeMode>(
+            valueListenable: _prefs.themeMode,
+            builder: (context, mode, _) => SegmentedButton<ThemeMode>(
+              segments: const [
+                ButtonSegment(value: ThemeMode.dark, icon: Icon(Icons.dark_mode_outlined), label: Text('Dark')),
+                ButtonSegment(value: ThemeMode.light, icon: Icon(Icons.light_mode_outlined), label: Text('Light')),
+                ButtonSegment(value: ThemeMode.system, icon: Icon(Icons.brightness_auto_outlined), label: Text('Auto')),
+              ],
+              selected: {mode},
+              onSelectionChanged: (v) => _prefs.themeMode.value = v.first,
+            ),
+          ),
+          const SizedBox(height: 8),
           Text('Sessions', style: text.titleMedium),
           if (_loadingSessions)
             const Padding(

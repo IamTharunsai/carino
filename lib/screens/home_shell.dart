@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../data/mock_data.dart';
 import '../theme/app_colors.dart';
+import '../services/services.dart';
+import '../widgets/app_lock_gate.dart';
 import '../widgets/glass_card.dart';
 import 'chats/chat_list_screen.dart';
 import 'connect/connect_screen.dart';
@@ -38,7 +40,7 @@ class _HomeShellState extends State<HomeShell> {
       const _TabSpec(Icons.person_outline, Icons.person, 'You'),
     ];
 
-    return Scaffold(
+    return AppLockGate(child: Scaffold(
       extendBody: true,
       body: IndexedStack(
         index: _index,
@@ -58,17 +60,23 @@ class _HomeShellState extends State<HomeShell> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
+              // Equal-width slots: labels never push the bar off-screen.
               for (var i = 0; i < tabs.length; i++)
-                _TabButton(
-                  spec: tabs[i],
-                  selected: _index == i,
-                  onTap: () => setState(() => _index = i),
+                Expanded(
+                  child: _TabButton(
+                    spec: tabs[i],
+                    selected: _index == i,
+                    onTap: () {
+                      Services.analytics.screen(tabs[i].label);
+                      setState(() => _index = i);
+                    },
+                  ),
                 ),
             ],
           ),
         ),
       ),
-    );
+    ));
   }
 }
 
@@ -104,7 +112,7 @@ class _TabButton extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(20),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -134,6 +142,9 @@ class _TabButton extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               Text(spec.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.fade,
+                  softWrap: false,
                   style: TextStyle(fontSize: 11, color: color,
                       fontWeight: selected ? FontWeight.w600 : FontWeight.w400)),
             ],

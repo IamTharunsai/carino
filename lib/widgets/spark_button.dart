@@ -110,12 +110,16 @@ class GlassIconButton extends StatelessWidget {
     required this.onPressed,
     required this.semanticLabel,
     this.filled = false,
+    this.onLongPress,
   });
 
   final IconData icon;
   final VoidCallback onPressed;
   final String semanticLabel;
   final bool filled; // solid crimson variant (e.g. Like)
+
+  /// Optional secondary action (e.g. long-press Like for note/gift/Spark).
+  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -130,6 +134,7 @@ class GlassIconButton extends StatelessWidget {
         child: InkWell(
           customBorder: const CircleBorder(),
           onTap: onPressed,
+          onLongPress: onLongPress,
           child: SizedBox(
             width: 52,
             height: 52,

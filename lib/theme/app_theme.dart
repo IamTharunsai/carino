@@ -13,10 +13,16 @@ class AppTheme {
   static const double minTouchTarget = 44;
   static const double screenPadding = 16;
 
+  /// Brand fonts (bundled, OFL). Body/UI = Poppins, headlines = DM Serif.
+  static const String bodyFont = 'Poppins';
+  static const String displayFont = 'DM Serif Display';
+
   static TextTheme _textTheme(Color primary, Color secondary) {
     return TextTheme(
-      displaySmall: TextStyle(fontSize: 32, fontWeight: FontWeight.w700, color: primary, height: 1.15),
-      headlineMedium: TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: primary, height: 1.2),
+      // Display + headline: DM Serif Display — the "feeling" voice.
+      displaySmall: TextStyle(fontFamily: displayFont, fontSize: 34, fontWeight: FontWeight.w400, color: primary, height: 1.12),
+      headlineMedium: TextStyle(fontFamily: displayFont, fontSize: 30, fontWeight: FontWeight.w400, color: primary, height: 1.15),
+      headlineSmall: TextStyle(fontFamily: displayFont, fontSize: 24, fontWeight: FontWeight.w400, color: primary, height: 1.2),
       titleLarge: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: primary),
       titleMedium: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: primary),
       bodyLarge: TextStyle(fontSize: 16, color: primary, height: 1.4),
@@ -36,6 +42,7 @@ class AppTheme {
       onPrimary: AppColors.warmIvory,
     );
     return ThemeData(
+      fontFamily: bodyFont,
       useMaterial3: true,
       brightness: Brightness.dark,
       colorScheme: scheme,
@@ -54,7 +61,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(radiusButton),
           ),
-          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          textStyle: const TextStyle(fontFamily: bodyFont, fontSize: 16, fontWeight: FontWeight.w600),
         ),
       ),
     );
@@ -69,6 +76,7 @@ class AppTheme {
       onPrimary: Colors.white,
     );
     return ThemeData(
+      fontFamily: bodyFont,
       useMaterial3: true,
       brightness: Brightness.light,
       colorScheme: scheme,
@@ -87,7 +95,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(radiusButton),
           ),
-          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          textStyle: const TextStyle(fontFamily: bodyFont, fontSize: 16, fontWeight: FontWeight.w600),
         ),
       ),
     );
