@@ -150,6 +150,27 @@ try {
   await denied(`insert into public.group_messages(group_id,sender,body) values ('${g2.id}','${e}','hi')`);
   await denied(`insert into public.chat_groups(name) values ('Unverified group')`);
 
+  // --- 0007 Decompress + presence -------------------------------------------
+  await db.exec('reset role');
+  await db.exec(`insert into public.experiences(title,partner_name,category,venue_type,city,starts_at,duration_min,price_cents,capacity,max_party)
+    values ('Kayak','Paddle Co','Water','River outfitter','Columbus',now()+interval '1 day',120,4500,4,4)`);
+  const exp = (await db.query(`select id from public.experiences where title='Kayak'`)).rows[0].id;
+  await as(c);
+  equal(await count('experiences'), 1);
+  // Client tries to set its own price: column not granted -> denied.
+  await denied(`insert into public.experience_bookings(experience_id,user_id,mode,party_size,member_pays_cents) values ('${exp}','${c}','date',2,1)`);
+  await db.exec(`insert into public.experience_bookings(experience_id,user_id,mode,party_size) values ('${exp}','${c}','date',2)`);
+  const bk = (await db.query(`select member_pays_cents, commission_cents from public.experience_bookings`)).rows[0];
+  equal(bk.member_pays_cents, 9000);   // listed price x2, no markup
+  equal(bk.commission_cents, 1080);    // 12% from the venue side
+  await denied(`insert into public.experience_bookings(experience_id,user_id,mode,party_size) values ('${exp}','${d}','solo',1)`); // forged user
+  await as(d);
+  await assert.rejects(db.exec(`insert into public.experience_bookings(experience_id,user_id,mode,party_size) values ('${exp}','${d}','circle',3)`)); assertions++; // sold out (2+3 > 4)
+  await db.exec(`insert into public.presence_sessions(user_id,started_at,ended_at,distracted_seconds,check_ins) values ('${d}',now()-interval '2 hours',now(),300,1)`);
+  await denied(`insert into public.presence_sessions(user_id,started_at,ended_at) values ('${c}',now()-interval '1 hour',now())`);
+  await as(e); // unverified
+  equal(await count('experiences'), 0);
+
   await db.exec('reset role; set role anon');
   await denied('select * from public.social_preferences');
   await denied('select public.is_social_group_member(null)');

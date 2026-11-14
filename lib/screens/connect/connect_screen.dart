@@ -14,6 +14,7 @@ import '../you/paywall_screen.dart';
 import '../chats/games_screen.dart';
 import 'incoming_call_screen.dart';
 import 'meet_irl_screens.dart';
+import 'decompress_screens.dart';
 import 'plans_hub_screens.dart';
 import 'plan_composer_screen.dart';
 import 'plans_list_screen.dart';
@@ -112,6 +113,30 @@ class ConnectScreen extends StatelessWidget {
                     }
                   },
                 ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          // Decompress: the bookable reset shelf (+ Phone-Down Mode).
+          GlassContainer(
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const DecompressScreen()),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.spa_outlined, color: AppColors.sparkCoral, size: 32),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Decompress', style: Theme.of(context).textTheme.titleMedium),
+                      Text('Sunset walks, kayaking, pottery, park yoga, spa hours — book a reset, phone down.',
+                          style: Theme.of(context).textTheme.bodySmall),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right),
               ],
             ),
           ),

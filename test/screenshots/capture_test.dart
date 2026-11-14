@@ -21,6 +21,7 @@ import 'package:carino/screens/chats/conversation_screen.dart';
 import 'package:carino/screens/chats/games_screen.dart';
 import 'package:carino/screens/chats/social_screens.dart';
 import 'package:carino/screens/connect/connect_screen.dart';
+import 'package:carino/screens/connect/decompress_screens.dart';
 import 'package:carino/screens/connect/meet_irl_screens.dart';
 import 'package:carino/screens/connect/plan_detail_screen.dart';
 import 'package:carino/screens/connect/spark_session_screen.dart';
@@ -231,6 +232,13 @@ void main() {
     Shot('46_connect', () => const ConnectScreen()),
     Shot('47_chats', () => const ChatListScreen()),
     Shot('48_you', () => const YouScreen()),
+    Shot('55_decompress', () => const DecompressScreen()),
+    Shot('56_decompress_booking', () => const DecompressScreen(), (t) async {
+      await t.tap(find.text('Kayak the Olentangy'));
+      await t.pump();
+      await t.pump(const Duration(milliseconds: 600));
+    }),
+    Shot('57_phone_down', () => const PhoneDownScreen(planTitle: 'Sunset walk on the Scioto Mile')),
     Shot('49_couples', () => const CoupleScreen()),
     Shot('50_referral', () => const ReferralScreen()),
     Shot('51_insights', () => const InsightsScreen()),

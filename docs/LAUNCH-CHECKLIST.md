@@ -32,8 +32,8 @@ Legend: ✅ done in code · 🔑 needs you · ⚠️ decision/risk
 
 ## 3. Backend go-live
 1. 🔑 `supabase link` to your project, then `supabase db push` (applies
-   migrations 0001–0006). ✅ All six migrations are tested in
-   `backend/tests` (48 RLS assertions) — run `cd backend/tests && npm test`
+   migrations 0001–0007). ✅ All six migrations are tested in
+   `backend/tests` (56 RLS assertions) — run `cd backend/tests && npm test`
    first.
 2. 🔑 Set Edge Function secrets: `ANTHROPIC_API_KEY`/`OPENAI_API_KEY`,
    verification vendor keys, `SCHEDULER_SECRET`; deploy all functions in
@@ -110,3 +110,18 @@ flutter build appbundle --release `
   groups, polls, guilds, check-ins already exist: migrations 0004–0006).
 - Passkeys: platform passkeys not yet wired; the button refuses in live
   mode rather than faking a sign-in.
+
+## Decompress + Phone-Down (added Nov 14)
+- ✅ Decompress shelf (Plans tab): solo / circle / date / join-a-group,
+  booking sheet shows the venue's price; commission is venue-side
+  (migration 0007 sets prices server-side; clients can't).
+- 🔑 Sign experience partners (use `docs/sales/VENUE-PARTNER-KIT.md`) and
+  connect their booking/payment flow — paid bookings must be paid to the
+  partner (physical services are outside store in-app-purchase rules).
+- ✅ Phone-Down Mode: ritual + honest Presence Score. Android tells screen
+  lock vs. app switch apart natively.
+- ⚠️ True app locking (Brick-style) needs Apple's **Family Controls
+  entitlement** (apply in the developer portal, Screen Time API) and on
+  Android a Digital-Wellbeing-style approach; do not ship a claim that
+  Cariño "locks apps" until then. iPhone currently counts any time away as
+  phone-down — say so in the UI (it does).

@@ -1,5 +1,6 @@
 package com.example.carino
 
+import android.os.PowerManager
 import android.view.WindowManager
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -21,6 +22,17 @@ class MainActivity : FlutterFragmentActivity() {
                         window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
                     }
                     result.success(null)
+                } else {
+                    result.notImplemented()
+                }
+            }
+        // Phone-Down Mode: is the screen on? Leaving the app with the screen
+        // on = another app opened (check-in); screen off = phone down.
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "carino/presence")
+            .setMethodCallHandler { call, result ->
+                if (call.method == "isInteractive") {
+                    val pm = getSystemService(POWER_SERVICE) as PowerManager
+                    result.success(pm.isInteractive)
                 } else {
                     result.notImplemented()
                 }

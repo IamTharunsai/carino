@@ -4,6 +4,7 @@ import '../models/member.dart';
 import '../models/message.dart';
 import '../models/platform.dart';
 import '../models/social.dart';
+import '../models/wellbeing.dart';
 
 /// ─────────────────────────────────────────────────────────────────────────
 /// SAMPLE DATA — clearly-marked demo content for the scaffold.
@@ -482,6 +483,19 @@ class MockData {
     SparkNight(id: 'sn2', theme: 'Over-35 Sunday', timeLabel: 'Sun · 19:00', blurb: 'Grown-up pace, same rules: full profiles, both accept.', ageBand: '35+'),
     SparkNight(id: 'sn3', theme: 'Queer Spark Night', timeLabel: 'Wed · 20:00', blurb: 'LGBTQ+ members meeting LGBTQ+ members. Hosted and moderated.'),
     SparkNight(id: 'sn4', theme: 'Gamers & Geeks', timeLabel: 'Fri · 21:00', blurb: 'Start with a round of This or That, end with a rematch.'),
+  ];
+
+  /// Decompress shelf — SAMPLE listings from imagined local partners.
+  /// Production: partner inventory via booking integrations.
+  static const List<Experience> decompress = [
+    Experience(id: 'd1', title: 'Sunset walk on the Scioto Mile', category: 'Walk', venueType: 'Riverfront park', partner: 'Columbus Walks', timeLabel: 'Today · 18:30', durationMin: 60, priceCents: 0, spotsLeft: 6, maxPeople: 6, groupGoing: 4, stepFree: true, phoneFree: true),
+    Experience(id: 'd2', title: 'Kayak the Olentangy', category: 'Water', venueType: 'River outfitter', partner: 'Olentangy Paddle Co.', timeLabel: 'Sat · 10:00', durationMin: 120, priceCents: 4500, spotsLeft: 4, maxPeople: 4, groupGoing: 2),
+    Experience(id: 'd3', title: 'Beginner pottery wheel', category: 'Make', venueType: 'Ceramics studio', partner: 'Clay & Coffee', timeLabel: 'Sun · 14:00', durationMin: 90, priceCents: 3800, spotsLeft: 3, maxPeople: 2, groupGoing: 0, stepFree: true, phoneFree: true),
+    Experience(id: 'd4', title: 'Park yoga, all levels', category: 'Calm', venueType: 'Park lawn', partner: 'Goodale Yoga', timeLabel: 'Sat · 09:00', durationMin: 60, priceCents: 1200, spotsLeft: 10, maxPeople: 4, groupGoing: 7, stepFree: true, phoneFree: true),
+    Experience(id: 'd5', title: 'Hiking crew: Highbanks trail', category: 'Move', venueType: 'Metro park', partner: 'Trail Friends CBUS', timeLabel: 'Sun · 08:30', durationMin: 150, priceCents: 0, spotsLeft: 5, maxPeople: 5, groupGoing: 6),
+    Experience(id: 'd6', title: 'Spa hour: sauna + cold plunge', category: 'Spa', venueType: 'Day spa', partner: 'Nordic Heat Studio', timeLabel: 'Fri · 19:00', durationMin: 60, priceCents: 5500, spotsLeft: 2, maxPeople: 2, groupGoing: 0),
+    Experience(id: 'd7', title: 'Phone-free café hour', category: 'Café', venueType: 'Café', partner: 'Quiet Cup', timeLabel: 'Tomorrow · 16:00', durationMin: 60, priceCents: 0, spotsLeft: 8, maxPeople: 4, groupGoing: 3, stepFree: true, phoneFree: true),
+    Experience(id: 'd8', title: 'Pickup volleyball', category: 'Sports', venueType: 'Sand courts', partner: 'CBUS Pickup', timeLabel: 'Thu · 18:00', durationMin: 90, priceCents: 500, spotsLeft: 4, maxPeople: 4, groupGoing: 8),
   ];
 
   static const List<GameQuestion> thisOrThatDeck = [

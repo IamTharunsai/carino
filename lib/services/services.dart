@@ -232,6 +232,9 @@ class UserPrefs {
   final String referralCode = 'CARINO-YOU7';
   String? redeemedPromo;
 
+  /// Decompress bookings (demo store; production = partner bookings table).
+  final List<String> bookings = [];
+
   /// Plans you created via Post → Plan or Host a plan (demo store).
   final List<String> myPlans = [];
 

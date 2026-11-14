@@ -6,6 +6,7 @@ import '../../theme/app_colors.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/spark_button.dart';
 import '../../widgets/plan_split_card.dart';
+import 'decompress_screens.dart';
 import 'plan_composer_screen.dart';
 
 /// S-040 Plan Detail — one plan, both people, honest states:
@@ -124,6 +125,13 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
           ],
           if (_confirmed && widget.upcoming && !_cancelled) ...[
             Text('On the day', style: text.titleMedium),
+            const SizedBox(height: 8),
+            SparkButton(
+              label: 'Start Phone-Down together',
+              icon: Icons.phonelink_lock_outlined,
+              onPressed: () => openPhoneDown(context,
+                  planTitle: '${widget.placeType} with ${member.firstName}'),
+            ),
             const SizedBox(height: 8),
             SparkButton(
               label: _arrived ? 'You\'re checked in ✓' : 'I\'m here',
