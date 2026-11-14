@@ -129,3 +129,9 @@ overflow — keep adding new screens to it.
 - PowerShell `Set-Content -Encoding utf8` adds a BOM — avoid for Dart files.
 - Inline heredoc Python sometimes fails in the Bash tool; write scripts to
   the scratchpad and run them.
+
+## Update (after Codex ea17cb2)
+- Reviewed Codex commit: analyzer clean, 65 Flutter tests, RLS tests pass.
+- Migration `0006_social_writes.sql` enables real client writes for groups, group messages, plan polls and guild joins (48 RLS assertions in `backend/tests`).
+- **Next priority:** wire Flutter Chats (groups, messages, polls) to Supabase in live mode; screens still use demo data.
+- Research: see `docs/RESEARCH-SYNTHESIS.md`.
