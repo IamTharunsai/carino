@@ -44,7 +44,7 @@ class GlassContainer extends StatelessWidget {
             borderRadius: BorderRadius.circular(radius),
             border: Border.all(color: AppColors.glassBorder(brightness), width: 1),
           ),
-          child: child,
+          child: Material(type: MaterialType.transparency, child: child),
         ),
       ),
     );

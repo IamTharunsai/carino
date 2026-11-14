@@ -5,7 +5,7 @@ import '../widgets/glass_card.dart';
 import 'chats/chat_list_screen.dart';
 import 'connect/connect_screen.dart';
 import 'discover/discover_screen.dart';
-import 'moments/moments_screen.dart';
+import 'stage/stage_screen.dart';
 import 'you/you_screen.dart';
 
 /// The five-tab shell (blueprint NAV & IA): Discover · Moments · Connect ·
@@ -28,11 +28,13 @@ class _HomeShellState extends State<HomeShell> {
   @override
   Widget build(BuildContext context) {
     final tabs = <_TabSpec>[
-      const _TabSpec(Icons.explore_outlined, Icons.explore, 'Discover'),
-      const _TabSpec(Icons.auto_stories_outlined, Icons.auto_stories, 'Moments'),
-      const _TabSpec(Icons.favorite_border, Icons.favorite, 'Connect'),
       _TabSpec(Icons.chat_bubble_outline, Icons.chat_bubble, 'Chats',
           badge: _unreadChats),
+      const _TabSpec(Icons.play_circle_outline, Icons.play_circle, 'Stage'),
+      // Dates: the 21+ verified dating deck, one tab of the social app.
+      const _TabSpec(Icons.local_fire_department_outlined,
+          Icons.local_fire_department, 'Dates'),
+      const _TabSpec(Icons.event_outlined, Icons.event, 'Plans'),
       const _TabSpec(Icons.person_outline, Icons.person, 'You'),
     ];
 
@@ -41,10 +43,10 @@ class _HomeShellState extends State<HomeShell> {
       body: IndexedStack(
         index: _index,
         children: const [
-          DiscoverScreen(),
-          MomentsScreen(),
-          ConnectScreen(),
           ChatListScreen(),
+          StageScreen(),
+          DiscoverScreen(),
+          ConnectScreen(),
           YouScreen(),
         ],
       ),

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../config/app_config.dart';
 import '../../data/mock_data.dart';
+import '../../models/experience.dart';
 import '../../models/member.dart';
+import '../../services/services.dart';
 import '../../services/sound_service.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/glass_card.dart';
@@ -44,8 +46,10 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   }
 
   List<Member> get _visibleDeck {
-    if (_showDrop) return MockData.dailyDrop;
+    // Reciprocal "I want to meet" applies to the Drop and the deck alike.
+    if (_showDrop) return MockData.dailyDrop.where(fitsMe).toList();
     return _deck.where((m) {
+      if (!fitsMe(m)) return false;
       if (_filter != null && m.intention != _filter) return false;
       if (m.age < _filters.ageMin || m.age > _filters.ageMax) return false;
       if (_filters.language != null &&
@@ -134,16 +138,23 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
             child: Row(
               children: [
-                Text(_showDrop ? 'Daily Drop' : 'Discover',
-                    style: Theme.of(context).textTheme.titleLarge),
-                const Spacer(),
+                Expanded(
+                  child: Text(_showDrop ? 'Daily Drop' : 'Discover',
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleLarge),
+                ),
                 // S-016: finite curated set, truthful count.
-                TextButton.icon(
+                Flexible(
+                  flex: 2,
+                  child: TextButton.icon(
                   onPressed: () => setState(() => _showDrop = !_showDrop),
                   icon: const Icon(Icons.local_fire_department_outlined, size: 18),
-                  label: Text(_showDrop
-                      ? 'All nearby'
-                      : 'Drop · ${MockData.dailyDrop.length} today'),
+                  label: Text(
+                      _showDrop
+                          ? 'All nearby'
+                          : 'Drop · ${MockData.dailyDrop.where(fitsMe).length} today',
+                      overflow: TextOverflow.ellipsis),
+                  ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.public),
@@ -348,6 +359,38 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   }
 }
 
+/// The viewer's own identity: what they set in About You, else the sample
+/// profile's defaults (demo).
+List<String> get myGender => Services.prefs.gender.isNotEmpty
+    ? Services.prefs.gender
+    : MockData.currentUser.gender;
+List<String> get myWantToMeet => Services.prefs.wantToMeet.isNotEmpty
+    ? Services.prefs.wantToMeet
+    : MockData.currentUser.wantToMeet;
+
+/// Reciprocal fit: both people want to meet each other.
+bool fitsMe(Member m) => mutualFit(
+      myWant: myWantToMeet,
+      myGender: myGender,
+      theirWant: m.wantToMeet,
+      theirGender: m.gender,
+    );
+
+/// "Why you're seeing them": REAL taste overlaps first, then shared
+/// interests. Returns null when there is nothing true to say.
+String? whySuggested(Member member) {
+  final mine = Services.prefs.tasteAnswers.isNotEmpty
+      ? Services.prefs.tasteAnswers
+      : const {'t2': 'Midnight pancakes', 't3': 'Coffee and a walk', 't7': 'Farmers market'};
+  final tastes = sharedTastes(mine, member.tasteAnswers);
+  if (tastes.isNotEmpty) return 'You both picked ${tastes.take(2).join(' · ')}';
+  final shared = member.interests
+      .where(MockData.currentUser.interests.toSet().contains)
+      .toList();
+  if (shared.isNotEmpty) return 'You both like ${shared.take(2).join(' · ')}';
+  return null;
+}
+
 /// The big glass Discover card: video-first media, intention chip, prompts.
 class _MemberCard extends StatelessWidget {
   const _MemberCard({
@@ -417,8 +460,20 @@ class _MemberCard extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(
-                          '${member.firstName}, ${member.age}',
+                        child: Text.rich(
+                          TextSpan(
+                            text: '${member.firstName}, ${member.age}',
+                            children: [
+                              if (member.pronouns.isNotEmpty &&
+                                  member.shows('pronouns', matched: false))
+                                TextSpan(
+                                  text: '  ${member.pronouns}',
+                                  style: const TextStyle(
+                                      fontSize: 13,
+                                      color: AppColors.softRose),
+                                ),
+                            ],
+                          ),
                           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                 color: AppColors.warmIvory,
                               ),
@@ -455,17 +510,24 @@ class _MemberCard extends StatelessWidget {
                   const SizedBox(height: 6),
                   Builder(builder: (context) {
                     // Shared-signal line (S-015): only states REAL overlaps
-                    // with the current member's profile — never invented.
-                    final mine = MockData.currentUser.interests.toSet();
-                    final shared =
-                        member.interests.where(mine.contains).toList();
-                    if (shared.isEmpty) return const SizedBox.shrink();
+                    // (taste quiz first, then interests) — never invented.
+                    final why = whySuggested(member);
+                    if (why == null) return const SizedBox.shrink();
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 4),
-                      child: Text(
-                        'You both like ${shared.take(2).join(' · ')}',
-                        style: const TextStyle(
-                            color: AppColors.sparkCoral, fontSize: 12),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.auto_awesome,
+                              size: 13, color: AppColors.sparkCoral),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              why,
+                              style: const TextStyle(
+                                  color: AppColors.sparkCoral, fontSize: 12),
+                            ),
+                          ),
+                        ],
                       ),
                     );
                   }),

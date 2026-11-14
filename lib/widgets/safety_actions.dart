@@ -44,6 +44,7 @@ class SafetyActions {
       'Hate speech or slurs',
       'Unwanted sexual content',
       'Stalking or repeated unwanted contact',
+      'Misgendering or attacks on identity',
     ],
     'Scams and fraud': [
       'Asking for money or gifts',

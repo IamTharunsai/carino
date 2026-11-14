@@ -4,10 +4,12 @@ import '../services/services.dart';
 import 'home_shell.dart';
 import 'onboarding/age_gate_screen.dart';
 import 'onboarding/auth_screen.dart';
+import 'onboarding/identity_screen.dart';
 import 'onboarding/intentions_screen.dart';
 import 'onboarding/permission_primers_screen.dart';
 import 'onboarding/privacy_setup_screen.dart';
 import 'onboarding/profile_creation_screen.dart';
+import 'onboarding/taste_quiz_screen.dart';
 import 'onboarding/verification_flow_screen.dart';
 import 'onboarding/verification_intro_screen.dart';
 import 'onboarding/waitlist_screen.dart';
@@ -25,6 +27,8 @@ enum _Stage {
   verificationProvider,
   verificationResult,
   intentions,
+  identity,
+  tasteQuiz,
   privacySetup,
   waitlist,
   profile,
@@ -102,7 +106,11 @@ class _RootFlowState extends State<RootFlow> {
           onRetry: () => _go(_Stage.verificationProvider),
         );
       case _Stage.intentions:
-        return IntentionsScreen(onDone: (_) => _go(_Stage.privacySetup));
+        return IntentionsScreen(onDone: (_) => _go(_Stage.identity));
+      case _Stage.identity:
+        return IdentityScreen(onDone: () => _go(_Stage.tasteQuiz));
+      case _Stage.tasteQuiz:
+        return TasteQuizScreen(onDone: () => _go(_Stage.privacySetup));
       case _Stage.privacySetup:
         return PrivacySetupScreen(onDone: () => _go(_Stage.profile));
       case _Stage.waitlist:

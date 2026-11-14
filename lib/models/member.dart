@@ -1,3 +1,5 @@
+import 'social.dart';
+
 /// The four stated intentions (blueprint S-008 / EMBER spec).
 /// Intention is always visible on the card — nobody guesses what someone wants.
 enum Intention {
@@ -37,6 +39,16 @@ class Member {
     this.availability = 'This week',
     this.boundaries = '',
     this.photoAssets = const [],
+    this.gender = const [],
+    this.pronouns = '',
+    this.orientation = '',
+    this.wantToMeet = const [],
+    this.identityVisibility = const {},
+    this.anthem,
+    this.topArtists = const [],
+    this.tasteAnswers = const {},
+    this.highlights = const [],
+    this.accessNote = '',
   });
 
   final String id;
@@ -84,6 +96,41 @@ class Member {
   /// Free-text boundaries shown on the profile (S-013). A label never
   /// grants consent — it only informs.
   final String boundaries;
+
+  // --- Identity (inclusion bundle) -----------------------------------------
+  // Each field is optional and member-controlled. [identityVisibility] maps
+  // field -> 'everyone' | 'matches' | 'hidden'. A hidden field is still used
+  // for matching ("I want to meet") but never rendered to anyone else.
+
+  /// Self-described gender(s), e.g. ['Woman'], ['Non-binary'].
+  final List<String> gender;
+  final String pronouns;
+  final String orientation;
+
+  /// Who they want to meet (empty = everyone). Used for matching only.
+  final List<String> wantToMeet;
+  final Map<String, String> identityVisibility;
+
+  /// What a viewer may see for [field], given whether they're matched.
+  bool shows(String field, {required bool matched}) {
+    final v = identityVisibility[field] ?? 'everyone';
+    return v == 'everyone' || (v == 'matches' && matched);
+  }
+
+  // --- Profile Soundtrack (official music-service link, never a ripped clip)
+  final String? anthem;
+  final List<String> topArtists;
+
+  /// Taste Quiz answers (question id -> pick). Powers the honest
+  /// "Why you're seeing them" line — real overlaps only.
+  final Map<String, String> tasteAnswers;
+
+  /// Up to 3 pinned Moments (captions) shown on the profile as Highlights.
+  final List<String> highlights;
+
+  /// Optional access needs (e.g. "Step-free venues, please"). Never a filter
+  /// anyone else can use against the member.
+  final String accessNote;
 
   String get firstName => name.split(' ').first;
 }
@@ -142,6 +189,8 @@ class Moment {
     required this.caption,
     required this.imageAsset,
     required this.expiresInLabel,
+    this.sticker,
+    this.circle = Circle.everyone,
   });
 
   final String id;
@@ -149,6 +198,29 @@ class Moment {
   final String caption;
   final String imageAsset;
   final String expiresInLabel;
+
+  /// Optional interactive sticker. Answers go to the poster as a PRIVATE
+  /// chat opener — never public counts or comments.
+  final MomentSticker? sticker;
+
+  /// Which circle this Moment was shared to (private by choice, per post).
+  final Circle circle;
+}
+
+enum StickerKind { poll, askMe, thisOrThat }
+
+class MomentSticker {
+  const MomentSticker({
+    required this.kind,
+    required this.question,
+    this.options = const [],
+  });
+
+  final StickerKind kind;
+  final String question;
+
+  /// Two options for poll / this-or-that; empty for Ask Me (free text).
+  final List<String> options;
 }
 
 /// A suggested real-world plan (blueprint S-039/S-040). Public place TYPES

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../data/mock_data.dart';
+import '../../models/experience.dart';
 import '../../models/member.dart';
 import '../../models/message.dart';
 import '../../services/services.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/safety_actions.dart';
+import '../../widgets/spark_button.dart';
 import '../connect/plan_composer_screen.dart';
 import '../connect/plan_detail_screen.dart';
 import 'conversation_settings_screen.dart';
@@ -45,6 +47,16 @@ class _ConversationScreenState extends State<ConversationScreen> {
 
   /// S-035: view-once applies to the NEXT media you send.
   bool _viewOnceNext = false;
+
+  /// Scam Shield: a calm card for BOTH people when money, crypto, gift
+  /// cards or a fast move off-app comes up. A signal, never a verdict.
+  bool _shieldDismissed = false;
+
+  Set<ScamSignal> get _signals => {
+        for (final m in widget.conversation.messages)
+          if (!m.dissolved && !m.unsent && !m.isSystemNotice)
+            ...scanForScam(m.text),
+      };
 
   /// S-032B: starters shown until you've sent your first message.
   List<String> _starters = const [];
@@ -99,9 +111,39 @@ class _ConversationScreenState extends State<ConversationScreen> {
 
   bool get _vanish => widget.conversation.mode == ChatMode.vanish;
 
-  void _send() {
+  Future<void> _send() async {
     final text = _composer.text.trim();
     if (text.isEmpty) return;
+    // Pre-send pause when YOU are about to talk money — a moment to think,
+    // never a block. Off-app mentions just raise the shield card.
+    final mine = scanForScam(text);
+    if (mine.contains(ScamSignal.money) ||
+        mine.contains(ScamSignal.crypto) ||
+        mine.contains(ScamSignal.giftCards)) {
+      final go = await showGlassSheet<bool>(
+        context,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text('Before you send', style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 8),
+            Text(scamShieldCopy(mine),
+                style: Theme.of(context).textTheme.bodyMedium),
+            const SizedBox(height: 14),
+            SparkButton(
+              label: 'Edit message',
+              onPressed: () => Navigator.of(context).pop(false),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Send anyway'),
+            ),
+          ],
+        ),
+      );
+      if (go != true || !mounted) return;
+    }
     setState(() {
       widget.conversation.messages.add(ChatMessage(
         id: 'local-${DateTime.now().millisecondsSinceEpoch}',
@@ -268,6 +310,45 @@ class _ConversationScreenState extends State<ConversationScreen> {
                       child: Text('Pinned plan: Coffee · Sat 11:00 · both confirmed'),
                     ),
                     Icon(Icons.chevron_right, size: 16),
+                  ],
+                ),
+              ),
+            ),
+          if (_signals.isNotEmpty && !_shieldDismissed)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+              child: GlassContainer(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.shield_outlined,
+                            size: 18, color: AppColors.sparkCoral),
+                        const SizedBox(width: 8),
+                        Text('Scam Shield',
+                            style: Theme.of(context).textTheme.titleSmall),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(scamShieldCopy(_signals),
+                        style: Theme.of(context).textTheme.bodySmall),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => SafetyActions.showReportFlow(context,
+                              member: _member, surface: 'Chat (Scam Shield)'),
+                          child: const Text('Report'),
+                        ),
+                        TextButton(
+                          onPressed: () =>
+                              setState(() => _shieldDismissed = true),
+                          child: const Text('Got it'),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -596,6 +677,22 @@ class _ConversationScreenState extends State<ConversationScreen> {
               onTap: () {
                 setState(() => msg.unsent = true);
                 Navigator.of(context).pop();
+              },
+            ),
+          if (!msg.fromMe && msg.mediaAsset == null)
+            ListTile(
+              leading: const Icon(Icons.translate),
+              title: const Text('Translate'),
+              onTap: () async {
+                Navigator.of(context).pop();
+                final out = await Services.ai.translate(msg.text);
+                if (!mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  duration: const Duration(seconds: 6),
+                  content: Text(out == null
+                      ? 'Translation runs on the live AI service, which isn\'t connected in this demo.'
+                      : 'Translated: $out'),
+                ));
               },
             ),
           ListTile(

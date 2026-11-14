@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/member.dart';
+import '../../services/services.dart';
+import '../../theme/app_colors.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/safety_actions.dart';
 import '../../widgets/spark_button.dart';
@@ -30,6 +32,20 @@ class _PostPlanFeedbackScreenState extends State<PostPlanFeedbackScreen> {
   bool? _worthwhile;
   final TextEditingController _comment = TextEditingController();
   bool _done = false;
+  String? _tip;
+
+  Future<void> _save() async {
+    final tip = await Services.ai.debriefTip(
+      happened: _happened ?? false,
+      comfortable: _comfortable ?? true,
+      worthwhile: _worthwhile ?? true,
+    );
+    if (!mounted) return;
+    setState(() {
+      _tip = tip;
+      _done = true;
+    });
+  }
 
   @override
   void dispose() {
@@ -78,6 +94,27 @@ class _PostPlanFeedbackScreenState extends State<PostPlanFeedbackScreen> {
                 style: Theme.of(context).textTheme.bodyLarge,
                 textAlign: TextAlign.center,
               ),
+              if (_tip != null) ...[
+                const SizedBox(height: 16),
+                GlassContainer(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Row(
+                        children: [
+                          Icon(Icons.auto_awesome_outlined,
+                              size: 16, color: AppColors.sparkCoral),
+                          SizedBox(width: 6),
+                          Text('Debrief · AI suggestion, just for you'),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(_tip!,
+                          style: Theme.of(context).textTheme.bodyLarge),
+                    ],
+                  ),
+                ),
+              ],
               const SizedBox(height: 20),
               SparkButton(
                 label: 'Done',
@@ -141,7 +178,7 @@ class _PostPlanFeedbackScreenState extends State<PostPlanFeedbackScreen> {
             controller: _comment,
             maxLines: 3,
             decoration: const InputDecoration(
-              labelText: 'Anything else? (optional, private)',
+              labelText: 'Private debrief note (only you see it)',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(16)),
               ),
@@ -150,9 +187,7 @@ class _PostPlanFeedbackScreenState extends State<PostPlanFeedbackScreen> {
           const SizedBox(height: 16),
           SparkButton(
             label: 'Save feedback',
-            onPressed: _happened == null
-                ? null
-                : () => setState(() => _done = true),
+            onPressed: _happened == null ? null : _save,
           ),
         ],
       ),

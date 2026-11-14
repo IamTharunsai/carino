@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../data/mock_data.dart';
 import '../../models/member.dart';
+import '../../services/services.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/spark_button.dart';
@@ -36,6 +37,11 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
   bool _arrived = false;
   bool _homeSafe = false;
   bool _cancelled = false;
+
+  // Date Check-in (free forever): venue + time + match's first name shared
+  // with ONE trusted contact if a check-in is missed. Never live GPS.
+  String _checkInAt = '22:00';
+  bool _checkInActive = false;
 
   @override
   Widget build(BuildContext context) {
@@ -167,6 +173,10 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
               ),
             ),
           ],
+          if (_confirmed && widget.upcoming && !_cancelled) ...[
+            const SizedBox(height: 14),
+            _checkInCard(text, member),
+          ],
           const SizedBox(height: 14),
           GlassContainer(
             child: Column(
@@ -183,6 +193,175 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                 ),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _checkInCard(TextTheme text, Member member) {
+    final prefs = Services.prefs;
+    final hasContact = prefs.trustedContactName.isNotEmpty;
+    return GlassContainer(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.shield_moon_outlined,
+                  color: AppColors.sparkCoral),
+              const SizedBox(width: 8),
+              Expanded(child: Text('Date check-in', style: text.titleMedium)),
+              const Chip(
+                label: Text('Free'),
+                visualDensity: VisualDensity.compact,
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          if (!hasContact) ...[
+            Text(
+              'Add one trusted contact. If you miss a check-in, they get the '
+              'venue, time and ${member.firstName}\'s first name and photo — '
+              'never your live location.',
+              style: text.bodyMedium,
+            ),
+            const SizedBox(height: 10),
+            SparkButton(
+              label: 'Add trusted contact',
+              icon: Icons.person_add_alt_outlined,
+              secondary: true,
+              onPressed: _addContact,
+            ),
+          ] else if (!_checkInActive) ...[
+            Text('Trusted contact: ${prefs.trustedContactName}',
+                style: text.bodyMedium),
+            const SizedBox(height: 8),
+            Text('Check on me at', style: text.bodySmall),
+            const SizedBox(height: 6),
+            Wrap(
+              spacing: 8,
+              children: [
+                for (final t in ['21:00', '22:00', '23:00', '00:00'])
+                  ChoiceChip(
+                    label: Text(t),
+                    selected: _checkInAt == t,
+                    selectedColor: AppColors.emberCrimson,
+                    onSelected: (_) => setState(() => _checkInAt = t),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            SparkButton(
+              label: 'Start check-in',
+              icon: Icons.shield_outlined,
+              onPressed: () => setState(() => _checkInActive = true),
+            ),
+            TextButton(
+              onPressed: _addContact,
+              child: const Text('Change contact'),
+            ),
+          ] else ...[
+            Text(
+              'Active. We\'ll ask "Are you OK?" at $_checkInAt. No answer in '
+              '15 minutes and ${prefs.trustedContactName} gets your plan '
+              'details, plus a prompt to call you.',
+              style: text.bodyMedium,
+            ),
+            const SizedBox(height: 10),
+            SparkButton(
+              label: 'I\'m safe — end check-in',
+              icon: Icons.check_circle_outline,
+              onPressed: () {
+                setState(() {
+                  _checkInActive = false;
+                  _homeSafe = true;
+                });
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                      content: Text('Check-in ended. Nothing was shared.')),
+                );
+              },
+            ),
+            const SizedBox(height: 8),
+            SparkButton(
+              label: 'I need help now',
+              icon: Icons.sos_outlined,
+              secondary: true,
+              onPressed: () => showGlassSheet<void>(
+                context,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text('If you\'re in danger, call 911 now.',
+                        style: Theme.of(context).textTheme.titleLarge),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Cariño is not an emergency service. We\'ve flagged '
+                      'this plan to ${prefs.trustedContactName} and to our '
+                      'Trust team (demo: nothing is sent).',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    const SizedBox(height: 12),
+                    SparkButton(
+                      label: 'Close',
+                      secondary: true,
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  void _addContact() {
+    final name = TextEditingController(text: Services.prefs.trustedContactName);
+    final phone =
+        TextEditingController(text: Services.prefs.trustedContactPhone);
+    showGlassSheet<void>(
+      context,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text('Trusted contact', style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 4),
+          Text('Only used for missed check-ins. They don\'t need the app.',
+              style: Theme.of(context).textTheme.bodySmall),
+          const SizedBox(height: 12),
+          TextField(
+            controller: name,
+            decoration: const InputDecoration(labelText: 'Name'),
+          ),
+          TextField(
+            controller: phone,
+            keyboardType: TextInputType.phone,
+            decoration: const InputDecoration(labelText: 'Mobile number'),
+          ),
+          const SizedBox(height: 14),
+          SparkButton(
+            label: 'Save',
+            onPressed: () {
+              final n = name.text.trim();
+              final p = phone.text.trim();
+              // Validate at the trust boundary: a check-in can't silently
+              // point at nobody.
+              if (n.isEmpty || p.replaceAll(RegExp(r'\D'), '').length < 7) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text('Add a name and a full phone number.')));
+                return;
+              }
+              Services.prefs
+                ..trustedContactName = n
+                ..trustedContactPhone = p;
+              Navigator.of(context).pop();
+              setState(() {});
+            },
           ),
         ],
       ),

@@ -12,6 +12,7 @@ class Conversation {
     this.unreadCount = 0,
     this.vanishMinutes = 60,
     this.planPinned = false,
+    this.quietDays = 0,
   });
 
   final String id;
@@ -25,6 +26,10 @@ class Conversation {
 
   /// A confirmed plan is pinned at the top of the conversation (S-040).
   bool planPinned;
+
+  /// Days since either person last wrote. Drives the optional, kind
+  /// Close the Loop nudge (never a public 'ghoster' label).
+  int quietDays;
 }
 
 class ChatMessage {

@@ -4,6 +4,8 @@ import '../../theme/app_colors.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/safety_actions.dart';
 import '../../widgets/spark_button.dart';
+import '../../widgets/video_reply_sheet.dart';
+import 'discover_screen.dart' show whySuggested;
 import '../chats/games_screen.dart';
 import '../connect/spark_session_screen.dart';
 
@@ -11,9 +13,16 @@ import '../connect/spark_session_screen.dart';
 /// prompts, interests, languages, boundaries. Report is reachable HERE
 /// (overflow menu) — safety is never more than one tap from a person.
 class ProfileDetailScreen extends StatelessWidget {
-  const ProfileDetailScreen({super.key, required this.member});
+  const ProfileDetailScreen({
+    super.key,
+    required this.member,
+    this.matched = false,
+  });
 
   final Member member;
+
+  /// Matches may see fields the member set to "Matches" visibility.
+  final bool matched;
 
   @override
   Widget build(BuildContext context) {
@@ -58,8 +67,20 @@ class ProfileDetailScreen extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: Text('${member.name}, ${member.age}',
-                          style: Theme.of(context).textTheme.titleLarge),
+                      child: Text.rich(
+                        TextSpan(
+                          text: '${member.name}, ${member.age}',
+                          children: [
+                            if (member.pronouns.isNotEmpty &&
+                                member.shows('pronouns', matched: matched))
+                              TextSpan(
+                                text: '  ${member.pronouns}',
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                          ],
+                        ),
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
                     ),
                     if (member.verified) const VerifiedBadge(size: 20),
                   ],
@@ -69,6 +90,20 @@ class ProfileDetailScreen extends StatelessWidget {
                     style: Theme.of(context).textTheme.bodySmall),
                 const SizedBox(height: 10),
                 Text(member.headline, style: Theme.of(context).textTheme.bodyLarge),
+                if (whySuggested(member) case final why?) ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(Icons.auto_awesome,
+                          size: 14, color: AppColors.sparkCoral),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text('Why you\'re seeing them: $why',
+                            style: Theme.of(context).textTheme.bodySmall),
+                      ),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: 12),
                 // S-019: the full S-008 dimensions + boundaries, printed.
                 Wrap(
@@ -78,8 +113,29 @@ class ProfileDetailScreen extends StatelessWidget {
                     Chip(label: Text('Structure · ${member.structure}')),
                     Chip(label: Text('Pace · ${member.pace}')),
                     Chip(label: Text('Free · ${member.availability}')),
+                    if (member.gender.isNotEmpty &&
+                        member.shows('gender', matched: matched))
+                      Chip(label: Text(member.gender.join(' · '))),
+                    if (member.orientation.isNotEmpty &&
+                        member.shows('orientation', matched: matched))
+                      Chip(label: Text(member.orientation)),
                   ],
                 ),
+                if (member.accessNote.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.accessible_forward,
+                          size: 16, color: AppColors.sparkCoral),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text('Access: ${member.accessNote}',
+                            style: Theme.of(context).textTheme.bodyMedium),
+                      ),
+                    ],
+                  ),
+                ],
                 if (member.boundaries.isNotEmpty) ...[
                   const SizedBox(height: 10),
                   Row(
@@ -123,6 +179,10 @@ class ProfileDetailScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
+          if (member.highlights.isNotEmpty) ...[
+            _Highlights(member: member),
+            const SizedBox(height: 12),
+          ],
           for (final prompt in member.prompts) ...[
             GlassContainer(
               child: Column(
@@ -136,6 +196,23 @@ class ProfileDetailScreen extends StatelessWidget {
                       ),
                       // S-019: react to THIS prompt — the like carries the
                       // anchor into chat (S-032B opens on it).
+                      IconButton(
+                        icon: const Icon(Icons.videocam_outlined,
+                            size: 18, color: AppColors.sparkCoral),
+                        tooltip: 'Reply with video',
+                        visualDensity: VisualDensity.compact,
+                        onPressed: () async {
+                          final sent = await showVideoReplySheet(context,
+                              member: member, prompt: prompt);
+                          if (sent != true || !context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                  'Video reply sent to ${member.firstName} privately — your like, with a hello.'),
+                            ),
+                          );
+                        },
+                      ),
                       IconButton(
                         icon: const Icon(Icons.favorite_border,
                             size: 18, color: AppColors.sparkCoral),
@@ -179,6 +256,43 @@ class ProfileDetailScreen extends StatelessWidget {
               ],
             ),
           ),
+          if (member.anthem != null || member.topArtists.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            GlassContainer(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.music_note_outlined,
+                          color: AppColors.sparkCoral),
+                      const SizedBox(width: 8),
+                      Text('Soundtrack',
+                          style: Theme.of(context).textTheme.titleMedium),
+                    ],
+                  ),
+                  if (member.anthem != null) ...[
+                    const SizedBox(height: 8),
+                    Text('Anthem · ${member.anthem}',
+                        style: Theme.of(context).textTheme.bodyLarge),
+                  ],
+                  if (member.topArtists.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: [
+                        for (final a in member.topArtists) Chip(label: Text(a)),
+                      ],
+                    ),
+                  ],
+                  const SizedBox(height: 4),
+                  Text('Linked from their music app.',
+                      style: Theme.of(context).textTheme.bodySmall),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 12),
           GlassContainer(
             child: Column(
@@ -245,6 +359,68 @@ class ProfileDetailScreen extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Highlights: up to 3 Moments the member chose to keep on their profile.
+class _Highlights extends StatelessWidget {
+  const _Highlights({required this.member});
+  final Member member;
+
+  @override
+  Widget build(BuildContext context) {
+    return GlassContainer(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Highlights', style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 92,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: member.highlights.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 10),
+              itemBuilder: (context, i) => SizedBox(
+                width: 150,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(14),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Image.asset(member.gallery[i % member.gallery.length],
+                          fit: BoxFit.cover),
+                      const DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [Colors.transparent, Color(0xCC151014)],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Align(
+                          alignment: Alignment.bottomLeft,
+                          child: Text(
+                            member.highlights[i],
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                                color: AppColors.warmIvory, fontSize: 12),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),

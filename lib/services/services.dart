@@ -1,3 +1,7 @@
+import 'package:flutter/foundation.dart';
+import '../data/mock_data.dart';
+import '../models/platform.dart';
+import '../models/social.dart';
 import 'ai_service.dart';
 import 'auth_service.dart';
 import 'backend_service.dart';
@@ -26,6 +30,8 @@ class Services {
   static final SoundService sound = SoundService();
   static final RemoteConfigService remoteConfig = RemoteConfigService();
   static final UserPrefs prefs = UserPrefs();
+  static final SocialGraph social = SocialGraph(MockData.initialCircles);
+  static final TrustGraph trust = MockData.initialTrust();
 }
 
 /// Member-controlled preferences (blueprint S-009 setup, S-047 Privacy
@@ -55,4 +61,61 @@ class UserPrefs {
   bool aiConversationAssistant = true;
   bool aiProfileCoach = true;
   bool aiIcebreakers = true;
+
+  // --- Identity (S-008A) — each field has its own visibility ---------------
+  List<String> gender = const [];
+  String pronouns = '';
+  String orientation = '';
+  List<String> wantToMeet = const []; // empty = open to everyone
+  Map<String, String> identityVisibility = {
+    'gender': 'everyone',
+    'pronouns': 'everyone',
+    'orientation': 'matches',
+  };
+  String accessNote = '';
+
+  /// Taste Quiz answers (question id -> pick).
+  Map<String, String> tasteAnswers = {};
+
+  /// Calm mode: fewer animations, no celebration motion, plain language.
+  /// A notifier so MaterialApp re-reads it app-wide the moment it flips.
+  final ValueNotifier<bool> calmMode = ValueNotifier<bool>(false);
+
+  /// Date Check-in: one trusted contact (name + number) kept on-device in
+  /// the demo; production stores it server-side, own-row RLS only.
+  String trustedContactName = '';
+  String trustedContactPhone = '';
+
+  /// Profile Soundtrack — connected through the official music service.
+  bool musicConnected = false;
+
+  /// Wingperson invite (one active link at a time; revocable).
+  bool wingpersonActive = false;
+
+  /// Moments pinned to your profile as Highlights (max 3).
+  final List<String> highlights = [];
+
+  /// Plans you created via Post → Plan or Host a plan (demo store).
+  final List<String> myPlans = [];
+
+  /// No-Counts mode: hide every public number (likes, views, followers).
+  final ValueNotifier<bool> noCounts = ValueNotifier<bool>(false);
+
+  /// Facets: one account, four selves. field -> facet -> audience
+  /// ('everyone' | 'matches' | 'circles' | 'hidden').
+  final Map<String, Map<String, String>> facetAudience = {
+    'Photos': {'Public': 'everyone', 'Circles': 'circles', 'Dating': 'matches', 'Professional': 'everyone'},
+    'Pronouns': {'Public': 'everyone', 'Circles': 'circles', 'Dating': 'everyone', 'Professional': 'everyone'},
+    'Orientation': {'Public': 'hidden', 'Circles': 'circles', 'Dating': 'matches', 'Professional': 'hidden'},
+    'Job': {'Public': 'hidden', 'Circles': 'circles', 'Dating': 'matches', 'Professional': 'everyone'},
+    'City': {'Public': 'everyone', 'Circles': 'circles', 'Dating': 'everyone', 'Professional': 'everyone'},
+  };
+
+  /// Professional wing: shown only in the Professional facet.
+  String workRole = 'Product engineer';
+  String workBuilding = 'A dating app that ends in real plans';
+  Set<String> workOpenTo = {'coffee', 'collabs'};
+
+  /// Guilds joined (ids) and whether each allows dating discovery.
+  final Map<String, bool> guildDating = {};
 }

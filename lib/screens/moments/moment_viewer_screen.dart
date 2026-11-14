@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/member.dart';
+import '../../services/services.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/safety_actions.dart';
@@ -29,6 +30,89 @@ class _MomentViewerScreenState extends State<MomentViewerScreen> {
   late int _index = widget.initialIndex;
   bool _reacted = false;
 
+  /// Sticker answer sent for the current Moment (private, to the poster).
+  String? _answered;
+  final TextEditingController _askMe = TextEditingController();
+
+  @override
+  void dispose() {
+    _askMe.dispose();
+    super.dispose();
+  }
+
+  void _answer(String answer) {
+    setState(() => _answered = answer);
+    _askMe.clear();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+            'Sent to ${_moment.member.firstName} privately — it opens a chat, never a public comment.'),
+      ),
+    );
+  }
+
+  Widget _sticker(MomentSticker s) {
+    return GlassContainer(
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(s.question,
+              style: const TextStyle(
+                  color: AppColors.warmIvory, fontWeight: FontWeight.w600)),
+          const SizedBox(height: 8),
+          if (widget.isOwn)
+            Text(
+              s.kind == StickerKind.askMe
+                  ? 'Answers arrive in your chats, privately.'
+                  : 'Votes arrive in your chats as openers — no public tally.',
+              style: const TextStyle(color: AppColors.softRose, fontSize: 12),
+            )
+          else if (_answered != null)
+            Text('You answered: $_answered',
+                style: const TextStyle(color: AppColors.sparkCoral))
+          else if (s.kind == StickerKind.askMe)
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _askMe,
+                    style: const TextStyle(color: AppColors.warmIvory),
+                    decoration: const InputDecoration(
+                      hintText: 'Your answer…',
+                      isDense: true,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.send, color: AppColors.sparkCoral),
+                  tooltip: 'Send privately',
+                  onPressed: () {
+                    final t = _askMe.text.trim();
+                    if (t.isNotEmpty) _answer(t);
+                  },
+                ),
+              ],
+            )
+          else
+            Row(
+              children: [
+                for (final o in s.options) ...[
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => _answer(o),
+                      child: Text(o, textAlign: TextAlign.center),
+                    ),
+                  ),
+                  if (o != s.options.last) const SizedBox(width: 8),
+                ],
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+
   Moment get _moment => widget.moments[_index];
 
   void _next() {
@@ -36,6 +120,7 @@ class _MomentViewerScreenState extends State<MomentViewerScreen> {
       setState(() {
         _index++;
         _reacted = false;
+        _answered = null;
       });
     } else {
       Navigator.of(context).pop();
@@ -47,6 +132,7 @@ class _MomentViewerScreenState extends State<MomentViewerScreen> {
       setState(() {
         _index--;
         _reacted = false;
+        _answered = null;
       });
     }
   }
@@ -121,18 +207,24 @@ class _MomentViewerScreenState extends State<MomentViewerScreen> {
                         backgroundImage: AssetImage(m.member.photoAsset),
                       ),
                       const SizedBox(width: 8),
-                      Text(
+                      Flexible(
+                        child: Text(
                         widget.isOwn ? 'Your Moment' : m.member.firstName,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                             color: AppColors.warmIvory,
                             fontWeight: FontWeight.w600),
                       ),
+                      ),
                       const SizedBox(width: 8),
-                      Chip(
-                        avatar: const Icon(Icons.schedule, size: 12),
-                        label: Text('Gone in ${m.expiresInLabel}'),
-                        visualDensity: VisualDensity.compact,
-                        labelStyle: const TextStyle(fontSize: 11),
+                      Flexible(
+                        child: Chip(
+                          avatar: const Icon(Icons.schedule, size: 12),
+                          label: Text('Gone in ${m.expiresInLabel}',
+                              overflow: TextOverflow.ellipsis),
+                          visualDensity: VisualDensity.compact,
+                          labelStyle: const TextStyle(fontSize: 11),
+                        ),
                       ),
                       const Spacer(),
                       if (!widget.isOwn)
@@ -164,6 +256,10 @@ class _MomentViewerScreenState extends State<MomentViewerScreen> {
                           style: const TextStyle(
                               color: AppColors.warmIvory, fontSize: 16)),
                       const SizedBox(height: 12),
+                      if (m.sticker != null) ...[
+                        _sticker(m.sticker!),
+                        const SizedBox(height: 12),
+                      ],
                       if (widget.isOwn)
                         GlassContainer(
                           child: Column(
@@ -177,6 +273,25 @@ class _MomentViewerScreenState extends State<MomentViewerScreen> {
                               const Text('Aria · Sofia · Marcus',
                                   style: TextStyle(color: AppColors.warmIvory)),
                               const SizedBox(height: 8),
+                              TextButton.icon(
+                                onPressed: () {
+                                  final pins = Services.prefs.highlights;
+                                  final msg = pins.contains(m.caption)
+                                      ? 'Already pinned to your profile.'
+                                      : pins.length >= 3
+                                          ? 'Highlights hold 3 — unpin one in Edit profile first.'
+                                          : 'Pinned to your profile as a Highlight. It\'s re-checked before it shows.';
+                                  if (!pins.contains(m.caption) &&
+                                      pins.length < 3) {
+                                    pins.add(m.caption);
+                                  }
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text(msg)));
+                                },
+                                icon: const Icon(Icons.push_pin_outlined,
+                                    size: 18),
+                                label: const Text('Pin to profile'),
+                              ),
                               TextButton.icon(
                                 onPressed: () {
                                   Navigator.of(context).pop();

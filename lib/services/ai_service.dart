@@ -66,6 +66,41 @@ class AIService {
     ];
   }
 
+  /// Live Translation (labelled "Translated", original one tap away).
+  /// Returns null when no translation service is connected — the UI says
+  /// so plainly instead of faking a translation.
+  Future<String?> translate(String text, {String to = 'English'}) async {
+    final live = await _proxy('translate', {'text': text, 'to': to});
+    if (live is Map && live['text'] is String) return live['text'] as String;
+    return null;
+  }
+
+  /// Date Debrief (private): one gentle suggestion for next time, from the
+  /// member's own private note. Never shared, never used for ranking.
+  Future<String> debriefTip({
+    required bool happened,
+    required bool comfortable,
+    required bool worthwhile,
+  }) async {
+    final live = await _proxy('debrief', {
+      'happened': happened,
+      'comfortable': comfortable,
+      'worthwhile': worthwhile,
+    });
+    if (live is Map && live['tip'] is String) return live['tip'] as String;
+    await Future<void>.delayed(const Duration(milliseconds: 300));
+    if (!happened) {
+      return 'Plans fall through. A quick "still on?" the day before saves a wasted trip.';
+    }
+    if (!comfortable) {
+      return 'Trust that feeling. Next time, pick a busier venue and keep check-in on.';
+    }
+    if (!worthwhile) {
+      return 'No spark is useful data. A Spark call first can save an evening.';
+    }
+    return 'Sounds good! If you want a second date, suggest it while it\'s fresh.';
+  }
+
   /// AI-07: draft a plan into the composer (member reviews + sends).
   Future<String> draftPlanNote({required String placeType}) async {
     debugPrint('[AIService] drafting plan note (stub)');

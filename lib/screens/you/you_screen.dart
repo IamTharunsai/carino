@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import '../../config/app_config.dart';
 import '../../data/mock_data.dart';
+import '../../models/experience.dart';
 import '../../services/services.dart';
 import '../../services/verification_service.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/safety_actions.dart';
+import '../../widgets/spark_button.dart';
+import '../onboarding/identity_screen.dart';
 import '../onboarding/intentions_screen.dart';
+import '../onboarding/taste_quiz_screen.dart';
 import '../onboarding/profile_creation_screen.dart';
 import 'delete_account_screen.dart';
 import 'likes_manager_screen.dart';
@@ -15,8 +19,9 @@ import 'paywall_screen.dart';
 import 'privacy_centre_screen.dart';
 import 'settings_screen.dart';
 import 'trust_safety_screen.dart';
+import 'wingperson_screen.dart';
 
-/// S-043 My Profile (You tab) — hub to Edit (S-044), Intentions (S-045),
+/// S-043 My Profile (You tab) â€” hub to Edit (S-044), Intentions (S-045),
 /// Verification Centre (S-046), Privacy Centre (S-047), Trust & Safety
 /// Centre (S-052), Plus (S-054), Settings (S-050) and Delete (S-055).
 class YouScreen extends StatelessWidget {
@@ -66,40 +71,69 @@ class YouScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          // S-043 completion meter — computed from the REAL profile
-          // fields (video, photos, prompts, headline, boundaries), so
-          // the percentage is a measurement, not a nag.
+          // Profile Aura: a glow that grows with EFFORT (verified, video,
+          // photos, prompts, voice, boundaries) â€” never looks, never
+          // popularity, and only you see the meter.
           Builder(builder: (context) {
-            var score = 0;
-            if (me.hasVideoIntro) score += 25;
-            if (me.gallery.length >= 3) score += 25;
-            if (me.prompts.length >= 3) score += 20;
-            if (me.headline.isNotEmpty) score += 15;
-            if (me.boundaries.isNotEmpty) score += 15;
+            final items = auraChecklist(me);
+            final strength = auraStrength(me);
             return GlassContainer(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      Expanded(
-                        child: Text('Profile completion · $score%',
-                            style: Theme.of(context).textTheme.titleMedium),
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.sparkCoral
+                                  .withValues(alpha: 0.25 + 0.6 * strength),
+                              blurRadius: 8 + 18 * strength,
+                              spreadRadius: 1 + 3 * strength,
+                            ),
+                          ],
+                        ),
+                        child: CircleAvatar(
+                            backgroundImage: AssetImage(me.photoAsset)),
                       ),
-                      Text(score >= 100 ? 'Complete' : 'In progress',
-                          style: Theme.of(context).textTheme.bodySmall),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                                'Profile aura Â· ${(strength * 100).round()}%',
+                                style: Theme.of(context).textTheme.titleMedium),
+                            Text('Glows brighter as your profile gets more real.',
+                                style: Theme.of(context).textTheme.bodySmall),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  LinearProgressIndicator(
-                    value: score / 100,
-                    color: AppColors.emberCrimson,
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [
+                      for (final (label, done) in items)
+                        Chip(
+                          avatar: Icon(
+                              done ? Icons.check_circle : Icons.add_circle_outline,
+                              size: 16,
+                              color: done ? AppColors.sparkCoral : null),
+                          label: Text(label),
+                          visualDensity: VisualDensity.compact,
+                        ),
+                    ],
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Complete profiles get real conversations. What\'s missing is listed in Edit Profile — no mystery.',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
+                  const SizedBox(height: 4),
+                  Text('Measures effort only â€” never looks. Only you see this.',
+                      style: Theme.of(context).textTheme.bodySmall),
                 ],
               ),
             );
@@ -109,7 +143,7 @@ class YouScreen extends StatelessWidget {
             context,
             icon: Icons.edit_outlined,
             title: 'Edit profile & media',
-            subtitle: 'Photos, video intro, prompts — AI Coach lives here too',
+            subtitle: 'Photos, video intro, prompts â€” AI Coach lives here too',
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
                 builder: (_) => ProfileCreationScreen(
@@ -134,9 +168,75 @@ class YouScreen extends StatelessWidget {
           ),
           _row(
             context,
+            icon: Icons.diversity_3_outlined,
+            title: 'About you',
+            subtitle: 'Gender, pronouns, orientation, who you want to meet',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) =>
+                    IdentityScreen(onDone: () => Navigator.of(context).pop()),
+              ),
+            ),
+          ),
+          _row(
+            context,
+            icon: Icons.quiz_outlined,
+            title: 'Taste quiz',
+            subtitle: 'Tune your Daily Drop â€” answers stay editable',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) =>
+                    TasteQuizScreen(onDone: () => Navigator.of(context).pop()),
+              ),
+            ),
+          ),
+          _row(
+            context,
+            icon: Icons.music_note_outlined,
+            title: 'Profile soundtrack',
+            subtitle: 'Show your anthem and top artists',
+            onTap: () => _soundtrack(context),
+          ),
+          _row(
+            context,
+            icon: Icons.push_pin_outlined,
+            title: 'Highlights',
+            subtitle: 'Moments pinned to your profile (up to 3)',
+            onTap: () => _highlights(context),
+          ),
+          _row(
+            context,
+            icon: Icons.handshake_outlined,
+            title: 'Wingperson',
+            subtitle: 'Let a friend suggest people from your Drop',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const WingpersonScreen(),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: GlassContainer(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              child: ValueListenableBuilder<bool>(
+                valueListenable: Services.prefs.calmMode,
+                builder: (context, calm, _) => SwitchListTile(
+                  secondary: const Icon(Icons.spa_outlined),
+                  title: const Text('Calm mode'),
+                  subtitle: const Text(
+                      'Fewer animations, no celebration motion. Easier on the senses.'),
+                  value: calm,
+                  onChanged: (v) => Services.prefs.calmMode.value = v,
+                ),
+              ),
+            ),
+          ),
+          _row(
+            context,
             icon: Icons.verified_user_outlined,
             title: 'Verification Centre',
-            subtitle: 'All 3 layers passed · badge active',
+            subtitle: 'All 3 layers passed Â· badge active',
             onTap: () => _verificationCentre(context),
           ),
           _row(
@@ -165,7 +265,7 @@ class YouScreen extends StatelessWidget {
             context,
             icon: Icons.notifications_outlined,
             title: 'Notifications',
-            subtitle: 'Matches, messages, plans — real events only',
+            subtitle: 'Matches, messages, plans â€” real events only',
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
                 builder: (_) => const NotificationsScreen(),
@@ -188,7 +288,7 @@ class YouScreen extends StatelessWidget {
             icon: Icons.workspace_premium_outlined,
             title: AppConfig.plusName,
             subtitle: Services.payments.isPlus
-                ? 'Active — manage subscription'
+                ? 'Active â€” manage subscription'
                 : 'See who likes you, read receipts, spark sooner',
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
@@ -221,6 +321,78 @@ class YouScreen extends StatelessWidget {
             style: TextButton.styleFrom(foregroundColor: AppColors.emberCrimson),
           ),
         ],
+      ),
+    );
+  }
+
+  void _soundtrack(BuildContext context) {
+    showGlassSheet<void>(
+      context,
+      child: StatefulBuilder(
+        builder: (ctx, setSheet) {
+          final connected = Services.prefs.musicConnected;
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text('Profile soundtrack',
+                  style: Theme.of(ctx).textTheme.titleLarge),
+              const SizedBox(height: 6),
+              Text(
+                connected
+                    ? 'Connected (demo). Your top artists show on your profile; '
+                        'shared artists become conversation starters.'
+                    : 'Connect Spotify or Apple Music to show your top artists '
+                        'and an anthem. We read artist names only â€” never your '
+                        'listening history.',
+                style: Theme.of(ctx).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 14),
+              SparkButton(
+                label: connected ? 'Disconnect' : 'Connect music (demo)',
+                icon: Icons.music_note_outlined,
+                secondary: connected,
+                onPressed: () => setSheet(
+                    () => Services.prefs.musicConnected = !connected),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  void _highlights(BuildContext context) {
+    showGlassSheet<void>(
+      context,
+      child: StatefulBuilder(
+        builder: (ctx, setSheet) {
+          final pins = Services.prefs.highlights;
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text('Highlights', style: Theme.of(ctx).textTheme.titleLarge),
+              const SizedBox(height: 6),
+              if (pins.isEmpty)
+                Text(
+                  'Nothing pinned yet. Open one of your Moments and tap '
+                  '"Pin to profile" to keep it past 24 hours.',
+                  style: Theme.of(ctx).textTheme.bodyMedium,
+                ),
+              for (final h in List.of(pins))
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.push_pin),
+                  title: Text(h),
+                  trailing: TextButton(
+                    onPressed: () => setSheet(() => pins.remove(h)),
+                    child: const Text('Unpin'),
+                  ),
+                ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -273,11 +445,11 @@ class YouScreen extends StatelessWidget {
               leading: const Icon(Icons.check_circle_outline,
                   color: AppColors.sparkCoral),
               title: Text(layer.label),
-              subtitle: Text('${layer.tagline} · Ref VN-DEMO'),
+              subtitle: Text('${layer.tagline} Â· Ref VN-DEMO'),
             ),
           const SizedBox(height: 8),
           Text(
-            'We store results + references only — never your ID images. '
+            'We store results + references only â€” never your ID images. '
             'If a check ever fails, you get the reason and a human appeal path.',
             style: Theme.of(context).textTheme.bodySmall,
           ),

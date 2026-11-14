@@ -13,6 +13,8 @@ import '../discover/profile_detail_screen.dart';
 import '../you/paywall_screen.dart';
 import '../chats/games_screen.dart';
 import 'incoming_call_screen.dart';
+import 'meet_irl_screens.dart';
+import 'plans_hub_screens.dart';
 import 'plan_composer_screen.dart';
 import 'plans_list_screen.dart';
 import 'spark_session_screen.dart';
@@ -74,9 +76,11 @@ class ConnectScreen extends StatelessWidget {
                     const Icon(Icons.schedule, size: 16,
                         color: AppColors.sparkCoral),
                     const SizedBox(width: 6),
-                    Text(
+                    Expanded(
+                      child: Text(
                       'Next window: ${Services.remoteConfig.nextSparkWindowLabel}',
                       style: Theme.of(context).textTheme.bodyMedium,
+                    ),
                     ),
                   ],
                 ),
@@ -107,6 +111,76 @@ class ConnectScreen extends StatelessWidget {
                     }
                   },
                 ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          const NightPlannerCard(),
+          const SizedBox(height: 12),
+          // --- Meet in real life: events, Spark Nights, group hangouts ---
+          GlassContainer(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Meet in real life',
+                    style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 4),
+                Text('Ready-made reasons to turn a match into a plan.',
+                    style: Theme.of(context).textTheme.bodySmall),
+                for (final (icon, title, sub, page) in [
+                  (
+                    Icons.local_activity_outlined,
+                    'Events near you',
+                    'Gigs, markets, comedy, run clubs',
+                    const EventsScreen() as Widget,
+                  ),
+                  (
+                    Icons.nightlife_outlined,
+                    'Spark Nights',
+                    'Themed evenings of 5-minute video hellos',
+                    const SparkNightsScreen() as Widget,
+                  ),
+                  (
+                    Icons.groups_outlined,
+                    'Group hangout',
+                    'Bring a friend — 2 + 2, lower pressure',
+                    const GroupHangoutScreen() as Widget,
+                  ),
+                  (
+                    Icons.nightlight_outlined,
+                    'Tonight near me',
+                    'Hosted plans, events, open tables',
+                    const TonightScreen() as Widget,
+                  ),
+                  (
+                    Icons.campaign_outlined,
+                    'Host a plan',
+                    'Coffee run, pickup game — earn host reputation',
+                    const HostPlanScreen() as Widget,
+                  ),
+                  (
+                    Icons.coffee_outlined,
+                    'Coffee chats',
+                    'One curated work intro a week + warm intros',
+                    const CoffeeChatsScreen() as Widget,
+                  ),
+                  (
+                    Icons.diversity_2_outlined,
+                    'Guilds',
+                    'Interest communities that turn into plans',
+                    const GuildsScreen() as Widget,
+                  ),
+                ])
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(icon, color: AppColors.sparkCoral),
+                    title: Text(title),
+                    subtitle: Text(sub),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(builder: (_) => page),
+                    ),
+                  ),
               ],
             ),
           ),
@@ -211,7 +285,7 @@ class _MatchTile extends StatelessWidget {
           MaterialPageRoute<void>(
             builder: (_) => convs.isNotEmpty
                 ? ConversationScreen(conversation: convs.first)
-                : ProfileDetailScreen(member: member),
+                : ProfileDetailScreen(member: member, matched: true),
           ),
         );
       },

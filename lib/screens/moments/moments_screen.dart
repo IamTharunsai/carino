@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../data/mock_data.dart';
 import '../../models/member.dart';
+import '../../models/social.dart';
+import '../../services/services.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/safety_actions.dart';
@@ -15,15 +17,41 @@ import 'moment_viewer_screen.dart';
 /// pre-screened BEFORE they appear (AI-05 holds distribution; humans
 /// decide), and the feed says so instead of pretending otherwise.
 class MomentsScreen extends StatefulWidget {
-  const MomentsScreen({super.key});
+  /// Optional title replacement (Stage puts its Feed/Moments switch here).
+  const MomentsScreen({super.key, this.header});
+
+  final Widget? header;
 
   @override
   State<MomentsScreen> createState() => _MomentsScreenState();
 }
 
 class _MomentsScreenState extends State<MomentsScreen> {
-  late final List<Moment> _moments = List.of(MockData.moments);
+  late final List<Moment> _all = [
+    ...MockData.friendMoments,
+    ...MockData.moments,
+  ];
   Moment? _ownMoment;
+
+  /// Feed filter: everything you can see, friends only, or dates only.
+  String _filter = 'All';
+
+  /// Only Moments whose circle includes YOU (as the poster placed you —
+  /// demo assumes placements are mutual). Unknown people see 'everyone'
+  /// posts only.
+  List<Moment> get _moments => _all.where((m) {
+        final rel = Services.social.circleOf(m.member.id);
+        final visible = rel == null
+            ? m.circle == Circle.everyone
+            : circleCanSee(m.circle, rel);
+        if (!visible) return false;
+        final isFriend = Services.social.isFriend(m.member.id);
+        return switch (_filter) {
+          'Friends' => isFriend,
+          'Dates' => !isFriend,
+          _ => true,
+        };
+      }).toList();
 
   @override
   Widget build(BuildContext context) {
@@ -33,8 +61,10 @@ class _MomentsScreenState extends State<MomentsScreen> {
         children: [
           Row(
             children: [
-              Text('Moments', style: Theme.of(context).textTheme.titleLarge),
-              const Spacer(),
+              Expanded(
+                child: widget.header ??
+                    Text('Moments', style: Theme.of(context).textTheme.titleLarge),
+              ),
               IconButton(
                 icon: const Icon(Icons.add_circle_outline),
                 tooltip: 'Create a Moment (S-023)',
@@ -43,10 +73,23 @@ class _MomentsScreenState extends State<MomentsScreen> {
             ],
           ),
           Text(
-            'Real life, for 24 hours. Only people connected with you can see these.',
+            'Real life, for 24 hours. Every Moment is shared to a circle you pick.',
             style: Theme.of(context).textTheme.bodySmall,
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            children: [
+              for (final f in ['All', 'Friends', 'Dates'])
+                ChoiceChip(
+                  label: Text(f),
+                  selected: _filter == f,
+                  selectedColor: AppColors.emberCrimson,
+                  onSelected: (_) => setState(() => _filter = f),
+                ),
+            ],
+          ),
+          const SizedBox(height: 10),
           // Your moment ring.
           GlassContainer(
             onTap: () {
@@ -79,7 +122,7 @@ class _MomentsScreenState extends State<MomentsScreen> {
                   child: Text(
                     _ownMoment == null
                         ? 'Share a Moment'
-                        : 'Your Moment · ${_ownMoment!.caption}',
+                        : 'Your Moment · ${_ownMoment!.circle.label}',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                 ),
@@ -174,6 +217,15 @@ class _MomentsScreenState extends State<MomentsScreen> {
                                 fontWeight: FontWeight.w600),
                           ),
                         ),
+                        if (moment.circle != Circle.everyone)
+                          Padding(
+                            padding: const EdgeInsets.only(right: 6),
+                            child: Chip(
+                              label: Text(moment.circle.label),
+                              visualDensity: VisualDensity.compact,
+                              labelStyle: const TextStyle(fontSize: 11),
+                            ),
+                          ),
                         Chip(
                           avatar: const Icon(Icons.schedule, size: 13),
                           label: Text(moment.expiresInLabel),
@@ -185,6 +237,23 @@ class _MomentsScreenState extends State<MomentsScreen> {
                     const SizedBox(height: 6),
                     Text(moment.caption,
                         style: const TextStyle(color: AppColors.warmIvory)),
+                    if (moment.sticker != null) ...[
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          const Icon(Icons.how_to_vote_outlined,
+                              size: 14, color: AppColors.sparkCoral),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              'Tap to answer · ${moment.sticker!.question}',
+                              style: const TextStyle(
+                                  color: AppColors.sparkCoral, fontSize: 12),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -200,12 +269,16 @@ class _MomentsScreenState extends State<MomentsScreen> {
   /// pass; the sheet states the real pipeline instead of hiding it.
   void _createSheet() {
     var kind = 'Photo';
-    var audience = 'Connections';
+    var audience = Circle.friends;
+    StickerKind? sticker;
     final caption = TextEditingController();
+    final stickerQ = TextEditingController();
+    final optA = TextEditingController();
+    final optB = TextEditingController();
     showGlassSheet<void>(
       context,
       child: StatefulBuilder(
-        builder: (ctx, setState) => Column(
+        builder: (ctx, setSheet) => Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -219,7 +292,7 @@ class _MomentsScreenState extends State<MomentsScreen> {
                     label: Text(k),
                     selected: kind == k,
                     selectedColor: AppColors.emberCrimson,
-                    onSelected: (_) => setState(() => kind = k),
+                    onSelected: (_) => setSheet(() => kind = k),
                   ),
               ],
             ),
@@ -235,27 +308,82 @@ class _MomentsScreenState extends State<MomentsScreen> {
                 ),
               ),
             ),
+            Text('Add a sticker', style: Theme.of(ctx).textTheme.titleMedium),
+            const SizedBox(height: 6),
+            Wrap(
+              spacing: 8,
+              children: [
+                ChoiceChip(
+                  label: const Text('None'),
+                  selected: sticker == null,
+                  selectedColor: AppColors.emberCrimson,
+                  onSelected: (_) => setSheet(() => sticker = null),
+                ),
+                for (final (k, label) in [
+                  (StickerKind.poll, 'Poll'),
+                  (StickerKind.askMe, 'Ask me'),
+                  (StickerKind.thisOrThat, 'This or That'),
+                ])
+                  ChoiceChip(
+                    label: Text(label),
+                    selected: sticker == k,
+                    selectedColor: AppColors.emberCrimson,
+                    onSelected: (_) => setSheet(() => sticker = k),
+                  ),
+              ],
+            ),
+            if (sticker != null) ...[
+              const SizedBox(height: 8),
+              TextField(
+                controller: stickerQ,
+                maxLength: 60,
+                decoration: InputDecoration(
+                  labelText: sticker == StickerKind.askMe
+                      ? 'Ask me…'
+                      : 'Question',
+                  border: const OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(16)),
+                  ),
+                ),
+              ),
+              if (sticker != StickerKind.askMe)
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: optA,
+                        decoration: const InputDecoration(labelText: 'Option A'),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: TextField(
+                        controller: optB,
+                        decoration: const InputDecoration(labelText: 'Option B'),
+                      ),
+                    ),
+                  ],
+                ),
+              Text(
+                'Answers come to you as private chat openers. No public counts.',
+                style: Theme.of(ctx).textTheme.bodySmall,
+              ),
+            ],
             const SizedBox(height: 6),
             Text('Who can see it?', style: Theme.of(ctx).textTheme.titleMedium),
-            RadioGroup<String>(
+            RadioGroup<Circle>(
               groupValue: audience,
-              onChanged: (v) => setState(() => audience = v ?? 'Connections'),
-              child: const Column(
+              onChanged: (v) => setSheet(() => audience = v ?? Circle.friends),
+              child: Column(
                 children: [
-                  RadioListTile<String>(
-                    contentPadding: EdgeInsets.zero,
-                    dense: true,
-                    title: Text('Connections'),
-                    subtitle: Text('People you\'re matched with.'),
-                    value: 'Connections',
-                  ),
-                  RadioListTile<String>(
-                    contentPadding: EdgeInsets.zero,
-                    dense: true,
-                    title: Text('Matches + their Sparks'),
-                    subtitle: Text('A slightly wider circle.'),
-                    value: 'Matches+',
-                  ),
+                  for (final c in Circle.values)
+                    RadioListTile<Circle>(
+                      contentPadding: EdgeInsets.zero,
+                      dense: true,
+                      title: Text(c.label),
+                      subtitle: Text(c.hint),
+                      value: c,
+                    ),
                 ],
               ),
             ),
@@ -273,8 +401,25 @@ class _MomentsScreenState extends State<MomentsScreen> {
                 // INTEGRATION POINT: media picker -> storage upload ->
                 // moderation hold -> publish (BackendService).
                 Navigator.of(ctx).pop();
+                final q = stickerQ.text.trim();
                 setState(() {
                   _ownMoment = Moment(
+                    sticker: sticker == null
+                        ? null
+                        : MomentSticker(
+                            kind: sticker!,
+                            question: q.isEmpty
+                                ? (sticker == StickerKind.askMe
+                                    ? 'Ask me anything'
+                                    : 'Which one?')
+                                : q,
+                            options: sticker == StickerKind.askMe
+                                ? const []
+                                : [
+                                    optA.text.trim().isEmpty ? 'This' : optA.text.trim(),
+                                    optB.text.trim().isEmpty ? 'That' : optB.text.trim(),
+                                  ],
+                          ),
                     id: 'moment-own-${DateTime.now().millisecondsSinceEpoch}',
                     member: MockData.currentUser,
                     caption: caption.text.trim().isEmpty
@@ -282,12 +427,13 @@ class _MomentsScreenState extends State<MomentsScreen> {
                         : caption.text.trim(),
                     imageAsset: 'assets/images/backdrop_match.jpg',
                     expiresInLabel: '24h',
+                    circle: audience,
                   );
                 });
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
-                        'Moment posted ($kind · $audience) — pre-screen passed (demo). It expires in 24h.'),
+                        'Moment posted to ${audience.label} ($kind) — pre-screen passed (demo). It expires in 24h.'),
                   ),
                 );
               },

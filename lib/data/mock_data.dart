@@ -1,6 +1,9 @@
 import '../config/app_config.dart';
+import '../models/experience.dart';
 import '../models/member.dart';
 import '../models/message.dart';
+import '../models/platform.dart';
+import '../models/social.dart';
 
 /// ─────────────────────────────────────────────────────────────────────────
 /// SAMPLE DATA — clearly-marked demo content for the scaffold.
@@ -40,6 +43,14 @@ class MockData {
         AppConfig.assetHeroWelcome,
         AppConfig.assetBackdropMatch,
       ],
+      gender: ['Woman'],
+      pronouns: 'she/her',
+      orientation: 'Bisexual',
+      identityVisibility: {'orientation': 'matches'},
+      wantToMeet: ['Men', 'Women', 'Non-binary people'],
+      anthem: 'Golden Hour · JVKE',
+      topArtists: ['SZA', 'Khruangbin', 'Mitski'],
+      tasteAnswers: {'t1': 'Slow brunch', 't2': 'Midnight pancakes', 't3': 'Coffee and a walk', 't6': 'Voice notes'},
     ),
     Member(
       id: 'm-dev',
@@ -56,6 +67,12 @@ class MockData {
         PromptAnswer('Green flag I look for', 'Kind to waiters, curious about everything.'),
       ],
       interests: ['Startups', 'Trail running', 'Cooking', 'Chess'],
+      gender: ['Man'],
+      pronouns: 'he/him',
+      orientation: 'Straight',
+      wantToMeet: ['Women'],
+      topArtists: ['Bon Iver', 'Kendrick Lamar'],
+      tasteAnswers: {'t1': 'Sunrise hike', 't3': 'Something active', 't5': 'Planned to the minute'},
     ),
     Member(
       id: 'm-sofia',
@@ -74,6 +91,14 @@ class MockData {
       interests: ['Board games', 'Karaoke', 'Bouldering', 'Comedy shows'],
       languages: ['English', 'Spanish'],
       onlineNow: true,
+      gender: ['Woman'],
+      pronouns: 'she/they',
+      orientation: 'Queer',
+      wantToMeet: ['Women', 'Non-binary people', 'Men'],
+      anthem: 'Dancing Queen · ABBA',
+      topArtists: ['ABBA', 'Charli XCX'],
+      tasteAnswers: {'t2': 'Midnight pancakes', 't4': 'Aux cord, always', 't8': 'Big group energy'},
+      highlights: ['Won game night. The crown is heavy. 👑', 'Karaoke PB: 94 points'],
     ),
     Member(
       id: 'm-marcus',
@@ -90,6 +115,12 @@ class MockData {
         PromptAnswer('Green flag I look for', 'Has a favourite song and a story about it.'),
       ],
       interests: ['Jazz', 'Vinyl', 'Ramen tours', 'Photography'],
+      gender: ['Man'],
+      pronouns: 'he/him',
+      orientation: 'Gay',
+      wantToMeet: ['Men'],
+      anthem: 'So What · Miles Davis',
+      tasteAnswers: {'t2': 'Midnight pancakes', 't4': 'Aux cord, always'},
     ),
     Member(
       id: 'm-priya',
@@ -107,8 +138,234 @@ class MockData {
       ],
       interests: ['Gardening', 'Classical music', 'Hiking', 'Book clubs'],
       languages: ['English', 'Hindi', 'Telugu'],
+      gender: ['Woman'],
+      pronouns: 'she/her',
+      orientation: 'Straight',
+      identityVisibility: {'orientation': 'hidden'},
+      wantToMeet: ['Men'],
+      tasteAnswers: {'t1': 'Sunrise hike', 't3': 'Coffee and a walk', 't7': 'Farmers market'},
+    ),
+    Member(
+      id: 'm-rowan',
+      name: 'Rowan',
+      age: 31,
+      city: 'Columbus',
+      distanceBand: 'Within a few miles',
+      intention: Intention.longTerm,
+      photoAsset: AppConfig.assetBackdropMatch,
+      headline: 'Ceramics on Sundays, terrible puns all week.',
+      prompts: [
+        PromptAnswer('My ideal first plan', 'Pottery class — we both make something lopsided.'),
+        PromptAnswer('I communicate best by', 'Saying things plainly. Ask me anything directly.'),
+        PromptAnswer('Green flag I look for', 'Uses the right pronouns without making it a thing.'),
+      ],
+      interests: ['Ceramics', 'Board games', 'Live music', 'Coffee'],
+      structure: 'Figuring it out',
+      gender: ['Non-binary'],
+      pronouns: 'they/them',
+      orientation: 'Queer',
+      wantToMeet: ['Women', 'Men', 'Non-binary people'],
+      anthem: 'Motion Sickness · Phoebe Bridgers',
+      tasteAnswers: {'t1': 'Slow brunch', 't6': 'Voice notes', 't7': 'Couch + a series', 't8': 'Just us'},
+      accessNote: 'Quiet venues help me — loud bars are a no.',
+    ),
+    Member(
+      id: 'm-elena',
+      name: 'Elena',
+      age: 44,
+      city: 'Columbus',
+      distanceBand: 'Across town',
+      intention: Intention.longTerm,
+      photoAsset: AppConfig.assetHeroWelcome,
+      headline: 'Single mum of one, fluent in sarcasm and Italian.',
+      prompts: [
+        PromptAnswer('My ideal first plan', 'Wine bar, early evening — I have a sitter till 10.'),
+        PromptAnswer('Non-negotiable', 'Kindness. And you must like dogs.'),
+        PromptAnswer('Green flag I look for', 'Makes plans and keeps them.'),
+      ],
+      interests: ['Cooking', 'Dogs', 'Travel', 'Book clubs'],
+      languages: ['English', 'Italian'],
+      availability: 'Weekends',
+      pace: 'Meet soon',
+      gender: ['Woman'],
+      pronouns: 'she/her',
+      orientation: 'Straight',
+      wantToMeet: ['Men'],
+      tasteAnswers: {'t3': 'Coffee and a walk', 't5': 'Planned to the minute', 't7': 'Farmers market'},
+      accessNote: 'Step-free venues, please — bad knee from skiing.',
     ),
   ];
+
+
+  // ── Social (Phase 1) ── sample friends, groups and friend Moments. ──────
+  // Friends are people, not dating profiles: they never appear in Dates.
+
+  static const List<Member> friends = [
+    Member(
+      id: 'f-maya', name: 'Maya', age: 26, city: 'Columbus',
+      distanceBand: '—', intention: Intention.stillExploring,
+      photoAsset: AppConfig.assetBackdropDiscover,
+      headline: 'Best friend since year 7.', prompts: [], interests: [],
+    ),
+    Member(
+      id: 'f-jordan', name: 'Jordan', age: 27, city: 'Columbus',
+      distanceBand: '—', intention: Intention.stillExploring,
+      photoAsset: AppConfig.assetHeroWelcome,
+      headline: 'Run club captain.', prompts: [], interests: [],
+    ),
+    Member(
+      id: 'f-sam', name: 'Sam', age: 25, city: 'Columbus',
+      distanceBand: '—', intention: Intention.stillExploring,
+      photoAsset: AppConfig.assetBackdropMatch,
+      headline: 'Always has the aux.', prompts: [], interests: [],
+      pronouns: 'they/them',
+    ),
+    Member(
+      id: 'f-nina', name: 'Nina', age: 52, city: 'Dublin',
+      distanceBand: '—', intention: Intention.stillExploring,
+      photoAsset: AppConfig.assetHeroWelcome,
+      headline: 'Mum. Sends the best voice notes.', prompts: [], interests: [],
+    ),
+  ];
+
+  /// Which circle each person is in (your private placement).
+  static Map<String, Circle> get initialCircles => {
+        'f-maya': Circle.inner,
+        'f-nina': Circle.inner,
+        'f-jordan': Circle.friends,
+        'f-sam': Circle.friends,
+        'm-aria': Circle.dates,
+        'm-sofia': Circle.dates,
+      };
+
+
+  // ── Platform (Stage, Trust, Plans engine, Professional, Money) ─────────
+
+  static const List<FeedItem> feed = [
+    FeedItem(id: 'v1', creatorId: 'f-jordan', creatorName: 'Jordan', caption: 'Sunrise 5K with the club — come next week', topic: 'Fitness', minutesAgo: 40, imageAsset: AppConfig.assetHeroWelcome, fromCircle: true, planIdea: 'Run club 5K'),
+    FeedItem(id: 'v2', creatorId: 'c-taco', creatorName: 'Taco Atlas', caption: 'Ranking every taco truck on Parsons Ave (part 3)', topic: 'Food', minutesAgo: 90, imageAsset: AppConfig.assetBackdropDiscover, viral: true, planIdea: 'Taco truck crawl'),
+    FeedItem(id: 'v3', creatorId: 'c-dreamlab', creatorName: 'DreamLab', caption: 'A city that doesn\'t exist, made with AI', topic: 'Art', minutesAgo: 30, imageAsset: AppConfig.assetBackdropMatch, aiGenerated: true, verifiedHuman: false, viral: true),
+    FeedItem(id: 'v4', creatorId: 'f-sam', creatorName: 'Sam', caption: 'Tiny gig in a record shop. Unreal.', topic: 'Music', minutesAgo: 120, imageAsset: AppConfig.assetBackdropMatch, fromCircle: true, planIdea: 'Record shop gig'),
+    FeedItem(id: 'v5', creatorId: 'c-fitfuel', creatorName: 'FitFuel', caption: '1,000-calorie day: what I eat', topic: 'Diet', minutesAgo: 60, imageAsset: AppConfig.assetHeroWelcome, viral: true),
+    FeedItem(id: 'v6', creatorId: 'c-clay', creatorName: 'Clay & Coffee', caption: 'Wheel-throwing for total beginners', topic: 'Art', minutesAgo: 200, imageAsset: AppConfig.assetBackdropDiscover, planIdea: 'Pottery drop-in'),
+    FeedItem(id: 'v7', creatorId: 'c-jazzcbus', creatorName: 'Jazz Columbus', caption: 'Friday trio — first set is free', topic: 'Music', minutesAgo: 300, imageAsset: AppConfig.assetBackdropMatch, planIdea: 'Jazz bar'),
+    FeedItem(id: 'v8', creatorId: 'c-botcomedy', creatorName: 'AutoLaughs', caption: 'AI writes stand-up (it\'s bad)', topic: 'Comedy', minutesAgo: 15, imageAsset: AppConfig.assetHeroWelcome, aiGenerated: true, verifiedHuman: false),
+  ];
+
+  static const Set<String> feedTopics = {'Fitness', 'Food', 'Art', 'Music', 'Diet', 'Comedy'};
+
+  static const List<Gift> gifts = [
+    Gift('g1', '☕', 'Coffee', 'Store price'),
+    Gift('g2', '🌹', 'Rose', 'Store price'),
+    Gift('g3', '🎟️', 'Gig ticket', 'Store price'),
+  ];
+
+  /// Trust Graph seed: you've met Maya and Jordan in person. Maya has met
+  /// Rowan; Jordan has met Elena — so warm intros are possible to both.
+  static TrustGraph initialTrust() => TrustGraph(
+        met: {'f-maya', 'f-jordan'},
+        metBy: {
+          'f-maya': {'m-rowan', 'f-sam'},
+          'f-jordan': {'m-elena', 'p-lee'},
+        },
+      );
+
+  static const Map<String, bool> freeTonight = {
+    'f-maya': true,
+    'f-sam': true,
+    'f-jordan': false,
+  };
+
+  static const List<(String, String, String)> nightIdeas = [
+    ('Night market + dumplings', 't2', 'Midnight pancakes'),
+    ('Board-game café', 't8', 'Big group energy'),
+    ('Jazz bar, first set', 't4', 'Aux cord, always'),
+  ];
+
+  // Professional wing ------------------------------------------------------
+  static const WorkFacet myWork = WorkFacet(
+    personId: 'me',
+    role: 'Product engineer',
+    building: 'A dating app that ends in real plans',
+    skills: ['Flutter', 'Product', 'Design'],
+    openTo: {'coffee', 'collabs'},
+  );
+
+  static const List<WorkFacet> workFacets = [
+    WorkFacet(personId: 'p-lee', role: 'Founder, climate startup', building: 'Batteries for e-bikes', skills: ['Hardware', 'Fundraising'], openTo: {'coffee', 'hiring'}),
+    WorkFacet(personId: 'p-ana', role: 'Designer', building: 'An accessibility toolkit', skills: ['Design', 'Flutter'], openTo: {'coffee', 'collabs', 'mentoring'}),
+    WorkFacet(personId: 'f-jordan', role: 'Physio', building: 'A running clinic', skills: ['Health'], openTo: {'mentoring'}),
+  ];
+
+  static const List<Member> professionals = [
+    Member(id: 'p-lee', name: 'Lee', age: 34, city: 'Columbus', distanceBand: '—', intention: Intention.stillExploring, photoAsset: AppConfig.assetHeroWelcome, headline: 'Founder, climate startup', prompts: [], interests: []),
+    Member(id: 'p-ana', name: 'Ana', age: 29, city: 'Columbus', distanceBand: '—', intention: Intention.stillExploring, photoAsset: AppConfig.assetBackdropDiscover, headline: 'Designer', prompts: [], interests: [], pronouns: 'she/her'),
+  ];
+
+  static const List<Guild> guilds = [
+    Guild(id: 'gd-ai', name: 'AI Builders', blurb: 'People shipping AI products in Columbus.', memberCount: 412, rooms: ['Show & tell', 'Hiring', 'Demo nights']),
+    Guild(id: 'gd-salsa', name: 'Salsa Dancers', blurb: 'Beginner-friendly socials every week.', memberCount: 238, rooms: ['Socials', 'Lessons'], datingOptIn: true),
+    Guild(id: 'gd-startup', name: 'Startup People', blurb: 'Founders, operators and the curious.', memberCount: 657, rooms: ['Founders', 'Coffee chats', 'Events']),
+    Guild(id: 'gd-run', name: 'Run Club', blurb: '5Ks, long runs, and brunch after.', memberCount: 189, rooms: ['Weekend runs', 'Races'], datingOptIn: true),
+  ];
+
+  /// Tonight Near Me: plans, events and open tables this evening.
+  static const List<(String, String, String, int)> tonight = [
+    ('Open table', 'Dumplings at the night market', '19:30 · Street market', 2),
+    ('Event', 'Comedy open mic', '21:00 · Comedy club', 0),
+    ('Hosted plan', 'Pickup basketball', '18:30 · Park courts', 3),
+    ('Open table', 'Board-game café, 4 seats left', '20:00 · Café', 4),
+  ];
+
+  static Member personById(String id) => [...friends, ...members, ...professionals].firstWhere(
+      (m) => m.id == id,
+      orElse: () => members.first);
+
+  static List<GroupChat> groups() => [
+        GroupChat(
+          id: 'g-weekend',
+          name: 'Weekend crew',
+          memberIds: ['f-maya', 'f-jordan', 'f-sam'],
+          unreadCount: 2,
+          messages: [
+            GroupMessage(senderId: 'f-jordan', text: 'We need to actually do something this weekend', timeLabel: '18:02'),
+            GroupMessage(senderId: 'f-sam', text: 'Saturday works for me, Sunday too', timeLabel: '18:04'),
+            GroupMessage(senderId: 'f-maya', text: 'Bowling? Or that night market', timeLabel: '18:05'),
+          ],
+        ),
+        GroupChat(
+          id: 'g-family',
+          name: 'Family 💛',
+          memberIds: ['f-nina', 'f-maya'],
+          messages: [
+            GroupMessage(senderId: 'f-nina', text: 'Sunday lunch at mine? I\'m making the lasagne', timeLabel: 'Yesterday'),
+          ],
+        ),
+      ];
+
+  static List<Moment> get friendMoments => [
+        Moment(
+          id: 'fm-1',
+          member: friends[0],
+          caption: 'New haircut, who dis ✂️',
+          imageAsset: AppConfig.assetBackdropDiscover,
+          expiresInLabel: '9h left',
+          circle: Circle.inner,
+        ),
+        Moment(
+          id: 'fm-2',
+          member: friends[1],
+          caption: 'Run club 5K done. Next Saturday, who\'s in?',
+          imageAsset: AppConfig.assetHeroWelcome,
+          expiresInLabel: '15h left',
+          circle: Circle.friends,
+          sticker: const MomentSticker(
+            kind: StickerKind.poll,
+            question: 'Join next week?',
+            options: ['I\'m in', 'Next time'],
+          ),
+        ),
+      ];
 
   static Member memberById(String id) =>
       members.firstWhere((m) => m.id == id, orElse: () => members.first);
@@ -152,6 +409,11 @@ class MockData {
           caption: 'Won game night. The crown is heavy. 👑',
           imageAsset: AppConfig.assetBackdropMatch,
           expiresInLabel: '6h left',
+          sticker: const MomentSticker(
+            kind: StickerKind.poll,
+            question: 'Next game night?',
+            options: ['Codenames', 'Mario Kart'],
+          ),
         ),
         Moment(
           id: 'moment-2',
@@ -159,6 +421,10 @@ class MockData {
           caption: 'Golden hour did the work, I just showed up.',
           imageAsset: AppConfig.assetBackdropDiscover,
           expiresInLabel: '11h left',
+          sticker: const MomentSticker(
+            kind: StickerKind.askMe,
+            question: 'Best café in Columbus? Go.',
+          ),
         ),
         Moment(
           id: 'moment-3',
@@ -187,6 +453,7 @@ class MockData {
           memberId: 'm-sofia',
           mode: ChatMode.vanish,
           vanishMinutes: 60,
+          quietDays: 6,
           messages: [
             ChatMessage(id: 's1', text: 'Two Truths and a Lie', fromMe: false, timeLabel: '09:41', isGameCard: true, gameTitle: 'Two Truths and a Lie', expiresInLabel: 'Vanish · 60 min after read'),
             ChatMessage(id: 's2', text: 'I guessed the llama one. I was WRONG?!', fromMe: true, timeLabel: '09:43', expiresInLabel: 'Vanish · 60 min after read'),
@@ -198,6 +465,24 @@ class MockData {
           ],
         ),
       ];
+
+  /// Events Near You — public venue types, sample listings (production:
+  /// partner venues + a curated city feed, server-side).
+  static const List<LocalEvent> events = [
+    LocalEvent(id: 'e1', title: 'Friday Night Jazz Trio', venueType: 'Jazz bar', timeLabel: 'Fri · 20:00', category: 'Music', goingMatchIds: ['m-aria']),
+    LocalEvent(id: 'e2', title: 'Short North Night Market', venueType: 'Street market', timeLabel: 'Sat · 18:00', category: 'Food', stepFree: true),
+    LocalEvent(id: 'e3', title: 'Beginner Pottery Drop-in', venueType: 'Ceramics studio', timeLabel: 'Sun · 14:00', category: 'Make', stepFree: true),
+    LocalEvent(id: 'e4', title: 'Comedy Open Mic', venueType: 'Comedy club', timeLabel: 'Thu · 21:00', category: 'Comedy', goingMatchIds: ['m-sofia']),
+    LocalEvent(id: 'e5', title: 'Riverside Run Club 5K', venueType: 'Park', timeLabel: 'Sat · 08:30', category: 'Active', stepFree: true),
+  ];
+
+  /// Speed Spark Nights — themed, scheduled, mutual-accept Spark rounds.
+  static const List<SparkNight> sparkNights = [
+    SparkNight(id: 'sn1', theme: 'Foodies Thursday', timeLabel: 'Thu · 19:30', blurb: 'Three 5-minute Sparks with people who love a good taco truck.'),
+    SparkNight(id: 'sn2', theme: 'Over-35 Sunday', timeLabel: 'Sun · 19:00', blurb: 'Grown-up pace, same rules: full profiles, both accept.', ageBand: '35+'),
+    SparkNight(id: 'sn3', theme: 'Queer Spark Night', timeLabel: 'Wed · 20:00', blurb: 'LGBTQ+ members meeting LGBTQ+ members. Hosted and moderated.'),
+    SparkNight(id: 'sn4', theme: 'Gamers & Geeks', timeLabel: 'Fri · 21:00', blurb: 'Start with a round of This or That, end with a rematch.'),
+  ];
 
   static const List<GameQuestion> thisOrThatDeck = [
     GameQuestion(prompt: 'Sunrise hike or sunset picnic?', options: ['Sunrise hike', 'Sunset picnic']),
@@ -289,6 +574,9 @@ class MockData {
       PromptAnswer('My ideal first plan', 'Coffee and a walk — simple beats fancy.'),
     ],
     interests: ['Tech', 'Coffee', 'Live music'],
+    gender: ['Man'],
+    pronouns: 'he/him',
+    // Open to everyone by default; About You narrows it.
   );
 }
 

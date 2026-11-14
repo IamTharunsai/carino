@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../data/mock_data.dart';
+import '../../models/experience.dart';
 import '../../models/member.dart';
 import '../../services/services.dart';
 import '../../theme/app_colors.dart';
@@ -30,6 +31,10 @@ enum _Game { thisOrThat, twoTruths, guessMyAnswer, buildOurDate, musicMatch, que
 
 class _GamesScreenState extends State<GamesScreen> {
   _Game _active = _Game.thisOrThat;
+
+  /// Forgiving streak (sample: day 4, freeze unused). See ChemistryStreak.
+  ChemistryStreak _streak = const ChemistryStreak(days: 4);
+  bool _playedToday = false;
 
   // --- This or That (with the both-answer waiting beat, S-031) ---
   int _totIndex = 0;
@@ -82,6 +87,11 @@ class _GamesScreenState extends State<GamesScreen> {
 
   void _answerTot(String option) {
     setState(() {
+      // Playing today counts for the streak (once per day server-side).
+      if (!_playedToday) {
+        _streak = _streak.nextDay(active: true);
+        _playedToday = true;
+      }
       _totMine = option;
       _totWaiting = true; // both-answer rule: no reveal until they answer
     });
@@ -114,6 +124,61 @@ class _GamesScreenState extends State<GamesScreen> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         children: [
+          GlassContainer(
+            child: Row(
+              children: [
+                const Text('🔥', style: TextStyle(fontSize: 26)),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _streak.completedByDate
+                            ? 'Streak complete — you made a date!'
+                            : 'Chemistry streak · Day ${_streak.days}',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      Text(
+                        _streak.freezeAvailable
+                            ? 'A game, voice note or plan keeps it going. Miss a day? Your free weekly freeze covers it.'
+                            : 'Freeze used this week — it comes back Monday. No pressure either way.',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+          GlassContainer(
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => PlanComposerScreen(member: widget.member),
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.edit_calendar_outlined,
+                    color: AppColors.sparkCoral),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Build our date',
+                          style: Theme.of(context).textTheme.titleMedium),
+                      Text('Turn your answers into a real plan.',
+                          style: Theme.of(context).textTheme.bodySmall),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
           // Pending invite (sample) — invites carry a state, not pressure.
           GlassContainer(
             child: Row(

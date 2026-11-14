@@ -24,6 +24,19 @@ class CarinoApp extends StatelessWidget {
       theme: AppTheme.light(), // Porcelain
       darkTheme: AppTheme.dark(), // Midnight — the brand default
       themeMode: ThemeMode.dark,
+      // Calm mode (Settings / You): app-wide reduced motion, layered on top
+      // of the OS setting — screens already honour disableAnimations.
+      builder: (context, child) => ValueListenableBuilder<bool>(
+        valueListenable: Services.prefs.calmMode,
+        builder: (context, calm, _) {
+          final mq = MediaQuery.of(context);
+          return MediaQuery(
+            data: mq.copyWith(
+                disableAnimations: calm || mq.disableAnimations),
+            child: child!,
+          );
+        },
+      ),
       home: const RootFlow(),
     );
   }

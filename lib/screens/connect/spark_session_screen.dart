@@ -338,6 +338,20 @@ class _SparkCallScreenState extends State<SparkCallScreen> {
   bool _captions = false;
   bool _connecting = true;
 
+  /// Fun AR lens for THIS call only (Snapchat energy, dating-safe).
+  /// Lenses never touch profile media or verification, include no
+  /// face-reshaping or skin-smoothing filters, and anyone wearing one is
+  /// labelled "Lens on" for the other person. INTEGRATION POINT: the RTC
+  /// provider's video-effects pipeline; the demo overlays the emoji.
+  String? _lens;
+  static const List<(String, String)> _lenses = [
+    ('🎉', 'Party'),
+    ('🌧️', 'Rainy day'),
+    ('🎲', 'Game night'),
+    ('🕶️', 'Shades'),
+    ('✨', 'Sparkle'),
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -403,6 +417,49 @@ class _SparkCallScreenState extends State<SparkCallScreen> {
     );
   }
 
+  void _pickLens() {
+    showGlassSheet<void>(
+      context,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text('Lenses', style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 4),
+          Text(
+            'Just for fun, just for this call. ${widget.member.firstName} sees a '
+            '"Lens on" label. No beauty or face-changing filters, ever.',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              ChoiceChip(
+                label: const Text('No lens'),
+                selected: _lens == null,
+                onSelected: (_) {
+                  setState(() => _lens = null);
+                  Navigator.of(context).pop();
+                },
+              ),
+              for (final (emoji, name) in _lenses)
+                ChoiceChip(
+                  label: Text('$emoji $name'),
+                  selected: _lens == emoji,
+                  onSelected: (_) {
+                    setState(() => _lens = emoji);
+                    Navigator.of(context).pop();
+                  },
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -462,10 +519,14 @@ class _SparkCallScreenState extends State<SparkCallScreen> {
                     ],
                   ),
                 ),
-                // In-call toggles: background blur + live captions.
+                // In-call toggles: background blur, live captions, lenses.
+                // Wrap (not Row) so the chips reflow on narrow phones.
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 6,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       FilterChip(
                         label: const Text('Blur background'),
@@ -473,24 +534,24 @@ class _SparkCallScreenState extends State<SparkCallScreen> {
                         onSelected: (v) => setState(() => _blur = v),
                         visualDensity: VisualDensity.compact,
                       ),
-                      const SizedBox(width: 8),
                       FilterChip(
                         label: const Text('Captions'),
                         selected: _captions,
                         onSelected: (v) => setState(() => _captions = v),
                         visualDensity: VisualDensity.compact,
                       ),
-                      if (_captions) ...[
-                        const SizedBox(width: 8),
-                        const Expanded(
-                          child: Text(
-                            'Live captions on (sample line).',
-                            style: TextStyle(
-                                color: AppColors.warmIvory, fontSize: 12),
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                      ActionChip(
+                        avatar: Text(_lens ?? '🙂'),
+                        label: Text(_lens == null ? 'Lenses' : 'Lens on'),
+                        visualDensity: VisualDensity.compact,
+                        onPressed: _pickLens,
+                      ),
+                      if (_captions)
+                        const Text(
+                          'Live captions on (sample line).',
+                          style: TextStyle(
+                              color: AppColors.warmIvory, fontSize: 12),
                         ),
-                      ],
                     ],
                   ),
                 ),
@@ -550,11 +611,39 @@ class _SparkCallScreenState extends State<SparkCallScreen> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(14),
               child: _cameraOn
-                  ? Image.asset(
-                      MockData.currentUser.photoAsset,
-                      width: 84,
-                      height: 112,
-                      fit: BoxFit.cover,
+                  ? Stack(
+                      children: [
+                        Image.asset(
+                          MockData.currentUser.photoAsset,
+                          width: 84,
+                          height: 112,
+                          fit: BoxFit.cover,
+                        ),
+                        if (_lens != null) ...[
+                          Positioned(
+                            top: 6,
+                            left: 0,
+                            right: 0,
+                            child: Text(_lens!,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(fontSize: 28)),
+                          ),
+                          Positioned(
+                            bottom: 4,
+                            left: 4,
+                            right: 4,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 2),
+                              color: AppColors.midnight.withValues(alpha: 0.7),
+                              child: const Text('Lens on',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      color: AppColors.warmIvory,
+                                      fontSize: 10)),
+                            ),
+                          ),
+                        ],
+                      ],
                     )
                   : Container(
                       width: 84,
