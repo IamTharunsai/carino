@@ -27,7 +27,7 @@ import 'glass_card.dart';
 class SafetyActions {
   SafetyActions._();
 
-  static final SoundService _sound = SoundService();
+  static SoundService get _sound => Services.sound;
 
   /// The structured report-reason tree: category -> specific reasons.
   /// Server-driven in production (the Trust team owns the taxonomy);

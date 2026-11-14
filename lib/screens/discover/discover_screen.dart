@@ -31,7 +31,7 @@ class DiscoverScreen extends StatefulWidget {
 }
 
 class _DiscoverScreenState extends State<DiscoverScreen> {
-  final SoundService _sound = SoundService();
+  SoundService get _sound => Services.sound;
   late List<Member> _deck;
   Member? _lastPassed;
   FiltersConfig _filters = const FiltersConfig();

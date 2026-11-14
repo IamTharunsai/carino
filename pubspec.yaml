@@ -10,7 +10,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.6
   # Backend SDK (Supabase) — wired behind the Services interfaces with a
   # mock fallback (lib/config/env.dart). Live only when --dart-define
   # supplies SUPABASE_URL + SUPABASE_ANON_KEY; see backend/ + .env.example.

@@ -22,17 +22,6 @@ class BiometricService {
     }
   }
 
-  /// Human label for Settings ("Face ID", "Fingerprint", "Screen lock").
-  Future<String> label() async {
-    try {
-      final types = await _auth.getAvailableBiometrics();
-      if (types.contains(BiometricType.face)) return 'Face unlock';
-      if (types.contains(BiometricType.fingerprint)) return 'Fingerprint';
-      if (types.isNotEmpty) return 'Biometrics';
-    } catch (_) {}
-    return 'Screen lock';
-  }
-
   /// Prompts the OS sheet. Returns true only on a real success.
   Future<bool> unlock(String reason) async {
     // Catch EVERYTHING: local_auth 3.x throws LocalAuthException (not a
