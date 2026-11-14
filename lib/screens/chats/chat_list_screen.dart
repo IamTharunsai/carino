@@ -364,6 +364,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
             onTap: () {
               Navigator.of(context).pop();
               setState(() => pinned ? prefs.pinnedChats.remove(id) : prefs.pinnedChats.add(id));
+              prefs.save();
             },
           ),
           ListTile(
@@ -373,6 +374,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
             onTap: () {
               Navigator.of(context).pop();
               setState(() => prefs.hiddenChats.add(id));
+              prefs.save();
             },
           ),
         ],
@@ -405,6 +407,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                 onPressed: () {
                   Navigator.of(context).pop();
                   setState(() => Services.prefs.hiddenChats.remove(c.id));
+                  Services.prefs.save();
                 },
                 child: const Text('Unhide'),
               ),

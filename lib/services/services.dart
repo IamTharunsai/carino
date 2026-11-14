@@ -1,4 +1,6 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../data/mock_data.dart';
 import '../models/platform.dart';
 import '../models/social.dart';
@@ -43,6 +45,55 @@ class Services {
 /// server-side (profile.notification_prefs / privacy fields) so they follow
 /// the member across devices.
 class UserPrefs {
+  // --- Persistence (security-relevant + gates only) --------------------------
+  // Survives restarts so app lock, hidden chats and the under-21 block can't
+  // be undone by killing the app. Non-sensitive flags only — no secrets.
+  SharedPreferences? _sp;
+
+  Future<void> load() async {
+    _sp = await SharedPreferences.getInstance();
+    final sp = _sp!;
+    _appLock = sp.getBool('appLock') ?? false;
+    hiddenChats
+      ..clear()
+      ..addAll(sp.getStringList('hiddenChats') ?? const []);
+    pinnedChats
+      ..clear()
+      ..addAll(sp.getStringList('pinnedChats') ?? const []);
+    mockVerified = sp.getBool('mockVerified') ?? false;
+    final blocked = sp.getString('ageBlockedUntil');
+    ageBlockedUntil = blocked == null ? null : DateTime.tryParse(blocked);
+    _sparkDay = sp.getString('sparkDay');
+    _sparksUsed = sp.getInt('sparksUsed') ?? 0;
+  }
+
+  Future<void> save() async {
+    final sp = _sp;
+    if (sp == null) return; // not loaded (e.g. widget tests without setup)
+    await sp.setBool('appLock', _appLock);
+    await sp.setStringList('hiddenChats', hiddenChats.toList());
+    await sp.setStringList('pinnedChats', pinnedChats.toList());
+    await sp.setBool('mockVerified', mockVerified);
+    if (ageBlockedUntil == null) {
+      await sp.remove('ageBlockedUntil');
+    } else {
+      await sp.setString('ageBlockedUntil', ageBlockedUntil!.toIso8601String());
+    }
+    if (_sparkDay != null) await sp.setString('sparkDay', _sparkDay!);
+    await sp.setInt('sparksUsed', _sparksUsed);
+  }
+
+  /// Demo-mode stand-in for the server's verification_records badge.
+  bool mockVerified = false;
+  Future<void> setMockVerified(bool v) async {
+    mockVerified = v;
+    await save();
+  }
+
+  /// Under-21 block: set when the age gate refuses; lifted on the 21st
+  /// birthday. Persisted so "back → create account" can't retry.
+  DateTime? ageBlockedUntil;
+
   // S-009 defaults are privacy-first, per the blueprint:
   String visibility = 'Discovery'; // Discovery | Connections only | Paused
   bool showActivity = false; // hidden until the member enables it
@@ -55,7 +106,12 @@ class UserPrefs {
   bool notifPlans = true;
   bool notifMoments = true;
   bool soundsEnabled = true;
-  bool appLock = false;
+  bool _appLock = false;
+  bool get appLock => _appLock;
+  set appLock(bool v) {
+    _appLock = v;
+    save();
+  }
   bool excludeContacts = true;
   bool showDistanceBand = true;
   bool readReceipts = true;
@@ -106,6 +162,32 @@ class UserPrefs {
   /// Relationship status + who may see it. In a relationship, Dates pauses
   /// itself (Honest Status): you can't be discoverable and "taken" at once.
   String relationshipStatus = 'Single'; // Single | Dating | In a relationship | Married | It's complicated
+  String? _visibilityBeforePause;
+
+  static bool pausesDating(String status) =>
+      status == 'In a relationship' || status == 'Married';
+
+  /// Honest Status: taken pauses Dates; going back to an available status
+  /// restores whatever visibility the member had before.
+  void setRelationshipStatus(String status) {
+    final wasPaused = pausesDating(relationshipStatus);
+    final nowPaused = pausesDating(status);
+    if (nowPaused && !wasPaused) {
+      _visibilityBeforePause = visibility;
+      visibility = 'Paused';
+    } else if (!nowPaused && wasPaused && _visibilityBeforePause != null) {
+      visibility = _visibilityBeforePause!;
+      _visibilityBeforePause = null;
+    }
+    relationshipStatus = status;
+  }
+
+  /// Unlinking wipes the shared space — a future partner never sees it.
+  void unlinkPartner() {
+    partnerName = null;
+    coupleMemories.clear();
+    coupleCalendar.clear();
+  }
   String relationshipVisibility = 'hidden'; // everyone | matches | hidden
 
   /// Couples mode: linked partner (by mutual invite code).
@@ -119,7 +201,28 @@ class UserPrefs {
   final Map<String, int> chatThemes = {};
 
   /// Super Like ("Spark"): 1 a day free, Plus gets 5 — honest count.
-  int sparksLeftToday = 1;
+  String? _sparkDay;
+  int _sparksUsed = 0;
+
+  static String _dayKey(DateTime d) => '${d.year}-${d.month}-${d.day}';
+
+  int sparksLeft(DateTime now, {required bool isPlus}) {
+    final allowance = isPlus ? 5 : 1;
+    if (_sparkDay != _dayKey(now)) return allowance;
+    return math.max(0, allowance - _sparksUsed);
+  }
+
+  /// Spends one Spark; false when none are left today.
+  bool useSpark(DateTime now, {required bool isPlus}) {
+    if (sparksLeft(now, isPlus: isPlus) <= 0) return false;
+    if (_sparkDay != _dayKey(now)) {
+      _sparkDay = _dayKey(now);
+      _sparksUsed = 0;
+    }
+    _sparksUsed++;
+    save();
+    return true;
+  }
 
   /// AI Away Assistant — replies ONLY with a visible "assistant" label,
   /// only when you're away, never pretending to be you.

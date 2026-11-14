@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../data/mock_data.dart';
 import '../theme/app_colors.dart';
 import '../services/services.dart';
-import '../widgets/app_lock_gate.dart';
 import '../widgets/glass_card.dart';
 import 'chats/chat_list_screen.dart';
 import 'connect/connect_screen.dart';
@@ -40,7 +39,7 @@ class _HomeShellState extends State<HomeShell> {
       const _TabSpec(Icons.person_outline, Icons.person, 'You'),
     ];
 
-    return AppLockGate(child: Scaffold(
+    return Scaffold(
       extendBody: true,
       body: IndexedStack(
         index: _index,
@@ -76,7 +75,7 @@ class _HomeShellState extends State<HomeShell> {
           ),
         ),
       ),
-    ));
+    );
   }
 }
 

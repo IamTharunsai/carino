@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../config/app_config.dart';
+import '../../services/services.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/spark_button.dart';
@@ -44,7 +45,11 @@ class _AgeGateScreenState extends State<AgeGateScreen> {
   late int _month = _today.month;
   late int _day = _today.day;
   bool _touched = false;
-  bool _blocked = false;
+
+  /// Blocked if this install already failed the gate and the 21st birthday
+  /// hasn't arrived — a fresh screen can't be used to retry.
+  late bool _blocked = Services.prefs.ageBlockedUntil != null &&
+      DateTime.now().isBefore(Services.prefs.ageBlockedUntil!);
 
   late final FixedExtentScrollController _monthCtl =
       FixedExtentScrollController(initialItem: _month - 1);
@@ -86,6 +91,9 @@ class _AgeGateScreenState extends State<AgeGateScreen> {
     } else {
       // NOTE: production cross-checks this DOB against the verified ID
       // (S-005/S-006). A mismatch at verification = fail + appeal path.
+      Services.prefs.ageBlockedUntil =
+          DateTime(_dob.year + AppConfig.minimumAge, _dob.month, _dob.day);
+      Services.prefs.save();
       setState(() => _blocked = true);
     }
   }
@@ -120,8 +128,10 @@ class _AgeGateScreenState extends State<AgeGateScreen> {
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     if (_blocked) {
-      // S-002B — clear refusal, calm tone, no account created.
+      // S-002B — clear refusal, calm tone, no account created, no back
+      // button (the block is persisted; retrying isn't a path).
       return GlassScaffold(
+        appBar: AppBar(automaticallyImplyLeading: false),
         body: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(

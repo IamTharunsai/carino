@@ -3,6 +3,7 @@ import 'config/app_config.dart';
 import 'screens/root_flow.dart';
 import 'services/services.dart';
 import 'theme/app_theme.dart';
+import 'widgets/app_lock_gate.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -10,6 +11,8 @@ Future<void> main() async {
   // Server-driven UI config — falls back to compiled defaults offline/mock;
   // can never hide safety surfaces (see RemoteConfigService hard limits).
   await Services.remoteConfig.fetch();
+  // Persisted gates (app lock, hidden chats, under-21 block) before UI.
+  await Services.prefs.load();
   runApp(const CarinoApp());
 }
 
@@ -36,7 +39,8 @@ class CarinoApp extends StatelessWidget {
           return MediaQuery(
             data: mq.copyWith(
                 disableAnimations: calm || mq.disableAnimations),
-            child: child!,
+            // App lock sits above the Navigator: it covers every route.
+            child: AppLockGate(child: child!),
           );
         },
       ),

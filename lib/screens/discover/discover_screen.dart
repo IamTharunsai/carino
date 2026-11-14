@@ -619,15 +619,12 @@ class _MemberCard extends StatelessWidget {
                           semanticLabel: 'View full profile',
                           onPressed: onOpen ?? () {},
                         ),
-                        Tooltip(
-                          message: 'Tap to like · hold for note, gift or Spark',
-                          child: GlassIconButton(
-                            icon: Icons.favorite,
-                            semanticLabel: 'Like. Long-press for note, gift or Spark',
-                            filled: true,
-                            onPressed: onLike ?? () {},
-                            onLongPress: onLikeOptions,
-                          ),
+                        GlassIconButton(
+                          icon: Icons.favorite,
+                          semanticLabel: 'Like. Long-press for note, gift or Spark',
+                          filled: true,
+                          onPressed: onLike ?? () {},
+                          onLongPress: onLikeOptions,
                         ),
                       ],
                     ),

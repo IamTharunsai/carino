@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
 
 /// Face ID / Touch ID / Android fingerprint + face unlock, with the device
@@ -9,15 +8,17 @@ import 'package:local_auth/local_auth.dart';
 class BiometricService {
   final LocalAuthentication _auth = LocalAuthentication();
 
+  /// Test seam: replaces the OS prompt.
+  @visibleForTesting
+  Future<bool> Function(String reason)? authenticatorOverride;
+
   /// True if the device has biometrics or a screen lock to fall back on.
   Future<bool> available() async {
     try {
       return await _auth.isDeviceSupported();
-    } on PlatformException catch (e) {
-      debugPrint('[Biometric] support check failed: ${e.message}');
-      return false;
-    } on MissingPluginException {
-      return false; // tests / unsupported platforms
+    } catch (e) {
+      debugPrint('[Biometric] support check failed: $e');
+      return false; // tests / unsupported platforms / plugin errors
     }
   }
 
@@ -34,15 +35,18 @@ class BiometricService {
 
   /// Prompts the OS sheet. Returns true only on a real success.
   Future<bool> unlock(String reason) async {
+    // Catch EVERYTHING: local_auth 3.x throws LocalAuthException (not a
+    // PlatformException) for lockout / no credentials. An escaped error
+    // here once left the app stuck behind the lock screen.
     try {
+      final override = authenticatorOverride;
+      if (override != null) return await override(reason);
       return await _auth.authenticate(
         localizedReason: reason,
         persistAcrossBackgrounding: true,
       );
-    } on PlatformException catch (e) {
-      debugPrint('[Biometric] auth error: ${e.code} ${e.message}');
-      return false;
-    } on MissingPluginException {
+    } catch (e) {
+      debugPrint('[Biometric] auth failed: $e');
       return false;
     }
   }

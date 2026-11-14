@@ -83,7 +83,13 @@ class _SignInScreenState extends State<SignInScreen> {
       _busy = false;
       _error = err;
     });
-    if (err == null) widget.onSignedIn();
+    if (err != null) return;
+    if (Services.auth.isSignedIn) {
+      widget.onSignedIn();
+    } else {
+      // LIVE: the browser is open; RootFlow routes when the session lands.
+      setState(() => _error = 'Finish signing in in your browser, then come back.');
+    }
   }
 
   Future<void> _passkey() async {
@@ -94,8 +100,15 @@ class _SignInScreenState extends State<SignInScreen> {
       setState(() => _error = "Passkey sign-in was cancelled or isn't set up on this phone.");
       return;
     }
-    await Services.auth.signInDemo();
-    if (mounted) widget.onSignedIn();
+    final signedIn = await Services.auth.signInDemo();
+    if (!mounted) return;
+    if (!signedIn || !Services.auth.isSignedIn) {
+      // A local fingerprint is NOT a credential. Until platform passkeys are
+      // wired to the server, live mode refuses rather than faking a session.
+      setState(() => _error = "Passkeys aren't available yet. Use your password or a one-time code.");
+      return;
+    }
+    widget.onSignedIn();
   }
 
   Widget _requiredLabel(String text) => Text.rich(

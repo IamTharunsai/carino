@@ -69,7 +69,30 @@ class _RootFlowState extends State<RootFlow> {
     super.dispose();
   }
 
+  /// The ONE place a signed-in member is routed: verified accounts go Home;
+  /// anything else must pass the age gate + ID verification first. Every
+  /// sign-in path (password, code, Google/Apple, passkey) calls this.
+  Future<void> _afterSignIn() async {
+    final verified = await Services.verification.isVerified();
+    if (!mounted) return;
+    if (verified) {
+      _completedOnboarding = true;
+      _go(_Stage.home);
+    } else {
+      _go(_Stage.ageGate);
+    }
+  }
+
   void _onSessionChange() {
+    // OAuth (Google/Apple) completes in the browser and returns via deep
+    // link; the session arriving is the signal to route.
+    if (AuthService.sessionChanges.value &&
+        _returning &&
+        (_stage == _Stage.signIn || _stage == _Stage.auth) &&
+        mounted) {
+      _afterSignIn();
+      return;
+    }
     // A sign-out anywhere invalidates the completed-onboarding shortcut.
     if (!AuthService.sessionChanges.value && mounted) {
       setState(() => _completedOnboarding = false);
@@ -119,27 +142,30 @@ class _RootFlowState extends State<RootFlow> {
           // requires the full gate chain.
           onSignIn: () {
             _returning = true;
-            _go(Services.auth.isSignedIn ? _Stage.home : _Stage.signIn);
+            // An existing session still goes through the verified check.
+            if (Services.auth.isSignedIn) {
+              _afterSignIn();
+            } else {
+              _go(_Stage.signIn);
+            }
           },
         );
       case _Stage.signIn:
         return SignInScreen(
-          onSignedIn: () {
-            _completedOnboarding = true;
-            _go(_Stage.home);
-          },
+          onSignedIn: _afterSignIn,
           onUseCode: () => _go(_Stage.auth),
         );
       case _Stage.ageGate:
         return AgeGateScreen(onPassed: () {
           _returning = false;
-          _go(_Stage.auth);
+          // Already signed in (returning but unverified)? Straight to
+          // verification — don't ask for a code twice.
+          _go(Services.auth.isSignedIn ? _Stage.verificationIntro : _Stage.auth);
         });
       case _Stage.auth:
         return AuthScreen(onAuthenticated: () {
           if (_returning) {
-            _completedOnboarding = true;
-            _go(_Stage.home);
+            _afterSignIn();
           } else {
             _go(_Stage.verificationIntro);
           }

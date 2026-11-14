@@ -164,7 +164,9 @@ Future<LikeChoice?> showLikeOptions(BuildContext context, Member m) {
           controller: note,
           maxLength: 140,
           decoration: InputDecoration(
-            hintText: 'Your “${m.prompts.first.answer}” made me smile because…',
+            hintText: m.prompts.isEmpty
+                ? 'What made you smile about ${m.firstName}?'
+                : 'Your “${m.prompts.first.answer}” made me smile because…',
             border: const OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(16))),
           ),
@@ -192,19 +194,18 @@ Future<LikeChoice?> showLikeOptions(BuildContext context, Member m) {
             const SizedBox(width: 8),
             Expanded(
               child: SparkButton(
-                label: prefs.sparksLeftToday > 0
-                    ? 'Spark (${prefs.sparksLeftToday} left)'
+                label: prefs.sparksLeft(DateTime.now(), isPlus: Services.payments.isPlus) > 0
+                    ? 'Spark (${prefs.sparksLeft(DateTime.now(), isPlus: Services.payments.isPlus)} left)'
                     : 'Spark — Plus',
                 icon: Icons.local_fire_department,
                 secondary: true,
                 onPressed: () {
-                  if (prefs.sparksLeftToday <= 0) {
+                  if (!prefs.useSpark(DateTime.now(), isPlus: Services.payments.isPlus)) {
                     Navigator.of(context).pop();
                     Navigator.of(context).push(MaterialPageRoute<void>(
                         builder: (_) => const PaywallScreen()));
                     return;
                   }
-                  prefs.sparksLeftToday--;
                   Navigator.of(context).pop(const LikeChoice(LikeKind.spark));
                 },
               ),
@@ -237,7 +238,7 @@ const relationshipStatuses = [
 ];
 
 /// Statuses where dating discovery pauses automatically.
-bool statusPausesDating(String s) => s == 'In a relationship' || s == 'Married';
+bool statusPausesDating(String s) => UserPrefs.pausesDating(s);
 
 class CoupleScreen extends StatefulWidget {
   const CoupleScreen({super.key});
@@ -250,13 +251,10 @@ class _CoupleScreenState extends State<CoupleScreen> {
   final _prefs = Services.prefs;
 
   void _setStatus(String s) {
-    setState(() {
-      _prefs.relationshipStatus = s;
-      // Honest Status: taken = not discoverable. Prevents the "on the app
-      // while married" harm without exposing anyone's activity.
-      if (statusPausesDating(s)) _prefs.visibility = 'Paused';
-    });
-    Services.analytics.action('status_$s');
+    // Honest Status: taken = not discoverable (and restored when not).
+    setState(() => _prefs.setRelationshipStatus(s));
+    // Event name only — never the status value (privacy rule).
+    Services.analytics.action('status_changed');
     if (statusPausesDating(s)) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Dates paused — you won\'t appear in anyone\'s Discover. Friends and Plans stay on.')));
@@ -301,8 +299,7 @@ class _CoupleScreenState extends State<CoupleScreen> {
     if (ok == true && mounted) {
       setState(() {
         if (!statusPausesDating(_prefs.relationshipStatus)) {
-          _prefs.relationshipStatus = 'In a relationship';
-          _prefs.visibility = 'Paused';
+          _prefs.setRelationshipStatus('In a relationship');
         }
       });
     }
@@ -382,7 +379,7 @@ class _CoupleScreenState extends State<CoupleScreen> {
   }
 
   Future<void> _book(String kind, Uri url) async {
-    Services.analytics.action('booking_$kind');
+    Services.analytics.action('booking_${kind.toLowerCase()}');
     final ok = await launchUrl(url, mode: LaunchMode.externalApplication)
         .catchError((_) => false);
     if (!ok && mounted) {
@@ -480,7 +477,7 @@ class _CoupleScreenState extends State<CoupleScreen> {
                   const SizedBox(width: 10),
                   Expanded(child: Text('You & ${_prefs.partnerName}', style: text.titleLarge)),
                   TextButton(
-                    onPressed: () => setState(() => _prefs.partnerName = null),
+                    onPressed: () => setState(_prefs.unlinkPartner),
                     child: const Text('Unlink'),
                   ),
                 ],

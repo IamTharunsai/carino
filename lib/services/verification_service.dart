@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../config/env.dart';
 import 'backend_service.dart';
+import 'services.dart';
 
 enum VerificationStatus { notStarted, pending, passed, failed }
 
@@ -79,6 +80,27 @@ class VerificationService {
     return null;
   }
 
+  /// Is the signed-in account verified (all three layers, badge active)?
+  /// LIVE: read from verification_records (RLS: own row only) — the client
+  /// can never self-grant this. MOCK: the persisted demo flag.
+  Future<bool> isVerified() async {
+    if (Env.useMockBackend) return Services.prefs.mockVerified;
+    try {
+      final client = BackendService().client;
+      final uid = client.auth.currentUser?.id;
+      if (uid == null) return false;
+      final row = await client
+          .from('verification_records')
+          .select('badge_state')
+          .eq('user_id', uid)
+          .maybeSingle();
+      return row != null && row['badge_state'] == 'active';
+    } catch (e) {
+      debugPrint('[VerificationService] status check failed: $e');
+      return false; // fail closed: unverified until proven otherwise
+    }
+  }
+
   /// Scaffold behaviour: walks the three layers in order, then passes, so
   /// onboarding can complete end-to-end (MOCK MODE only).
   Future<VerificationStatus> runDemoFlow() async {
@@ -95,6 +117,7 @@ class VerificationService {
       debugPrint('[VerificationService] layer passed: ${layer.label} (stub)');
     }
     _status = VerificationStatus.passed;
+    await Services.prefs.setMockVerified(true);
     debugPrint('[VerificationService] all 3 layers passed — badge earned (stub)');
     return _status;
   }
