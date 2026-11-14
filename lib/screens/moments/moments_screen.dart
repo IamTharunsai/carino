@@ -217,20 +217,20 @@ class _MomentsScreenState extends State<MomentsScreen> {
                                 fontWeight: FontWeight.w600),
                           ),
                         ),
-                        if (moment.circle != Circle.everyone)
-                          Padding(
-                            padding: const EdgeInsets.only(right: 6),
-                            child: Chip(
-                              label: Text(moment.circle.label),
-                              visualDensity: VisualDensity.compact,
-                              labelStyle: const TextStyle(fontSize: 11),
+                        // Circle + expiry in one chip that can shrink, so
+                        // the header never overflows on small phones.
+                        Flexible(
+                          child: Chip(
+                            avatar: const Icon(Icons.schedule, size: 13),
+                            label: Text(
+                              moment.circle == Circle.everyone
+                                  ? moment.expiresInLabel
+                                  : '${moment.circle.label} · ${moment.expiresInLabel}',
+                              overflow: TextOverflow.ellipsis,
                             ),
+                            visualDensity: VisualDensity.compact,
+                            labelStyle: const TextStyle(fontSize: 11),
                           ),
-                        Chip(
-                          avatar: const Icon(Icons.schedule, size: 13),
-                          label: Text(moment.expiresInLabel),
-                          visualDensity: VisualDensity.compact,
-                          labelStyle: const TextStyle(fontSize: 11),
                         ),
                       ],
                     ),

@@ -86,7 +86,7 @@ rooms, night planner), 14 Tonight Near Me, 15 group hangouts + Spark Nights,
 ```
 $env:Path = "C:\src\flutter\bin;$env:Path"
 flutter analyze   # only 'material_ui' deprecation infos are expected
-flutter test      # 40 tests passed at last full run (before social pass)
+flutter test      # 40 tests pass at commit after 2af3200 (all green)
 ```
 `test/experience_test.dart` renders screens at 360×740 and fails on any
 overflow — keep adding new screens to it.
