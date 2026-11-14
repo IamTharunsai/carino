@@ -58,35 +58,67 @@ rooms, night planner), 14 Tonight Near Me, 15 group hangouts + Spark Nights,
 30 calm mode (You tab), 31 forgiving streaks, 32 why-you're-seeing,
 33 Plus (existing), 34 gifts in Stage (demo-only purchase).
 
-**Not yet built — next agent:**
-- 2 **Facets screen** (Public/Circles/Dating/Professional per-field
-  audience). Data exists: `Services.prefs.facetAudience`. Add
-  `you/facets_screen.dart` + a row in You.
-- 3 **Trust Graph screen** (met-IRL code confirm, vouches). Logic exists in
-  `TrustGraph`; add UI in You.
-- 22 **Work facet editor** (prefs `workRole`, `workBuilding`, `workOpenTo`).
-- 30 **No-Counts toggle UI** (`Services.prefs.noCounts`; Guilds already
-  respects it; also hide Likes You count in `connect_screen.dart`).
-- 10 **Smart chat extras**: AI catch-up button in `GroupChatScreen` using
-  `catchUpSummary`, Vanish toggle for groups, voice note + translate stub.
-- 34 **Plan splits** UI in `connect/plan_detail_screen.dart` using
-  `splitCents`/`formatCents` ("Mark paid", no in-app money transfer).
-- 27 AI coach: keep craft tips only — the blueprint forbids attractiveness
-  scores, so do NOT "score photos".
-- Tests: add `test/platform_test.dart` (pure logic in platform.dart and
-  social.dart) and add Stage/Plans-hub/Friends/Group chat screens to the
-  render list in `test/experience_test.dart`.
-- Backend: `backend/supabase/migrations/0004_experience_bundle.sql` covers
-  identity, stickers, events, check-ins, wingperson. **Not applied, not run
-  against a DB.** A 0005 migration is still needed for circles, groups,
-  polls, feed posts (ai_generated), trust edges/vouches, hosts, work facets,
-  coffee matches, intro requests, guilds, gifts, plan splits.
+**Implemented in the remaining-features pass (Nov 13, 2026):**
+- 2 **Facets**: `you/facets_screen.dart`, linked from You; all five fields,
+  four facets and four audiences editable. Session preferences only; the
+  screen explicitly says live profile enforcement is not connected.
+- 3 **Trust Graph**: `you/trust_graph_screen.dart`, linked from You. Local
+  matching-code preview, regenerated after success/selection; confirmed
+  meetings, received vouches and own authored vouches. Never impersonates
+  a voucher. This is not bilateral verification on two phones.
+- 22 **Work facet**: `you/work_facet_screen.dart`, validated role, project
+  and open-to choices; updates prefs used by coffee matching.
+- 30 **No-Counts**: reactive switch in You, reactive Likes You headline;
+  Guilds continues using the same notifier.
+- 10 **Group chat extras**: Chat extras menu offers AI catch-up (consent
+  gated, labelled rule-based local fallback), prospective 24-hour Vanish
+  for own new messages, and an honest voice/translation integration stub.
+  Expired messages are removed on thread open, while open, and before
+  list previews. Turning Vanish off preserves existing expiry times.
+- 34 **Plan splits**: `widgets/plan_split_card.dart` on plan detail, exact
+  USD cents, two equal shares, mark/undo own payment, edit/reset total.
+  Stable stored-plan ID keys, session ledger; no transfer or verified payment.
+- 27 **AI coach remains craft tips only**, never attractiveness scores.
+- Added logic and interaction tests; expanded phone renders to Stage,
+  Friends, Group chat, all Plans hub destinations and all new screens.
+  Fixed Stage action-row and Plans match-card phone overflows.
+- Backend: **0005_social_platform.sql** adds 20 tables with RLS and explicit
+  grants. Consent/invitation/moderation/payment/reputation writes are
+  service-role only pending authenticated endpoints. Paid marks can only
+  update the caller's own share, never amounts or another member's mark.
+- Migrations **0001–0005 run locally in PostgreSQL WASM (PGlite)** with
+  Supabase Auth/Storage shims and 32 RLS assertions. Fixed 0004 check-in
+  INSERT authorization to require actual plan participation.
+  **Neither 0004 nor 0005 has been applied to hosted Supabase.**
+
+**Still requires production integration:**
+- Existing app prefs/social models are session memory. Add authenticated
+  persistence and server-enforced per-field facet projections before launch.
+- Server-issued expiring meeting codes with bilateral acceptance, vouch
+  delivery, group membership invitations and group-wide Vanish consent.
+- Scheduled deletion of expired messages/media (RLS hiding is not deletion).
+- Real AI summaries, audio capture/playback/transcription and voice translation.
+- Server-side social write endpoints, validated poll membership/options and
+  majority, split membership/rounding, purchase receipts and host reputation.
+  Schema availability does not imply these endpoints exist.
+- Hosted Supabase migration dry-run/apply and real Auth/Storage/Edge testing.
+  Docker Desktop's Linux engine was unavailable here; tests use isolated
+  PGlite and do not validate hosted services or scheduled jobs.
 
 ## Tests & checks
+Verified in this pass: 65 Flutter tests pass; 32 database/RLS assertions
+pass; eight additional Midnight/Porcelain preview renders pass at 360×740.
+Analyzer reports only the existing Flutter material import deprecation infos.
+Android debug packaging passes: `flutter build apk --debug --no-pub`;
+artifact: `build/app/outputs/flutter-apk/app-debug.apk` (mock backend).
+
 ```
 $env:Path = "C:\src\flutter\bin;$env:Path"
 flutter analyze   # only 'material_ui' deprecation infos are expected
-flutter test      # 40 tests pass at commit after 2af3200 (all green)
+flutter test      # includes logic, interaction and 360x740 render tests
+cd backend/tests
+npm ci --ignore-scripts
+npm test          # applies 0001-0005 and checks 32 authorization assertions
 ```
 `test/experience_test.dart` renders screens at 360×740 and fails on any
 overflow — keep adding new screens to it.

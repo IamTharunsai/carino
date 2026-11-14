@@ -1,6 +1,5 @@
-/// Platform layer (Stage, Trust Graph, Plans engine, Professional wing,
-/// Money). Pure Dart — every rule here is unit-tested in
-/// test/platform_test.dart.
+// Platform layer (Stage, Trust Graph, Plans engine, Professional wing,
+// Money). Pure Dart — rules are tested in test/platform_test.dart.
 
 // ============================================================================
 // STAGE — finite, controllable, human-first feed
@@ -189,7 +188,9 @@ String whyThisPost(FeedItem i, FeedControls c) {
 class TrustGraph {
   TrustGraph({Set<String>? met, Map<String, Set<String>>? metBy})
       : _met = {...?met},
-        _metBy = {for (final e in (metBy ?? {}).entries) e.key: {...e.value}};
+        _metBy = {
+          for (final e in (metBy ?? {}).entries) e.key: {...e.value}
+        };
 
   /// People *I* have met in person (both confirmed).
   final Set<String> _met;
@@ -205,7 +206,8 @@ class TrustGraph {
   Set<String> get met => Set.unmodifiable(_met);
 
   /// Met-IRL: both phones confirm the same one-time code.
-  bool confirmMeeting(String id, {required String myCode, required String theirCode}) {
+  bool confirmMeeting(String id,
+      {required String myCode, required String theirCode}) {
     if (myCode.isEmpty || myCode != theirCode) return false;
     _met.add(id);
     return true;
@@ -235,7 +237,8 @@ enum HostTier { newHost, trusted, partner }
 /// Good hosts earn reputation, then a revenue share. Reputation comes from
 /// private post-plan feedback ("did it happen / comfortable / worthwhile"),
 /// never from public star ratings of people.
-HostTier hostTier({required int plansHosted, required int positive, required int reports}) {
+HostTier hostTier(
+    {required int plansHosted, required int positive, required int reports}) {
   if (reports > 0) return HostTier.newHost; // any upheld report resets trust
   final rate = plansHosted == 0 ? 0 : positive / plansHosted;
   if (plansHosted >= 10 && rate >= 0.9) return HostTier.partner;
@@ -257,7 +260,34 @@ List<int> splitCents(int totalCents, int people) {
   return [for (var i = 0; i < people; i++) base + (i < rem ? 1 : 0)];
 }
 
-String formatCents(int c) => '\$${(c ~/ 100)}.${(c % 100).toString().padLeft(2, '0')}';
+String formatCents(int c) =>
+    '\$${(c ~/ 100)}.${(c % 100).toString().padLeft(2, '0')}';
+
+/// Session ledger only. A paid mark records the member's own statement;
+/// it is never evidence of a transfer or another participant's payment.
+class PlanSplit {
+  PlanSplit({required this.totalCents, required List<String> participants})
+      : participants = List.unmodifiable(participants),
+        amounts =
+            List.unmodifiable(splitCents(totalCents, participants.length)) {
+    if (participants.toSet().length != participants.length) {
+      throw ArgumentError('Participants must be unique');
+    }
+  }
+  final int totalCents;
+  final List<String> participants;
+  final List<int> amounts;
+  bool mySharePaid = false;
+}
+
+/// Parse dollars without floating-point rounding or silently rounding input.
+int? parseCostCents(String input) {
+  final value = input.trim();
+  if (!RegExp(r'^\d{1,7}(\.\d{1,2})?$').hasMatch(value)) return null;
+  final parts = value.split('.');
+  return int.parse(parts.first) * 100 +
+      (parts.length == 1 ? 0 : int.parse(parts.last.padRight(2, '0')));
+}
 
 /// AI Night Planner: suggests a plan when 2+ circle members are free and an
 /// idea matches your taste. Returns null if nothing honest to suggest.
@@ -274,7 +304,10 @@ NightPlan? suggestNightPlan({
   required Map<String, String> myTaste,
   required List<(String idea, String tasteKey, String tastePick)> ideas,
 }) {
-  final free = [for (final e in friendFreeTonight.entries) if (e.value) e.key];
+  final free = [
+    for (final e in friendFreeTonight.entries)
+      if (e.value) e.key
+  ];
   if (free.length < 2) return null;
   for (final (idea, key, pick) in ideas) {
     if (myTaste[key] == pick) {
@@ -311,11 +344,14 @@ class WorkFacet {
 /// One curated coffee chat a week: the person whose "open to" and skills
 /// overlap yours most (ties -> first). Never someone you've already been
 /// matched with this cycle.
-WorkFacet? weeklyCoffeeMatch(WorkFacet me, List<WorkFacet> pool, Set<String> alreadyMatched) {
+WorkFacet? weeklyCoffeeMatch(
+    WorkFacet me, List<WorkFacet> pool, Set<String> alreadyMatched) {
   WorkFacet? best;
   var bestScore = 0;
   for (final p in pool) {
-    if (p.personId == me.personId || alreadyMatched.contains(p.personId)) continue;
+    if (p.personId == me.personId || alreadyMatched.contains(p.personId)) {
+      continue;
+    }
     if (!p.openTo.contains('coffee')) continue;
     final score = p.openTo.intersection(me.openTo).length * 2 +
         p.skills.toSet().intersection(me.skills.toSet()).length;
@@ -357,10 +393,14 @@ class Guild {
 List<String> catchUpSummary(List<(String sender, String text)> messages) {
   if (messages.isEmpty) return const ['Nothing new.'];
   final speakers = <String>{for (final m in messages) m.$1};
-  final points = <String>['${messages.length} new messages from ${speakers.join(', ')}.'];
+  final points = <String>[
+    '${messages.length} new messages from ${speakers.join(', ')}.'
+  ];
   for (final (s, t) in messages) {
     final l = t.toLowerCase();
-    if (RegExp(r'\b(mon|tues|wednes|thurs|fri|satur|sun)day\b|tonight|tomorrow|weekend').hasMatch(l)) {
+    if (RegExp(
+            r'\b(mon|tues|wednes|thurs|fri|satur|sun)day\b|tonight|tomorrow|weekend')
+        .hasMatch(l)) {
       points.add('$s talked timing: “$t”');
     } else if (t.trim().endsWith('?')) {
       points.add('$s asked: “$t”');

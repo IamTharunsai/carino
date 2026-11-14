@@ -104,17 +104,45 @@ class UserPrefs {
   /// Facets: one account, four selves. field -> facet -> audience
   /// ('everyone' | 'matches' | 'circles' | 'hidden').
   final Map<String, Map<String, String>> facetAudience = {
-    'Photos': {'Public': 'everyone', 'Circles': 'circles', 'Dating': 'matches', 'Professional': 'everyone'},
-    'Pronouns': {'Public': 'everyone', 'Circles': 'circles', 'Dating': 'everyone', 'Professional': 'everyone'},
-    'Orientation': {'Public': 'hidden', 'Circles': 'circles', 'Dating': 'matches', 'Professional': 'hidden'},
-    'Job': {'Public': 'hidden', 'Circles': 'circles', 'Dating': 'matches', 'Professional': 'everyone'},
-    'City': {'Public': 'everyone', 'Circles': 'circles', 'Dating': 'everyone', 'Professional': 'everyone'},
+    'Photos': {
+      'Public': 'everyone',
+      'Circles': 'circles',
+      'Dating': 'matches',
+      'Professional': 'everyone'
+    },
+    'Pronouns': {
+      'Public': 'everyone',
+      'Circles': 'circles',
+      'Dating': 'everyone',
+      'Professional': 'everyone'
+    },
+    'Orientation': {
+      'Public': 'hidden',
+      'Circles': 'circles',
+      'Dating': 'matches',
+      'Professional': 'hidden'
+    },
+    'Job': {
+      'Public': 'hidden',
+      'Circles': 'circles',
+      'Dating': 'matches',
+      'Professional': 'everyone'
+    },
+    'City': {
+      'Public': 'everyone',
+      'Circles': 'circles',
+      'Dating': 'everyone',
+      'Professional': 'everyone'
+    },
   };
 
   /// Professional wing: shown only in the Professional facet.
   String workRole = 'Product engineer';
   String workBuilding = 'A dating app that ends in real plans';
   Set<String> workOpenTo = {'coffee', 'collabs'};
+
+  final Map<String, String> givenVouches = {};
+  final Map<String, PlanSplit> planSplits = {};
 
   /// Guilds joined (ids) and whether each allows dating discovery.
   final Map<String, bool> guildDating = {};

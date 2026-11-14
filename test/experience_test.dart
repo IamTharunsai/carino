@@ -25,6 +25,12 @@ import 'package:carino/screens/you/wingperson_screen.dart';
 import 'package:carino/screens/you/you_screen.dart';
 import 'package:carino/services/services.dart';
 import 'package:carino/theme/app_theme.dart';
+import 'package:carino/screens/you/facets_screen.dart';
+import 'package:carino/screens/you/work_facet_screen.dart';
+import 'package:carino/screens/you/trust_graph_screen.dart';
+import 'package:carino/screens/chats/social_screens.dart';
+import 'package:carino/screens/stage/stage_screen.dart';
+import 'package:carino/screens/connect/plans_hub_screens.dart';
 
 void main() {
   group('Reciprocal "I want to meet"', () {
@@ -36,7 +42,8 @@ void main() {
       expect(wantsToMeet(const ['Men'], const ['Trans man']), isTrue);
     });
     test('other identities map to non-binary', () {
-      expect(wantsToMeet(const ['Non-binary people'], const ['Genderfluid']), isTrue);
+      expect(wantsToMeet(const ['Non-binary people'], const ['Genderfluid']),
+          isTrue);
       expect(wantsToMeet(const ['Women'], const ['Non-binary']), isFalse);
     });
     test('must be mutual', () {
@@ -103,13 +110,17 @@ void main() {
   });
 
   test('taste overlaps are real only', () {
-    expect(sharedTastes({'t1': 'Sunrise hike'}, {'t1': 'Slow brunch'}), isEmpty);
-    expect(sharedTastes({'t1': 'Sunrise hike', 't2': 'Midnight pancakes'},
-        {'t2': 'Midnight pancakes'}), ['Midnight pancakes']);
+    expect(
+        sharedTastes({'t1': 'Sunrise hike'}, {'t1': 'Slow brunch'}), isEmpty);
+    expect(
+        sharedTastes({'t1': 'Sunrise hike', 't2': 'Midnight pancakes'},
+            {'t2': 'Midnight pancakes'}),
+        ['Midnight pancakes']);
   });
 
   test('sample data includes non-binary and 40+ members, all 21+', () {
-    expect(MockData.members.any((m) => m.gender.contains('Non-binary')), isTrue);
+    expect(
+        MockData.members.any((m) => m.gender.contains('Non-binary')), isTrue);
     expect(MockData.members.any((m) => m.age >= 40), isTrue);
     expect(MockData.members.every((m) => m.age >= 21), isTrue);
   });
@@ -125,20 +136,31 @@ void main() {
   group('Customer view renders at phone size', () {
     final screens = <String, Widget Function()>{
       'Identity': () => IdentityScreen(onDone: () {}),
+      'Facets': () => const FacetsScreen(),
+      'Work facet': () => const WorkFacetScreen(),
+      'Trust Graph': () => const TrustGraphScreen(),
+      'Stage': () => const StageScreen(),
+      'Friends': () => const FriendsScreen(),
+      'Group chat': () => GroupChatScreen(group: MockData.groups().first),
+      'Tonight': () => const TonightScreen(),
+      'Host plan': () => const HostPlanScreen(),
+      'Coffee chats': () => const CoffeeChatsScreen(),
+      'Guilds': () => const GuildsScreen(),
       'Taste quiz': () => TasteQuizScreen(onDone: () {}),
       'Discover': () => const DiscoverScreen(),
       'Profile (Sofia: highlights, soundtrack)': () =>
           ProfileDetailScreen(member: MockData.memberById('m-sofia')),
-      'Profile (Rowan: they/them, access)': () =>
-          ProfileDetailScreen(member: MockData.memberById('m-rowan'), matched: true),
+      'Profile (Rowan: they/them, access)': () => ProfileDetailScreen(
+          member: MockData.memberById('m-rowan'), matched: true),
       'Moments': () => const MomentsScreen(),
-      'Moment viewer w/ sticker': () => MomentViewerScreen(
-          moments: MockData.moments, initialIndex: 0),
+      'Moment viewer w/ sticker': () =>
+          MomentViewerScreen(moments: MockData.moments, initialIndex: 0),
       'Connect': () => const ConnectScreen(),
       'Events': () => const EventsScreen(),
       'Spark Nights': () => const SparkNightsScreen(),
       'Group hangout': () => const GroupHangoutScreen(),
-      'Games + streak': () => GamesScreen(member: MockData.memberById('m-sofia')),
+      'Games + streak': () =>
+          GamesScreen(member: MockData.memberById('m-sofia')),
       'Plan detail + check-in': () => PlanDetailScreen(
           member: MockData.memberById('m-aria'),
           placeType: 'Coffee',

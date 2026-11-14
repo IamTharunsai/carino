@@ -1,5 +1,5 @@
-/// Social platform, Phase 1: circles, friends, group chats with a Plan
-/// button. Pure Dart (no Flutter) so the rules are unit-tested.
+// Social platform, Phase 1: circles, friends, group chats with a Plan
+// button. Pure Dart (no Flutter) so the rules are unit-tested.
 
 /// Who a post, story or chat is for. Private is the default — a member
 /// picks a circle every time they share.
@@ -35,8 +35,10 @@ class SocialGraph {
   Circle? circleOf(String personId) => _circles[personId];
   void place(String personId, Circle circle) => _circles[personId] = circle;
   void remove(String personId) => _circles.remove(personId);
-  List<String> inCircle(Circle c) =>
-      [for (final e in _circles.entries) if (e.value == c) e.key];
+  List<String> inCircle(Circle c) => [
+        for (final e in _circles.entries)
+          if (e.value == c) e.key
+      ];
   bool isFriend(String id) =>
       _circles[id] == Circle.inner || _circles[id] == Circle.friends;
 }
@@ -57,6 +59,13 @@ class GroupChat {
   final List<GroupMessage> messages;
   int unreadCount;
   PlanPoll? poll;
+  bool vanishEnabled = false;
+
+  void removeExpired([DateTime? now]) {
+    final instant = now ?? DateTime.now();
+    messages.removeWhere(
+        (m) => m.expiresAt != null && !m.expiresAt!.isAfter(instant));
+  }
 }
 
 class GroupMessage {
@@ -65,6 +74,7 @@ class GroupMessage {
     required this.text,
     required this.timeLabel,
     this.isSystem = false,
+    this.expiresAt,
   });
 
   final String senderId;
@@ -73,6 +83,7 @@ class GroupMessage {
 
   /// Poll results, plan set, member joined… rendered centred.
   final bool isSystem;
+  final DateTime? expiresAt;
 }
 
 /// "We should hang out" -> a real plan. Everyone votes on options; the

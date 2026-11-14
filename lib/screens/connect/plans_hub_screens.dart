@@ -28,7 +28,8 @@ class NightPlannerCard extends StatelessWidget {
       ideas: MockData.nightIdeas,
     );
     if (plan == null) return const SizedBox.shrink();
-    final names = plan.friendIds.map((i) => MockData.personById(i).firstName).join(' & ');
+    final names =
+        plan.friendIds.map((i) => MockData.personById(i).firstName).join(' & ');
     return GlassContainer(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -105,8 +106,9 @@ class _TonightScreenState extends State<TonightScreen> {
                     ),
                   ),
                   FilledButton.tonal(
-                    onPressed: () => setState(() =>
-                        _joined.contains(title) ? _joined.remove(title) : _joined.add(title)),
+                    onPressed: () => setState(() => _joined.contains(title)
+                        ? _joined.remove(title)
+                        : _joined.add(title)),
                     child: Text(_joined.contains(title) ? 'Going ✓' : 'Join'),
                   ),
                 ],
@@ -114,7 +116,8 @@ class _TonightScreenState extends State<TonightScreen> {
             ),
             const SizedBox(height: 10),
           ],
-          Text('Joining a hosted plan shares your first name and verified badge with the host.',
+          Text(
+              'Joining a hosted plan shares your first name and verified badge with the host.',
               style: text.bodySmall),
         ],
       ),
@@ -157,21 +160,25 @@ class _HostPlanScreenState extends State<HostPlanScreen> {
       return;
     }
     final price = double.tryParse(_price.text.trim());
-    if (_price.text.trim().isNotEmpty && (price == null || price < 0 || price > 500)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Ticket price must be between \$0 and \$500.')));
+    if (_price.text.trim().isNotEmpty &&
+        (price == null || price < 0 || price > 500)) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Ticket price must be between \$0 and \$500.')));
       return;
     }
-    Services.prefs.myPlans.add('Hosting: $w · $_when · ${_spots.round()} spots');
+    Services.prefs.myPlans
+        .add('Hosting: $w · $_when · ${_spots.round()} spots');
     Navigator.of(context).pop();
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Published. It shows in Tonight Near Me and to your circles.')));
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text(
+            'Published. It shows in Tonight Near Me and to your circles.')));
   }
 
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
-    final tier = hostTier(plansHosted: _hosted, positive: _positive, reports: _reports);
+    final tier =
+        hostTier(plansHosted: _hosted, positive: _positive, reports: _reports);
     return GlassScaffold(
       appBar: AppBar(title: const Text('Host a plan')),
       body: ListView(
@@ -185,9 +192,12 @@ class _HostPlanScreenState extends State<HostPlanScreen> {
                 const SizedBox(height: 4),
                 Text(
                   switch (tier) {
-                    HostTier.newHost => 'New host · host 3 plans people enjoy to become Trusted.',
-                    HostTier.trusted => 'Trusted host · $_hosted plans, all good. 10 great plans unlock Partner and a 70% share of ticket sales.',
-                    HostTier.partner => 'Partner host · you earn 70% of ticket sales.',
+                    HostTier.newHost =>
+                      'New host · host 3 plans people enjoy to become Trusted.',
+                    HostTier.trusted =>
+                      'Trusted host · $_hosted plans, all good. 10 great plans unlock Partner and a 70% share of ticket sales.',
+                    HostTier.partner =>
+                      'Partner host · you earn 70% of ticket sales.',
                   },
                   style: text.bodyMedium,
                 ),
@@ -197,7 +207,8 @@ class _HostPlanScreenState extends State<HostPlanScreen> {
                   color: AppColors.emberCrimson,
                 ),
                 const SizedBox(height: 4),
-                Text('Built from private "did it happen / felt comfortable" feedback — never public star ratings.',
+                Text(
+                    'Built from private "did it happen / felt comfortable" feedback — never public star ratings.',
                     style: text.bodySmall),
               ],
             ),
@@ -243,9 +254,13 @@ class _HostPlanScreenState extends State<HostPlanScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          SparkButton(label: 'Publish plan', icon: Icons.campaign_outlined, onPressed: _publish),
+          SparkButton(
+              label: 'Publish plan',
+              icon: Icons.campaign_outlined,
+              onPressed: _publish),
           const SizedBox(height: 8),
-          Text('Public places only. Every guest is verified. You can remove anyone, anytime.',
+          Text(
+              'Public places only. Every guest is verified. You can remove anyone, anytime.',
               style: text.bodySmall),
         ],
       ),
@@ -278,7 +293,8 @@ class _CoffeeChatsScreenState extends State<CoffeeChatsScreen> {
 
   void _requestIntro(String targetId, String introducerId) {
     final note = TextEditingController(
-        text: 'Hi! Would you introduce me to ${MockData.personById(targetId).firstName}? '
+        text:
+            'Hi! Would you introduce me to ${MockData.personById(targetId).firstName}? '
             'I\'d love a quick coffee about what they\'re building.');
     showGlassSheet<void>(
       context,
@@ -286,10 +302,12 @@ class _CoffeeChatsScreenState extends State<CoffeeChatsScreen> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Ask ${MockData.personById(introducerId).firstName} for an intro',
+          Text(
+              'Ask ${MockData.personById(introducerId).firstName} for an intro',
               style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 4),
-          Text('They\'ve met you both in person. They decide whether to pass it on.',
+          Text(
+              'They\'ve met you both in person. They decide whether to pass it on.',
               style: Theme.of(context).textTheme.bodySmall),
           const SizedBox(height: 10),
           TextField(controller: note, maxLines: 3, maxLength: 280),
@@ -330,7 +348,8 @@ class _CoffeeChatsScreenState extends State<CoffeeChatsScreen> {
           const SizedBox(height: 12),
           if (match == null)
             GlassContainer(
-              child: Text('No match this week — check back Monday.', style: text.bodyMedium),
+              child: Text('No match this week — check back Monday.',
+                  style: text.bodyMedium),
             )
           else
             GlassContainer(
@@ -341,8 +360,8 @@ class _CoffeeChatsScreenState extends State<CoffeeChatsScreen> {
                     children: [
                       CircleAvatar(
                           radius: 24,
-                          backgroundImage:
-                              AssetImage(MockData.personById(match.personId).photoAsset)),
+                          backgroundImage: AssetImage(
+                              MockData.personById(match.personId).photoAsset)),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
@@ -364,13 +383,16 @@ class _CoffeeChatsScreenState extends State<CoffeeChatsScreen> {
                     runSpacing: 6,
                     children: [
                       for (final s in match.skills) Chip(label: Text(s)),
-                      for (final o in match.openTo) Chip(label: Text('Open to $o')),
+                      for (final o in match.openTo)
+                        Chip(label: Text('Open to $o')),
                     ],
                   ),
                   const SizedBox(height: 10),
                   if (_accepted)
-                    Text('Accepted — you\'ll both get a 15-minute slot to pick.',
-                        style: text.bodyMedium?.copyWith(color: AppColors.sparkCoral))
+                    Text(
+                        'Accepted — you\'ll both get a 15-minute slot to pick.',
+                        style: text.bodyMedium
+                            ?.copyWith(color: AppColors.sparkCoral))
                   else
                     Row(
                       children: [
@@ -379,7 +401,8 @@ class _CoffeeChatsScreenState extends State<CoffeeChatsScreen> {
                             label: 'Pass',
                             secondary: true,
                             icon: Icons.close,
-                            onPressed: () => setState(() => _passed.add(match.personId)),
+                            onPressed: () =>
+                                setState(() => _passed.add(match.personId)),
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -397,21 +420,25 @@ class _CoffeeChatsScreenState extends State<CoffeeChatsScreen> {
             ),
           const SizedBox(height: 20),
           Text('Warm intros', style: text.titleMedium),
-          Text('Through someone who has met you both in person.', style: text.bodySmall),
+          Text('Through someone who has met you both in person.',
+              style: text.bodySmall),
           const SizedBox(height: 8),
           for (final (target, via) in intros) ...[
             GlassContainer(
               child: Row(
                 children: [
                   CircleAvatar(
-                      backgroundImage: AssetImage(MockData.personById(target).photoAsset)),
+                      backgroundImage:
+                          AssetImage(MockData.personById(target).photoAsset)),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(MockData.personById(target).firstName, style: text.titleMedium),
-                        Text('Via ${via.map((v) => MockData.personById(v).firstName).join(', ')}',
+                        Text(MockData.personById(target).firstName,
+                            style: text.titleMedium),
+                        Text(
+                            'Via ${via.map((v) => MockData.personById(v).firstName).join(', ')}',
                             style: text.bodySmall),
                       ],
                     ),
@@ -469,15 +496,19 @@ class _GuildsScreenState extends State<GuildsScreen> {
                     children: [
                       Expanded(child: Text(g.name, style: text.titleMedium)),
                       FilledButton.tonal(
-                        onPressed: () => setState(() => _joined.containsKey(g.id)
-                            ? _joined.remove(g.id)
-                            : _joined[g.id] = false),
-                        child: Text(_joined.containsKey(g.id) ? 'Joined ✓' : 'Join'),
+                        onPressed: () => setState(() =>
+                            _joined.containsKey(g.id)
+                                ? _joined.remove(g.id)
+                                : _joined[g.id] = false),
+                        child: Text(
+                            _joined.containsKey(g.id) ? 'Joined ✓' : 'Join'),
                       ),
                     ],
                   ),
                   Text(
-                    hideCounts ? g.blurb : '${g.blurb} · ${g.memberCount} members',
+                    hideCounts
+                        ? g.blurb
+                        : '${g.blurb} · ${g.memberCount} members',
                     style: text.bodySmall,
                   ),
                   const SizedBox(height: 6),

@@ -16,12 +16,11 @@ endless chat. One Flutter codebase for iOS + Android.
 MOTION / SOUND DESIGN sheets) and
 `~/workspace/your_files/lustra-product-bible/lustra-product-bible.pdf` (v1.2).
 
-> ⚠️ **Build status:** this machine has **no Flutter/Dart toolchain**
-> (`flutter`/`dart` not installed), so the code was written carefully by
-> hand and checked statically (imports resolve, no duplicate classes) but
-> was **NOT compiled or run here**. First step on a dev machine:
-> `flutter pub get && flutter analyze`, then fix whatever the analyzer
-> flags before judging the result.
+> **Current build status:** 65 Flutter tests and 32 database authorization
+> assertions pass. Android debug APK packaging passes; the app still uses
+> demo data and several provider stubs. See [HANDOFF.md](HANDOFF.md) for
+> feature status and [DEPLOYMENT.md](DEPLOYMENT.md) for the walkthrough,
+> hosting architecture and Android/iOS release requirements.
 
 ---
 

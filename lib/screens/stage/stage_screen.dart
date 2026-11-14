@@ -75,7 +75,8 @@ class _FeedViewState extends State<_FeedView> {
   }
 
   void _apply() {
-    setState(() => _controls = parseFeedControls(_ask.text, MockData.feedTopics));
+    setState(
+        () => _controls = parseFeedControls(_ask.text, MockData.feedTopics));
     if (_controls.isDefault) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text(
@@ -157,14 +158,16 @@ class _FeedViewState extends State<_FeedView> {
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
               title: const Text('Public on Stage'),
-              subtitle: Text(public ? 'Anyone can see it' : 'Your circles only'),
+              subtitle:
+                  Text(public ? 'Anyone can see it' : 'Your circles only'),
               value: public,
               onChanged: (v) => setSheet(() => public = v),
             ),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
               title: const Text('I used AI to make this'),
-              subtitle: const Text('Required honesty: it gets an "AI-generated" label.'),
+              subtitle: const Text(
+                  'Required honesty: it gets an "AI-generated" label.'),
               value: usedAi,
               onChanged: (v) => setSheet(() => usedAi = v),
             ),
@@ -240,7 +243,8 @@ class _FeedViewState extends State<_FeedView> {
               border: const OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(999)),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             ),
           ),
           const SizedBox(height: 8),
@@ -332,22 +336,25 @@ class _FeedViewState extends State<_FeedView> {
               children: [
                 Text(item.creatorName,
                     style: const TextStyle(
-                        color: AppColors.warmIvory, fontWeight: FontWeight.w600)),
+                        color: AppColors.warmIvory,
+                        fontWeight: FontWeight.w600)),
                 Text(item.caption,
                     style: const TextStyle(color: AppColors.warmIvory)),
                 Text(whyThisPost(item, _controls),
-                    style: const TextStyle(color: AppColors.softRose, fontSize: 11)),
-                Row(
+                    style: const TextStyle(
+                        color: AppColors.softRose, fontSize: 11)),
+                Wrap(
+                  spacing: 4,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     TextButton.icon(
-                      onPressed: () =>
-                          showPostToPlanSheet(context, idea: item.planIdea ?? ''),
+                      onPressed: () => showPostToPlanSheet(context,
+                          idea: item.planIdea ?? ''),
                       icon: const Icon(Icons.event_available_outlined,
                           size: 16, color: AppColors.sparkCoral),
                       label: const Text('Make it a plan',
                           style: TextStyle(color: AppColors.warmIvory)),
                     ),
-                    const Spacer(),
                     if (item.creatorId != 'me')
                       IconButton(
                         icon: const Icon(Icons.card_giftcard,
@@ -359,9 +366,10 @@ class _FeedViewState extends State<_FeedView> {
                       icon: const Icon(Icons.flag_outlined,
                           color: AppColors.warmIvory),
                       tooltip: 'Report',
-                      onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('Reported — a human reviews within 24h.'))),
+                      onPressed: () => ScaffoldMessenger.of(context)
+                          .showSnackBar(const SnackBar(
+                              content: Text(
+                                  'Reported — a human reviews within 24h.'))),
                     ),
                   ],
                 ),
@@ -377,7 +385,8 @@ class _FeedViewState extends State<_FeedView> {
     return GlassContainer(
       child: Column(
         children: [
-          const Icon(Icons.check_circle_outline, size: 36, color: AppColors.sparkCoral),
+          const Icon(Icons.check_circle_outline,
+              size: 36, color: AppColors.sparkCoral),
           const SizedBox(height: 8),
           Text(done ? 'Done for today' : 'You\'re caught up',
               style: text.titleMedium),

@@ -73,14 +73,14 @@ class ConnectScreen extends StatelessWidget {
                 // RemoteConfig — a stated window, never a fake countdown).
                 Row(
                   children: [
-                    const Icon(Icons.schedule, size: 16,
-                        color: AppColors.sparkCoral),
+                    const Icon(Icons.schedule,
+                        size: 16, color: AppColors.sparkCoral),
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
-                      'Next window: ${Services.remoteConfig.nextSparkWindowLabel}',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
+                        'Next window: ${Services.remoteConfig.nextSparkWindowLabel}',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
                     ),
                   ],
                 ),
@@ -90,7 +90,8 @@ class ConnectScreen extends StatelessWidget {
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.ring_volume_outlined),
                   title: const Text('Try the incoming-call screen (demo)'),
-                  subtitle: const Text('See exactly what a Spark ring looks like.'),
+                  subtitle:
+                      const Text('See exactly what a Spark ring looks like.'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () async {
                     final accepted = await Navigator.of(context).push<bool>(
@@ -237,7 +238,8 @@ class ConnectScreen extends StatelessWidget {
             secondary: true,
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
-                builder: (_) => GamesScreen(member: MockData.memberById('m-sofia')),
+                builder: (_) =>
+                    GamesScreen(member: MockData.memberById('m-sofia')),
               ),
             ),
           ),
@@ -289,35 +291,42 @@ class _MatchTile extends StatelessWidget {
           ),
         );
       },
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          CircleAvatar(radius: 26, backgroundImage: AssetImage(member.photoAsset)),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text('${member.firstName}, ${member.age}',
-                        style: Theme.of(context).textTheme.titleMedium),
-                    const SizedBox(width: 6),
-                    if (member.verified)
-                      const Icon(Icons.verified, size: 15, color: AppColors.sparkCoral),
-                  ],
-                ),
-                Text(
-                  match.planStatus ??
-                      (match.archived
-                          ? 'Expired ${match.matchedAtLabel.toLowerCase()} · no conversation'
-                          : 'Matched ${match.matchedAtLabel.toLowerCase()} · say hello'),
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
+          Row(children: [
+            CircleAvatar(
+                radius: 26, backgroundImage: AssetImage(member.photoAsset)),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text('${member.firstName}, ${member.age}',
+                          style: Theme.of(context).textTheme.titleMedium),
+                      const SizedBox(width: 6),
+                      if (member.verified)
+                        const Icon(Icons.verified,
+                            size: 15, color: AppColors.sparkCoral),
+                    ],
+                  ),
+                  Text(
+                    match.planStatus ??
+                        (match.archived
+                            ? 'Expired ${match.matchedAtLabel.toLowerCase()} · no conversation'
+                            : 'Matched ${match.matchedAtLabel.toLowerCase()} · say hello'),
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
             ),
-          ),
-          // The expiry/archive state chip (REA fold-in #1).
-          MatchExpiryChip(match: match),
+          ]),
+          const SizedBox(height: 8),
+          Align(
+              alignment: Alignment.centerLeft,
+              child: MatchExpiryChip(match: match)),
         ],
       ),
     );
@@ -345,10 +354,13 @@ class _LikesYou extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '${likes.length} ${likes.length == 1 ? 'person likes' : 'people like'} you',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
+          ValueListenableBuilder<bool>(
+              valueListenable: Services.prefs.noCounts,
+              builder: (context, hidden, _) => Text(
+                  hidden
+                      ? 'People who like you'
+                      : '${likes.length} ${likes.length == 1 ? 'person likes' : 'people like'} you',
+                  style: Theme.of(context).textTheme.titleMedium)),
           const SizedBox(height: 10),
           Row(
             children: [
@@ -359,8 +371,7 @@ class _LikesYou extends StatelessWidget {
                     onTap: isPlus
                         ? () => Navigator.of(context).push(
                               MaterialPageRoute<void>(
-                                builder: (_) =>
-                                    ProfileDetailScreen(member: m),
+                                builder: (_) => ProfileDetailScreen(member: m),
                               ),
                             )
                         : null,

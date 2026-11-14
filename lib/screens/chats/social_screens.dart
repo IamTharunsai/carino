@@ -5,6 +5,7 @@ import '../../data/mock_data.dart';
 import '../../models/experience.dart';
 import '../../models/member.dart';
 import '../../models/social.dart';
+import '../../models/platform.dart';
 import '../../services/services.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/glass_card.dart';
@@ -54,10 +55,10 @@ class _FriendsScreenState extends State<FriendsScreen> {
                 await Clipboard.setData(const ClipboardData(
                     text: 'https://carino.app/add/you-demo'));
               } catch (_) {}
-              if (!context.mounted) return;
+              if (!mounted) return;
               Navigator.of(context).pop();
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                  content: Text('Invite link copied.')));
+              ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Invite link copied.')));
             },
           ),
           const SizedBox(height: 12),
@@ -92,15 +93,18 @@ class _FriendsScreenState extends State<FriendsScreen> {
       child: ListTile(
         contentPadding: EdgeInsets.zero,
         leading: CircleAvatar(backgroundImage: AssetImage(p.photoAsset)),
-        title: Text(p.pronouns.isEmpty ? p.name : '${p.name}  ·  ${p.pronouns}'),
-        subtitle: Text(p.headline, maxLines: 1, overflow: TextOverflow.ellipsis),
+        title:
+            Text(p.pronouns.isEmpty ? p.name : '${p.name}  ·  ${p.pronouns}'),
+        subtitle:
+            Text(p.headline, maxLines: 1, overflow: TextOverflow.ellipsis),
         trailing: PopupMenuButton<String>(
           tooltip: 'Move or remove ${p.firstName}',
           onSelected: (v) {
             if (v == 'remove') {
               setState(() => _graph.remove(p.id));
             } else if (v == 'report') {
-              SafetyActions.showForMember(context, member: p, surface: 'Friends');
+              SafetyActions.showForMember(context,
+                  member: p, surface: 'Friends');
             } else {
               setState(() => _graph.place(
                   p.id, v == 'inner' ? Circle.inner : Circle.friends));
@@ -108,11 +112,14 @@ class _FriendsScreenState extends State<FriendsScreen> {
           },
           itemBuilder: (_) => [
             if (c != Circle.inner)
-              const PopupMenuItem(value: 'inner', child: Text('Move to Inner circle')),
+              const PopupMenuItem(
+                  value: 'inner', child: Text('Move to Inner circle')),
             if (c != Circle.friends)
-              const PopupMenuItem(value: 'friends', child: Text('Move to Friends')),
+              const PopupMenuItem(
+                  value: 'friends', child: Text('Move to Friends')),
             const PopupMenuItem(value: 'remove', child: Text('Remove friend')),
-            const PopupMenuItem(value: 'report', child: Text('Report or block')),
+            const PopupMenuItem(
+                value: 'report', child: Text('Report or block')),
           ],
         ),
       ),
@@ -174,7 +181,10 @@ class _FriendsScreenState extends State<FriendsScreen> {
 /// Pick friends + a name; returns the new group (or null).
 Future<GroupChat?> showNewGroupSheet(BuildContext context) {
   final graph = Services.social;
-  final friendIds = [...graph.inCircle(Circle.inner), ...graph.inCircle(Circle.friends)];
+  final friendIds = [
+    ...graph.inCircle(Circle.inner),
+    ...graph.inCircle(Circle.friends)
+  ];
   final picked = <String>{};
   final name = TextEditingController();
   return showGlassSheet<GroupChat>(
@@ -221,7 +231,9 @@ Future<GroupChat?> showNewGroupSheet(BuildContext context) {
                 : () => Navigator.of(ctx).pop(GroupChat(
                       id: 'g-${DateTime.now().millisecondsSinceEpoch}',
                       name: name.text.trim().isEmpty
-                          ? picked.map((i) => MockData.personById(i).firstName).join(', ')
+                          ? picked
+                              .map((i) => MockData.personById(i).firstName)
+                              .join(', ')
                           : name.text.trim(),
                       memberIds: picked.toList(),
                       messages: [
@@ -263,6 +275,12 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   void initState() {
     super.initState();
     _g.unreadCount = 0;
+    _g.removeExpired();
+    _timers.add(Timer.periodic(const Duration(seconds: 1), (_) {
+      final before = _g.messages.length;
+      _g.removeExpired();
+      if (mounted && before != _g.messages.length) setState(() {});
+    }));
   }
 
   @override
@@ -278,7 +296,13 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     final t = _composer.text.trim();
     if (t.isEmpty) return;
     setState(() {
-      _g.messages.add(GroupMessage(senderId: 'me', text: t, timeLabel: 'now'));
+      _g.messages.add(GroupMessage(
+          senderId: 'me',
+          text: t,
+          timeLabel: 'now',
+          expiresAt: _g.vanishEnabled
+              ? DateTime.now().add(const Duration(hours: 24))
+              : null));
       _composer.clear();
     });
   }
@@ -287,7 +311,13 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     final suggested = suggestPlanTimes(_g.messages.map((m) => m.text));
     final picked = <String>{...suggested.take(2)};
     final place = TextEditingController();
-    const ideas = ['Bowling', 'Night market', 'Brunch', 'Board-game café', 'Picnic'];
+    const ideas = [
+      'Bowling',
+      'Night market',
+      'Brunch',
+      'Board-game café',
+      'Picnic'
+    ];
     final poll = await showGlassSheet<PlanPoll>(
       context,
       child: StatefulBuilder(
@@ -331,8 +361,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
             ),
             TextField(
               controller: place,
-              decoration: const InputDecoration(
-                  labelText: 'Public place or activity'),
+              decoration:
+                  const InputDecoration(labelText: 'Public place or activity'),
             ),
             const SizedBox(height: 14),
             SparkButton(
@@ -371,9 +401,11 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         if (!mounted || _g.poll != poll) return;
         setState(() {
           // Most friends go with you; the last one picks the first option.
-          poll.vote(id, i == _g.memberIds.length - 1 && i > 0
-              ? poll.votes.keys.first
-              : option);
+          poll.vote(
+              id,
+              i == _g.memberIds.length - 1 && i > 0
+                  ? poll.votes.keys.first
+                  : option);
           _checkWinner();
         });
       }));
@@ -409,7 +441,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                   size: 18, color: AppColors.sparkCoral),
               const SizedBox(width: 8),
               Expanded(
-                  child: Text('Vote: ${poll.placeType}', style: text.titleSmall)),
+                  child:
+                      Text('Vote: ${poll.placeType}', style: text.titleSmall)),
               Text('${poll.totalVotes}/$_groupSize', style: text.bodySmall),
             ],
           ),
@@ -451,6 +484,93 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
           if (!m.isSystem) ...scanForScam(m.text),
       };
 
+  void _catchUp() {
+    _g.removeExpired();
+    final messages = _g.messages.where((m) => !m.isSystem).toList();
+    showGlassSheet<void>(context,
+        child: SingleChildScrollView(
+            child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text('AI catch-up', style: Theme.of(context).textTheme.titleLarge),
+            const Text(
+                'Local summary preview, generated with simple rules from the current thread. No messages leave this device. Review the full conversation for context.'),
+            const SizedBox(height: 12),
+            for (final point in catchUpSummary([
+              for (final m in messages)
+                (
+                  m.senderId == 'me'
+                      ? 'You'
+                      : MockData.personById(m.senderId).firstName,
+                  m.text
+                )
+            ]))
+              Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Text(point)),
+            TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Back to full thread')),
+          ],
+        )));
+  }
+
+  void _voicePreview() {
+    showGlassSheet<void>(context,
+        child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text('Voice notes & translation',
+                  style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: 12),
+              const Text(
+                  'Voice recording, playback and transcription are not connected yet. Nothing is being recorded. Voice translation will require your consent and a transcript; the original will stay available.'),
+              const SizedBox(height: 12),
+              const Text('Translate voice note',
+                  style: TextStyle(fontWeight: FontWeight.w600)),
+              const Text(
+                  'Unavailable until an audio and transcription provider is connected.'),
+              TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Back to chat')),
+            ]));
+  }
+
+  Future<void> _toggleVanish() async {
+    final enable = !_g.vanishEnabled;
+    final accepted = await showGlassSheet<bool>(context,
+        child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(enable ? 'Enable group Vanish?' : 'Turn off group Vanish?',
+                  style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: 12),
+              const Text(
+                  'Local demo: new messages sent by you while Vanish is on expire after 24 hours. Existing expiry times stay in place. Screenshots and copies remain possible. Server deletion and group-wide consent are not connected.'),
+              const SizedBox(height: 12),
+              SparkButton(
+                  label: enable ? 'Enable in demo' : 'Turn off',
+                  onPressed: () => Navigator.of(context).pop(true)),
+              TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('Cancel')),
+            ]));
+    if (accepted != true || !mounted) return;
+    setState(() {
+      _g.vanishEnabled = enable;
+      _g.messages.add(GroupMessage(
+          senderId: 'me',
+          text: enable
+              ? 'Vanish enabled in local demo: new messages expire in 24 hours.'
+              : 'Vanish turned off in local demo.',
+          timeLabel: 'now',
+          isSystem: true));
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
@@ -458,6 +578,26 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       appBar: AppBar(
         title: Text(_g.name, overflow: TextOverflow.ellipsis),
         actions: [
+          PopupMenuButton<String>(
+              tooltip: 'Chat extras',
+              onSelected: (action) {
+                if (action == 'catch-up') _catchUp();
+                if (action == 'vanish') _toggleVanish();
+                if (action == 'voice') _voicePreview();
+              },
+              itemBuilder: (_) => [
+                    if (Services.prefs.aiConversationAssistant)
+                      const PopupMenuItem(
+                          value: 'catch-up', child: Text('AI catch-up')),
+                    PopupMenuItem(
+                        value: 'vanish',
+                        child: Text(_g.vanishEnabled
+                            ? 'Turn off Vanish'
+                            : 'Enable Vanish')),
+                    const PopupMenuItem(
+                        value: 'voice',
+                        child: Text('Voice notes & translation')),
+                  ]),
           IconButton(
             icon: const Icon(Icons.event_available_outlined),
             tooltip: 'Make it a plan',
@@ -467,6 +607,11 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       ),
       body: Column(
         children: [
+          if (_g.vanishEnabled)
+            const Padding(
+                padding: EdgeInsets.all(8),
+                child: Text(
+                    'Vanish demo is on · new messages expire in 24 hours')),
           SizedBox(
             height: 44,
             child: ListView(
@@ -564,7 +709,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         child: Center(
           child: GlassContainer(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-            child: Text(m.text, style: text.bodySmall, textAlign: TextAlign.center),
+            child: Text(m.text,
+                style: text.bodySmall, textAlign: TextAlign.center),
           ),
         ),
       );
@@ -597,7 +743,10 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                     color: mine
                         ? AppColors.warmIvory
                         : Theme.of(context).textTheme.bodyLarge?.color)),
-            Text(m.timeLabel,
+            Text(
+                m.expiresAt == null
+                    ? m.timeLabel
+                    : '${m.timeLabel} · Vanish 24h',
                 style: TextStyle(
                     fontSize: 10,
                     color: (mine ? AppColors.warmIvory : AppColors.softRose)

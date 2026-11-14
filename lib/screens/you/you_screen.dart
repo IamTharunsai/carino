@@ -20,6 +20,9 @@ import 'privacy_centre_screen.dart';
 import 'settings_screen.dart';
 import 'trust_safety_screen.dart';
 import 'wingperson_screen.dart';
+import 'facets_screen.dart';
+import 'work_facet_screen.dart';
+import 'trust_graph_screen.dart';
 
 /// S-043 My Profile (You tab) â€” hub to Edit (S-044), Intentions (S-045),
 /// Verification Centre (S-046), Privacy Centre (S-047), Trust & Safety
@@ -46,7 +49,8 @@ class YouScreen extends StatelessWidget {
             ),
             child: Row(
               children: [
-                CircleAvatar(radius: 32, backgroundImage: AssetImage(me.photoAsset)),
+                CircleAvatar(
+                    radius: 32, backgroundImage: AssetImage(me.photoAsset)),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(
@@ -54,7 +58,8 @@ class YouScreen extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          Text(me.name, style: Theme.of(context).textTheme.titleLarge),
+                          Text(me.name,
+                              style: Theme.of(context).textTheme.titleLarge),
                           const SizedBox(width: 6),
                           const Icon(Icons.verified,
                               size: 17, color: AppColors.sparkCoral),
@@ -105,10 +110,10 @@ class YouScreen extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                                'Profile aura Â· ${(strength * 100).round()}%',
+                            Text('Profile aura Â· ${(strength * 100).round()}%',
                                 style: Theme.of(context).textTheme.titleMedium),
-                            Text('Glows brighter as your profile gets more real.',
+                            Text(
+                                'Glows brighter as your profile gets more real.',
                                 style: Theme.of(context).textTheme.bodySmall),
                           ],
                         ),
@@ -123,7 +128,9 @@ class YouScreen extends StatelessWidget {
                       for (final (label, done) in items)
                         Chip(
                           avatar: Icon(
-                              done ? Icons.check_circle : Icons.add_circle_outline,
+                              done
+                                  ? Icons.check_circle
+                                  : Icons.add_circle_outline,
                               size: 16,
                               color: done ? AppColors.sparkCoral : null),
                           label: Text(label),
@@ -132,18 +139,52 @@ class YouScreen extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 4),
-                  Text('Measures effort only â€” never looks. Only you see this.',
+                  Text(
+                      'Measures effort only â€” never looks. Only you see this.',
                       style: Theme.of(context).textTheme.bodySmall),
                 ],
               ),
             );
           }),
           const SizedBox(height: 12),
+          _row(context,
+              icon: Icons.layers_outlined,
+              title: 'Facets',
+              subtitle: 'Choose an audience for each field',
+              onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
+                  builder: (_) => const FacetsScreen()))),
+          _row(context,
+              icon: Icons.work_outline,
+              title: 'Work facet',
+              subtitle: 'Your role, projects and coffee chat interests',
+              onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
+                  builder: (_) => const WorkFacetScreen()))),
+          _row(context,
+              icon: Icons.handshake_outlined,
+              title: 'Trust Graph',
+              subtitle: 'People you have met and personal vouches',
+              onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
+                  builder: (_) => const TrustGraphScreen()))),
+          Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: GlassContainer(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  child: ValueListenableBuilder<bool>(
+                      valueListenable: Services.prefs.noCounts,
+                      builder: (context, hidden, _) => SwitchListTile(
+                          title: const Text('No-Counts'),
+                          subtitle: const Text(
+                              'Hide public popularity totals and the Likes You count.'),
+                          value: hidden,
+                          onChanged: (v) =>
+                              Services.prefs.noCounts.value = v)))),
           _row(
             context,
             icon: Icons.edit_outlined,
             title: 'Edit profile & media',
-            subtitle: 'Photos, video intro, prompts â€” AI Coach lives here too',
+            subtitle:
+                'Photos, video intro, prompts â€” AI Coach lives here too',
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
                 builder: (_) => ProfileCreationScreen(
@@ -318,7 +359,8 @@ class YouScreen extends StatelessWidget {
             ),
             icon: const Icon(Icons.delete_outline, size: 18),
             label: const Text('Delete account'),
-            style: TextButton.styleFrom(foregroundColor: AppColors.emberCrimson),
+            style:
+                TextButton.styleFrom(foregroundColor: AppColors.emberCrimson),
           ),
         ],
       ),
@@ -352,8 +394,8 @@ class YouScreen extends StatelessWidget {
                 label: connected ? 'Disconnect' : 'Connect music (demo)',
                 icon: Icons.music_note_outlined,
                 secondary: connected,
-                onPressed: () => setSheet(
-                    () => Services.prefs.musicConnected = !connected),
+                onPressed: () =>
+                    setSheet(() => Services.prefs.musicConnected = !connected),
               ),
             ],
           );
@@ -458,7 +500,8 @@ class YouScreen extends StatelessWidget {
             contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.gavel_outlined),
             title: const Text('Appeals'),
-            subtitle: const Text('None open. Outcomes land here + Notifications.'),
+            subtitle:
+                const Text('None open. Outcomes land here + Notifications.'),
             onTap: () {
               Navigator.of(context).pop();
               SafetyActions.showAppealsEntry(context);
@@ -468,5 +511,4 @@ class YouScreen extends StatelessWidget {
       ),
     );
   }
-
 }

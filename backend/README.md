@@ -43,7 +43,7 @@ backend/
 ## Deploy (hosting phase — Lovely's accounts)
 
 1. Create the Supabase project; link this folder (`supabase link`).
-2. `supabase db push` (runs 0001 + 0002), then run
+2. Review `supabase db push --dry-run`, then `supabase db push` (runs 0001–0005), then run
    `seed_remote_config.sql`.
 3. `supabase functions deploy` for all six functions.
 4. Set function secrets: `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`,
@@ -56,6 +56,22 @@ backend/
    mode and none of this is touched.
 
 ## What is deliberately NOT here yet (hosting-phase contracts)
+
+Migration 0005 adds the social schema with default-deny access. Group,
+trust, intro, guild, host, gift and split creation writes require service-role
+endpoints that validate consent, membership, blocks, exact split amounts and
+purchase receipts. These endpoints are not implemented yet. Client table
+access is limited to own preferences/circles/work facets, scoped reads and
+marking one's own split share paid. Cross-member facet/feed projections,
+server-issued bilateral meeting codes and expired group-media deletion are
+also pending. Do not treat a local Vanish preview as a server retention promise.
+
+Run `npm ci --ignore-scripts` and `npm test` from `backend/tests` for a
+disposable PostgreSQL WASM (PGlite) migration/RLS test. It applies 0001–0005
+without altering a hosted project. Auth and Storage are minimal test shims;
+real Supabase services, Edge Functions and cron jobs still need staging tests.
+The 0004 check-in insertion policy now requires plan membership as well as
+the caller's own user ID. Neither 0004 nor 0005 has been deployed here.
 
 - IDV vendor SDK session creation (D-01) — `verification-session` returns
   a marked pending session until the vendor is chosen.

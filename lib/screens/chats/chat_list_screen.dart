@@ -70,7 +70,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
                   Navigator.of(context).pop();
                   setState(() => _closed.add(conv.id));
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Sent to $firstName. Chat archived.')),
+                    SnackBar(
+                        content: Text('Sent to $firstName. Chat archived.')),
                   );
                 },
                 child: Text(t),
@@ -87,17 +88,19 @@ class _ChatListScreenState extends State<ChatListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    var conversations = MockData.conversations()
-        .where((c) => !_closed.contains(c.id))
-        .toList();
+    for (final group in _groups) {
+      group.removeExpired();
+    }
+    var conversations =
+        MockData.conversations().where((c) => !_closed.contains(c.id)).toList();
     if (_query.trim().isNotEmpty) {
       final q = _query.trim().toLowerCase();
       conversations = conversations.where((c) {
         if (c.mode == ChatMode.vanish) return false; // never indexed
         final member = MockData.memberById(c.memberId);
         return member.name.toLowerCase().contains(q) ||
-            c.messages.any(
-                (m) => !m.dissolved && m.text.toLowerCase().contains(q));
+            c.messages
+                .any((m) => !m.dissolved && m.text.toLowerCase().contains(q));
       }).toList();
     }
     return GlassScaffold(
@@ -114,7 +117,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
                 icon: const Icon(Icons.people_outline),
                 tooltip: 'Friends & circles',
                 onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(builder: (_) => const FriendsScreen()),
+                  MaterialPageRoute<void>(
+                      builder: (_) => const FriendsScreen()),
                 ),
               ),
               IconButton(
@@ -166,9 +170,9 @@ class _ChatListScreenState extends State<ChatListScreen> {
                             top: i * 12.0,
                             child: CircleAvatar(
                               radius: 18,
-                              backgroundImage: AssetImage(MockData.personById(
-                                      g.memberIds[i])
-                                  .photoAsset),
+                              backgroundImage: AssetImage(
+                                  MockData.personById(g.memberIds[i])
+                                      .photoAsset),
                             ),
                           ),
                       ],
@@ -185,7 +189,9 @@ class _ChatListScreenState extends State<ChatListScreen> {
                         Text(
                           g.poll != null
                               ? '🗳 Vote open: ${g.poll!.placeType}'
-                              : (g.messages.isEmpty ? 'Say hello' : g.messages.last.text),
+                              : (g.messages.isEmpty
+                                  ? 'Say hello'
+                                  : g.messages.last.text),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.bodySmall,
@@ -250,17 +256,22 @@ class _ChatListScreenState extends State<ChatListScreen> {
                               Flexible(
                                 child: Text(member.firstName,
                                     overflow: TextOverflow.ellipsis,
-                                    style: Theme.of(context).textTheme.titleMedium),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium),
                               ),
                               const SizedBox(width: 8),
                               Chip(
                                 label: Text(
-                                  conv.mode == ChatMode.vanish ? 'Vanish' : 'Keep',
+                                  conv.mode == ChatMode.vanish
+                                      ? 'Vanish'
+                                      : 'Keep',
                                 ),
                                 visualDensity: VisualDensity.compact,
                                 labelStyle: const TextStyle(fontSize: 11),
                                 backgroundColor: conv.mode == ChatMode.vanish
-                                    ? AppColors.sparkCoral.withValues(alpha: 0.18)
+                                    ? AppColors.sparkCoral
+                                        .withValues(alpha: 0.18)
                                     : null,
                                 side: BorderSide.none,
                               ),

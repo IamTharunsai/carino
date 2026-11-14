@@ -143,7 +143,8 @@ alter table public.plan_check_ins enable row level security;
 create policy "plan_check_ins: own row" on public.plan_check_ins
   for all using (user_id = auth.uid() and public.is_match_participant(
                    (select p.match_id from public.plans p where p.id = plan_id)))
-  with check (user_id = auth.uid());
+  with check (user_id = auth.uid() and public.is_match_participant(
+                   (select p.match_id from public.plans p where p.id = plan_id)));
 -- ponytail: the missed-check-in SMS is a scheduled Edge Function (service
 -- role) reading state='active' rows past check_at + 15 min; add it with the
 -- SMS vendor in the hosting phase.

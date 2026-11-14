@@ -5,6 +5,7 @@ import '../../services/services.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/spark_button.dart';
+import '../../widgets/plan_split_card.dart';
 import 'plan_composer_screen.dart';
 
 /// S-040 Plan Detail — one plan, both people, honest states:
@@ -20,6 +21,7 @@ class PlanDetailScreen extends StatefulWidget {
     required this.timeLabel,
     this.confirmed = false,
     this.upcoming = true,
+    this.planId,
   });
 
   final Member member;
@@ -27,6 +29,7 @@ class PlanDetailScreen extends StatefulWidget {
   final String timeLabel;
   final bool confirmed;
   final bool upcoming;
+  final String? planId;
 
   @override
   State<PlanDetailScreen> createState() => _PlanDetailScreenState();
@@ -62,7 +65,8 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                         backgroundImage: AssetImage(member.photoAsset)),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Text('${widget.placeType} with ${member.firstName}',
+                      child: Text(
+                          '${widget.placeType} with ${member.firstName}',
                           style: text.titleLarge),
                     ),
                   ],
@@ -76,7 +80,8 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                       : _confirmed
                           ? 'Both confirmed'
                           : 'Waiting for ${member.firstName} to confirm'),
-                  backgroundColor: AppColors.emberCrimson.withValues(alpha: 0.2),
+                  backgroundColor:
+                      AppColors.emberCrimson.withValues(alpha: 0.2),
                   side: BorderSide.none,
                 ),
                 const SizedBox(height: 8),
@@ -124,7 +129,8 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
               label: _arrived ? 'You\'re checked in ✓' : 'I\'m here',
               icon: Icons.place_outlined,
               secondary: _arrived,
-              onPressed: _arrived ? null : () => setState(() => _arrived = true),
+              onPressed:
+                  _arrived ? null : () => setState(() => _arrived = true),
             ),
             const SizedBox(height: 8),
             SparkButton(
@@ -178,6 +184,14 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
             _checkInCard(text, member),
           ],
           const SizedBox(height: 14),
+          if (!_cancelled) ...[
+            PlanSplitCard(
+                planKey: widget.planId ??
+                    '${member.id}|${widget.placeType}|${widget.timeLabel}',
+                otherId: member.id,
+                otherName: member.firstName),
+            const SizedBox(height: 14),
+          ],
           GlassContainer(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -329,7 +343,8 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Trusted contact', style: Theme.of(context).textTheme.titleLarge),
+          Text('Trusted contact',
+              style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 4),
           Text('Only used for missed check-ins. They don\'t need the app.',
               style: Theme.of(context).textTheme.bodySmall),
@@ -409,6 +424,7 @@ void openMockPlan(BuildContext context, MockPlan plan) {
   Navigator.of(context).push(
     MaterialPageRoute<void>(
       builder: (_) => PlanDetailScreen(
+        planId: plan.id,
         member: member,
         placeType: plan.placeType,
         timeLabel: plan.timeLabel,
