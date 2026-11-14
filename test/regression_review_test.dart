@@ -13,6 +13,7 @@ import 'package:carino/screens/root_flow.dart';
 import 'package:carino/services/services.dart';
 import 'package:carino/theme/app_theme.dart';
 import 'package:carino/widgets/app_lock_gate.dart';
+import 'package:carino/widgets/secure_screen.dart';
 
 Future<void> _phone(WidgetTester tester) async {
   tester.view.physicalSize = const Size(390, 844) * 3;
@@ -189,5 +190,15 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('Like '), findsWidgets);
     expect(find.text('Send like with note'), findsOneWidget);
+  });
+
+  // FLAG_SECURE: nested secure screens stay protected until the last closes.
+  testWidgets('secure screens are reference-counted', (tester) async {
+    await tester.pumpWidget(const SecureScreen(child: SecureScreen(child: SizedBox())));
+    expect(SecureScreen.depth, 2);
+    await tester.pumpWidget(const SecureScreen(child: SizedBox()));
+    expect(SecureScreen.depth, 1);
+    await tester.pumpWidget(const SecureScreen(enabled: false, child: SizedBox()));
+    expect(SecureScreen.depth, 0);
   });
 }

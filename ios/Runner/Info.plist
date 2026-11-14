@@ -16,6 +16,17 @@
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>carino-auth</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>carino</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleName</key>
 	<string>carino</string>
 	<key>CFBundlePackageType</key>

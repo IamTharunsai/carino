@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../widgets/secure_screen.dart';
 import '../../models/message.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/safety_actions.dart';
@@ -16,7 +17,7 @@ class MediaViewerScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final consumed = message.viewOnce && message.mediaConsumed;
-    return Scaffold(
+    return SecureScreen(child: Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -73,7 +74,7 @@ class MediaViewerScreen extends StatelessWidget {
               ),
             )
           : null,
-    );
+    ));
   }
 }
 

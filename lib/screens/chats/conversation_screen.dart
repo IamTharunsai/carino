@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../widgets/secure_screen.dart';
 import '../../data/mock_data.dart';
 import '../../models/experience.dart';
 import '../../models/member.dart';
@@ -271,7 +272,8 @@ class _ConversationScreenState extends State<ConversationScreen> {
   @override
   Widget build(BuildContext context) {
     final conv = widget.conversation;
-    return GlassScaffold(
+    // Vanish: block screenshots on Android while the chat is open.
+    return SecureScreen(enabled: _vanish, child: GlassScaffold(
       appBar: AppBar(
         title: GestureDetector(
           // S-038: tapping the person opens Conversation Settings.
@@ -549,7 +551,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
           ),
         ],
       ),
-    );
+    ));
   }
 
   Widget _bubble(BuildContext context, ChatMessage msg) {

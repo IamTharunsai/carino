@@ -38,6 +38,19 @@ Deno.serve(async (req: Request) => {
   const user = userData?.user;
   if (!user) return json({ error: "unauthorized" }, 401);
 
+  // Per-user rate limit: model calls cost money and are an abuse vector.
+  // ponytail: counts this user's log rows in the last minute; move to a
+  // token bucket in Redis/KV if traffic ever needs it.
+  const since = new Date(Date.now() - 60_000).toISOString();
+  const { count } = await supabase
+    .from("ai_interaction_log")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .gte("created_at", since);
+  if ((count ?? 0) >= 20) {
+    return json({ error: "rate_limited", retry_after_seconds: 60 }, 429);
+  }
+
   const body = await req.json().catch(() => ({}));
   const feature = String(body.feature ?? "");
   const route = FEATURE_MODELS[feature];
