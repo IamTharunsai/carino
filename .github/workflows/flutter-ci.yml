@@ -18,6 +18,9 @@ jobs:
       - run: flutter analyze --no-fatal-infos
       - run: flutter test --reporter github   # failures show as annotations on the run
       - run: flutter build apk --release
+      - name: Show build error (temporary)
+        if: failure()
+        run: flutter build apk --release 2>&1 | grep -iE "error|what went wrong|failed|exception|> " | head -9 | sed 's/^/::warning::/'
 
   ios:
     runs-on: macos-latest
