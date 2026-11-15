@@ -24,6 +24,7 @@ import '../experience/experience_screens.dart';
 import 'facets_screen.dart';
 import 'work_facet_screen.dart';
 import 'trust_graph_screen.dart';
+import 'sync_settings_screen.dart';
 
 /// S-043 My Profile (You tab) — hub to Edit (S-044), Intentions (S-045),
 /// Verification Centre (S-046), Privacy Centre (S-047), Trust & Safety
@@ -148,6 +149,12 @@ class YouScreen extends StatelessWidget {
             );
           }),
           const SizedBox(height: 12),
+          _row(context,
+              icon: Icons.chat_bubble_outline,
+              title: 'How I text & comfort',
+              subtitle: 'Your texting style + rules Cariño keeps for you',
+              onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
+                  builder: (_) => const SyncSettingsScreen()))),
           _row(context,
               icon: Icons.layers_outlined,
               title: 'Facets',

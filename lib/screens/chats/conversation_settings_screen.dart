@@ -29,6 +29,14 @@ class _ConversationSettingsScreenState
     extends State<ConversationSettingsScreen> {
   final UserPrefs _prefs = Services.prefs;
   bool _muted = false;
+  late final _note = TextEditingController(
+      text: Services.prefs.matchNotes[widget.member.id] ?? '');
+
+  @override
+  void dispose() {
+    _note.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +60,21 @@ class _ConversationSettingsScreenState
                 builder: (_) => ProfileDetailScreen(member: member),
               ),
             ),
+          ),
+          // Things to remember: private, own-row only.
+          TextField(
+            controller: _note,
+            maxLength: 300,
+            maxLines: 2,
+            decoration: const InputDecoration(
+              labelText: 'Things to remember (only you see this)',
+              hintText: 'Dog called Biscuit · loves the café on High St',
+              border: OutlineInputBorder(),
+            ),
+            onChanged: (v) {
+              Services.prefs.matchNotes[member.id] = v.trim();
+              Services.prefs.save();
+            },
           ),
           const Divider(),
           ListTile(

@@ -24,6 +24,8 @@ import 'package:carino/screens/connect/connect_screen.dart';
 import 'package:carino/screens/connect/decompress_screens.dart';
 import 'package:carino/screens/connect/meet_irl_screens.dart';
 import 'package:carino/screens/connect/plan_detail_screen.dart';
+import 'package:carino/screens/connect/post_plan_feedback_screen.dart';
+import 'package:carino/screens/you/sync_settings_screen.dart';
 import 'package:carino/screens/connect/spark_session_screen.dart';
 import 'package:carino/screens/discover/discover_screen.dart';
 import 'package:carino/screens/experience/experience_screens.dart';
@@ -54,45 +56,13 @@ import 'package:carino/screens/you/you_screen.dart';
 import 'package:carino/theme/app_theme.dart';
 import 'package:carino/widgets/glass_card.dart';
 import 'package:carino/widgets/match_celebration.dart';
+import '../support/real_fonts.dart';
 
 final bool _capture = Platform.environment['CAPTURE'] == '1';
 const _size = Size(390, 844);
 final _outDir = Directory('build/screens');
 
-Future<void> _loadFonts() async {
-  final cache = '${Platform.environment['FLUTTER_ROOT'] ?? 'C:/src/flutter'}'
-      '/bin/cache/artifacts/material_fonts';
-  Future<void> family(String name, List<String> files) async {
-    final loader = FontLoader(name);
-    for (final f in files) {
-      final bytes = File('$cache/$f').readAsBytesSync();
-      loader.addFont(Future.value(ByteData.view(bytes.buffer)));
-    }
-    await loader.load();
-  }
-
-  const roboto = ['roboto-regular.ttf', 'roboto-medium.ttf', 'roboto-bold.ttf', 'roboto-italic.ttf'];
-  await family('Roboto', roboto);
-  await family('CupertinoSystemText', roboto);
-  // Text with no explicit family falls back to the test engine's box font;
-  // devices use Roboto/SF. Register Roboto under that name for realism.
-  await family('FlutterTest', roboto);
-  await family('CupertinoSystemDisplay', roboto);
-  await family('MaterialIcons', ['materialicons-regular.otf']);
-  // Bundled brand fonts (tests don't load pubspec fonts automatically).
-  Future<void> bundled(String name, List<String> files) async {
-    final loader = FontLoader(name);
-    for (final f in files) {
-      final bytes = File('assets/fonts/$f').readAsBytesSync();
-      loader.addFont(Future.value(ByteData.view(bytes.buffer)));
-    }
-    await loader.load();
-  }
-
-  await bundled('Poppins', ['Poppins-Regular.ttf', 'Poppins-Medium.ttf',
-      'Poppins-SemiBold.ttf', 'Poppins-Bold.ttf', 'Poppins-Italic.ttf']);
-  await bundled('DM Serif Display', ['DMSerifDisplay-Regular.ttf', 'DMSerifDisplay-Italic.ttf']);
-}
+Future<void> _loadFonts() => loadRealFonts();
 
 typedef Scenario = Future<void> Function(WidgetTester tester);
 
@@ -239,6 +209,39 @@ void main() {
       await t.pump(const Duration(milliseconds: 600));
     }),
     Shot('57_phone_down', () => const PhoneDownScreen(planTitle: 'Sunset walk on the Scioto Mile')),
+    Shot('58_chat_you_both', () => ConversationScreen(conversation: MockData.conversations().first), (t) async {
+      await t.drag(find.byType(Scrollable).first, const Offset(0, 600));
+      await t.pumpAndSettle();
+    }),
+    Shot('59_their_style', () => ConversationScreen(conversation: MockData.conversations().first), (t) async {
+      await t.drag(find.byType(Scrollable).first, const Offset(0, 600));
+      await t.pumpAndSettle();
+      await t.tap(find.text('Their style'));
+      await t.pump();
+      await t.pump(const Duration(milliseconds: 600));
+    }),
+    Shot('60_chat_bridge_tone', () => ConversationScreen(conversation: MockData.conversations().first), (t) async {
+      await t.tap(find.byTooltip('Add photo, sticker, voice, game'));
+      await t.pumpAndSettle();
+      await t.tap(find.text('Add a tone tag'));
+      await t.pumpAndSettle();
+      await t.tap(find.text('joking'));
+      await t.pumpAndSettle();
+    }),
+    Shot('61_comfort_hold', () => ConversationScreen(conversation: MockData.conversations()[1]), (t) async {
+      await t.tap(find.byTooltip('Spark video (connections only)'));
+      await t.pump();
+      await t.pump(const Duration(milliseconds: 600));
+    }),
+    Shot('62_how_i_text', () => const SyncSettingsScreen()),
+    Shot('63_after_date_checkin', () => PostPlanFeedbackScreen(member: MockData.memberById('m-aria'), placeType: 'Coffee'), (t) async {
+      await t.drag(find.byType(Scrollable).first, const Offset(0, -300));
+      await t.pumpAndSettle();
+    }),
+    Shot('64_profile_how_they_text', () => ProfileDetailScreen(member: MockData.memberById('m-aria')), (t) async {
+      await t.drag(find.byType(Scrollable).first, const Offset(0, -900));
+      await t.pumpAndSettle();
+    }),
     Shot('49_couples', () => const CoupleScreen()),
     Shot('50_referral', () => const ReferralScreen()),
     Shot('51_insights', () => const InsightsScreen()),

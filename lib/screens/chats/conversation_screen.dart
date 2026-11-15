@@ -4,6 +4,10 @@ import '../../data/mock_data.dart';
 import '../../models/experience.dart';
 import '../../models/member.dart';
 import '../../models/message.dart';
+import '../../models/sync.dart';
+import '../../models/wellbeing.dart' show BookMode;
+import '../../widgets/sync_widgets.dart';
+import '../connect/decompress_screens.dart' show bookExperience;
 import '../../services/services.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/glass_card.dart';
@@ -39,6 +43,17 @@ class ConversationScreen extends StatefulWidget {
 
 class _ConversationScreenState extends State<ConversationScreen> {
   final TextEditingController _composer = TextEditingController();
+
+  /// Keeps the newest message in view (on open and whenever one is added).
+  final ScrollController _scroll = ScrollController();
+  int _shown = 0;
+
+  @override
+  void dispose() {
+    _composer.dispose();
+    _scroll.dispose();
+    super.dispose();
+  }
   late final Member _member;
   List<String> _aiDrafts = const [];
   bool _aiLoading = false;
@@ -63,6 +78,181 @@ class _ConversationScreenState extends State<ConversationScreen> {
   /// S-032B: starters shown until you've sent your first message.
   List<String> _starters = const [];
 
+  // --- Conversation Sync ----------------------------------------------------
+  /// Tone tag for the NEXT message you send (optional).
+  ToneTag? _tone;
+  bool _bridgeDismissed = false;
+
+  bool get _met => Services.trust.hasMet(_member.id);
+
+  /// "You both": real overlaps only, minus anything they asked not to discuss.
+  List<String> get _chips => commonGround(
+        myInterests: MockData.currentUser.interests,
+        theirInterests: _member.interests,
+        myTastes: Services.prefs.tastesOrSample,
+        theirTastes: _member.tasteAnswers,
+        theirAvoid: _member.textingStyle.avoid,
+      );
+
+  /// A shared chip came up in the chat → a bookable plan for it.
+  Bridge? get _bridge => findBridge(
+        chips: _chips,
+        texts: [
+          for (final m in widget.conversation.messages)
+            if (!m.isSystemNotice && !m.dissolved && !m.unsent) m.text
+        ],
+        experiences: MockData.decompress,
+      );
+
+  void _showStyle() {
+    final hints = styleHints(
+        mine: Services.prefs.myStyle,
+        theirs: _member.textingStyle,
+        name: _member.firstName);
+    showGlassSheet<void>(
+      context,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TextingCard(
+            title: 'How ${_member.firstName} texts',
+            style: _member.textingStyle,
+            comfort: _member.comfort,
+          ),
+          for (final h in hints)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(h, style: Theme.of(context).textTheme.bodySmall),
+            ),
+          if (Services.prefs.myStyle.isEmpty)
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Add yours: You tab, How I text & comfort'),
+            ),
+        ],
+      ),
+    );
+  }
+
+  void _photo({required bool viewOnce}) {
+    final hold = photoBlockedReason(
+      theirs: _member.comfort,
+      daysChatting: widget.conversation.daysChatting,
+      met: _met,
+      theirName: _member.firstName,
+    );
+    if (hold != null) {
+      showComfortHold(context, hold);
+      return;
+    }
+    _viewOnceNext = viewOnce;
+    _sendMedia();
+  }
+
+  void _openComposer() => Navigator.of(context).push(
+        MaterialPageRoute<void>(builder: (_) => PlanComposerScreen(member: _member)),
+      );
+
+  void _call() {
+    final hold = callBlockedReason(
+      mine: Services.prefs.myComfort,
+      theirs: _member.comfort,
+      met: _met,
+      theirName: _member.firstName,
+    );
+    if (hold != null) {
+      showComfortHold(context, hold, onPlan: _openComposer);
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('Video calls start as a Spark invite — ${_member.firstName} '
+          'chooses to accept. (Demo: no call is placed.)'),
+    ));
+  }
+
+  Future<void> _pickTone() async {
+    final t = await showGlassSheet<ToneTag>(
+      context,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text('Tone tag for your next message',
+              style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 4),
+          Text('Optional. Helps the message land the way you mean it.',
+              style: Theme.of(context).textTheme.bodySmall),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final tag in ToneTag.values)
+                ActionChip(
+                  label: Text(tag.label),
+                  onPressed: () => Navigator.of(context).pop(tag),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+    if (t != null && mounted) setState(() => _tone = t);
+  }
+
+  Future<void> _pause() async {
+    final conv = widget.conversation;
+    if (conv.pausedLabel != null) {
+      setState(() {
+        conv.pausedLabel = null;
+        conv.messages.add(ChatMessage(
+          id: 'resume-${DateTime.now().millisecondsSinceEpoch}',
+          text: "You're back — chat resumed.",
+          fromMe: true,
+          timeLabel: 'now',
+          isSystemNotice: true,
+        ));
+      });
+      return;
+    }
+    final l = await showGlassSheet<PauseLength>(
+      context,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text("Pause, don't ghost", style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 6),
+          Text(
+            "${_member.firstName} gets a kind note saying you're busy, not gone. "
+            'No nudges while paused.',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 10),
+          for (final p in PauseLength.values)
+            ListTile(
+              leading: const Icon(Icons.pause_circle_outline),
+              title: Text('Back ${p.label}'),
+              onTap: () => Navigator.of(context).pop(p),
+            ),
+        ],
+      ),
+    );
+    if (l == null || !mounted) return;
+    setState(() {
+      conv.pausedLabel = l.label;
+      conv.messages.add(ChatMessage(
+        id: 'pause-${DateTime.now().millisecondsSinceEpoch}',
+        text: pauseNotice(l, name: 'You'),
+        fromMe: true,
+        timeLabel: 'now',
+        isSystemNotice: true,
+      ));
+    });
+    Services.analytics.action('chat_paused');
+  }
+
   bool get _iHaveNotSpoken =>
       !widget.conversation.messages.any((m) => m.fromMe && !m.isGameCard);
 
@@ -78,10 +268,13 @@ class _ConversationScreenState extends State<ConversationScreen> {
     // S-032B Conversation Starters: context-aware openers (incl. from any
     // game result — AI-01), always drafts. "Suggest a plan" + "Send a
     // message" sit beside them in the UI.
-    final drafts =
-        await Services.ai.suggestOpeners(memberName: _member.firstName);
+    // Grounded in "You both" first; AI drafts (also given the overlaps) after.
+    final chips = _chips;
+    final drafts = await Services.ai
+        .suggestOpeners(memberName: _member.firstName, shared: chips);
     if (!mounted) return;
-    setState(() => _starters = drafts);
+    setState(() => _starters =
+        [...groundedOpeners(chips, _member.firstName), ...drafts].take(4).toList());
   }
 
   void _sendMedia() {
@@ -139,22 +332,17 @@ class _ConversationScreenState extends State<ConversationScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          item(Icons.photo_outlined, 'Photo', () {
-            _viewOnceNext = false;
-            _sendMedia();
-          }),
-          item(Icons.visibility_outlined, 'View-once photo', () {
-            _viewOnceNext = true;
-            _sendMedia();
-          }),
+          item(Icons.photo_outlined, 'Photo', () => _photo(viewOnce: false)),
+          item(Icons.visibility_outlined, 'View-once photo', () => _photo(viewOnce: true)),
+          item(Icons.theater_comedy_outlined, 'Add a tone tag', _pickTone),
           item(Icons.emoji_emotions_outlined, 'Sticker', _sendSticker),
           item(Icons.mic_none_outlined, 'Voice note', _sendVoiceNote),
           item(Icons.sports_esports_outlined, 'Play a game', () => Navigator.of(context).push(
                 MaterialPageRoute<void>(builder: (_) => GamesScreen(member: _member)),
               )),
-          item(Icons.calendar_month_outlined, 'Suggest a plan', () => Navigator.of(context).push(
-                MaterialPageRoute<void>(builder: (_) => PlanComposerScreen(member: _member)),
-              )),
+          item(Icons.calendar_month_outlined, 'Suggest a plan', _openComposer),
+          item(Icons.pause_circle_outline,
+              widget.conversation.pausedLabel == null ? 'Pause this chat' : 'Resume chat', _pause),
         ],
       ),
     );
@@ -211,9 +399,11 @@ class _ConversationScreenState extends State<ConversationScreen> {
         text: text,
         fromMe: true,
         timeLabel: 'now',
+        toneTag: _tone?.label,
       ));
       _composer.clear();
       _aiDrafts = const [];
+      _tone = null;
     });
   }
 
@@ -272,6 +462,12 @@ class _ConversationScreenState extends State<ConversationScreen> {
   @override
   Widget build(BuildContext context) {
     final conv = widget.conversation;
+    if (conv.messages.length != _shown) {
+      _shown = conv.messages.length;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scroll.hasClients) _scroll.jumpTo(_scroll.position.maxScrollExtent);
+      });
+    }
     // Vanish: block screenshots on Android while the chat is open.
     return SecureScreen(enabled: _vanish, child: GlassScaffold(
       appBar: AppBar(
@@ -289,7 +485,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
             children: [
               CircleAvatar(radius: 16, backgroundImage: AssetImage(_member.photoAsset)),
               const SizedBox(width: 8),
-              Text(_member.firstName),
+              Flexible(child: Text(_member.firstName, overflow: TextOverflow.ellipsis)),
             ],
           ),
         ),
@@ -306,7 +502,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
           IconButton(
             icon: const Icon(Icons.videocam_outlined),
             tooltip: 'Spark video (connections only)',
-            onPressed: () {},
+            onPressed: _call,
           ),
           IconButton(
             icon: const Icon(Icons.palette_outlined),
@@ -422,9 +618,43 @@ class _ConversationScreenState extends State<ConversationScreen> {
             ),
           Expanded(
             child: ListView(
+              controller: _scroll,
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
               children: [
+                _syncStrip(context),
                 for (final msg in conv.messages) _bubble(context, msg),
+              if (_bridge case final b? when !_bridgeDismissed && !_blocked)
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: GlassContainer(
+                    padding: const EdgeInsets.fromLTRB(12, 8, 4, 4),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'You both like ${b.chip.toLowerCase()}. ${b.experience.title} · '
+                          '${b.experience.timeLabel} · '
+                          '${b.experience.priceCents == 0 ? 'Free' : '\$${b.experience.priceCents ~/ 100}'}',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        Wrap(
+                          alignment: WrapAlignment.end,
+                          children: [
+                            TextButton(
+                              onPressed: () => setState(() => _bridgeDismissed = true),
+                              child: const Text('Not now'),
+                            ),
+                            TextButton(
+                              onPressed: () =>
+                                  bookExperience(context, b.experience, BookMode.date),
+                              child: const Text('Book as a date'),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -509,7 +739,19 @@ class _ConversationScreenState extends State<ConversationScreen> {
                 ),
               ),
             )
-          else
+          else ...[
+          if (_tone != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: InputChip(
+                  avatar: const Icon(Icons.theater_comedy_outlined, size: 14),
+                  label: Text('Tone: ${_tone!.label}'),
+                  onDeleted: () => setState(() => _tone = null),
+                ),
+              ),
+            ),
           // Composer.
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 4, 12, 14),
@@ -549,9 +791,60 @@ class _ConversationScreenState extends State<ConversationScreen> {
               ],
             ),
           ),
+          ],
         ],
       ),
     ));
+  }
+
+  /// Pace note + "You both" chips + their style — the "read them right" strip.
+  Widget _syncStrip(BuildContext context) {
+    final pace = paceNote(_member.firstName, _member.textingStyle);
+    final chips = _chips;
+    final note = Services.prefs.matchNotes[_member.id];
+    final small = Theme.of(context).textTheme.bodySmall;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: GlassContainer(
+        padding: const EdgeInsets.fromLTRB(12, 4, 4, 6),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.schedule, size: 14, color: AppColors.sparkCoral),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(pace ?? 'See how ${_member.firstName} likes to text',
+                      style: small, maxLines: 2, overflow: TextOverflow.ellipsis),
+                ),
+                TextButton(onPressed: _showStyle, child: const Text('Their style')),
+              ],
+            ),
+            if (chips.isNotEmpty)
+              Wrap(
+                spacing: 6,
+                runSpacing: 4,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Text('You both', style: small),
+                  for (final c in chips.take(3))
+                    Chip(
+                      label: Text(c),
+                      labelStyle: small?.copyWith(fontWeight: FontWeight.w600),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                ],
+              ),
+            if (note != null && note.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 4, right: 8),
+                child: Text('Remember: $note', style: small, overflow: TextOverflow.ellipsis),
+              ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _bubble(BuildContext context, ChatMessage msg) {
@@ -567,7 +860,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
                 const Icon(Icons.sports_esports_outlined,
                     size: 16, color: AppColors.sparkCoral),
                 const SizedBox(width: 8),
-                Text('Game · ${msg.gameTitle ?? msg.text}'),
+                Flexible(child: Text('Game · ${msg.gameTitle ?? msg.text}')),
               ],
             ),
           ),
@@ -658,6 +951,19 @@ class _ConversationScreenState extends State<ConversationScreen> {
                   fontStyle: msg.dissolved ? FontStyle.italic : FontStyle.normal,
                 ),
               ),
+            if (msg.toneTag != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: AppColors.warmIvory.withValues(alpha: 0.18),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(msg.toneTag!,
+                      style: const TextStyle(fontSize: 10, fontStyle: FontStyle.italic)),
+                ),
+              ),
             const SizedBox(height: 2),
             Row(
               mainAxisSize: MainAxisSize.min,
@@ -666,7 +972,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
                   Text(msg.reaction!, style: const TextStyle(fontSize: 11)),
                   const SizedBox(width: 6),
                 ],
-                Text(
+                Flexible(child: Text(
                   // "Seen" renders only per read-receipt prefs/entitlement;
                   // scaffold shows time (+ vanish expiry where it applies).
                   _vanish && msg.expiresInLabel != null
@@ -677,7 +983,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
                     color: (mine ? AppColors.warmIvory : AppColors.softRose)
                         .withValues(alpha: 0.8),
                   ),
-                ),
+                )),
               ],
             ),
           ],

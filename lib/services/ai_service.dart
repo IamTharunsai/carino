@@ -41,8 +41,12 @@ class AIService {
   /// AI-01/02: draft opener / reply suggestions for the conversation panel.
   /// INTEGRATION POINT: POST to our server (auth'd) with the conversation
   /// context both members consented to share; server calls the model.
-  Future<List<String>> suggestOpeners({required String memberName}) async {
-    final live = await _proxy('AI-01', {'member_name': memberName});
+  /// [shared] = real "You both" overlaps, so drafts are grounded in them.
+  Future<List<String>> suggestOpeners({
+    required String memberName,
+    List<String> shared = const [],
+  }) async {
+    final live = await _proxy('AI-01', {'member_name': memberName, 'shared': shared});
     if (live is Map && live['drafts'] is List) {
       return List<String>.from(live['drafts'] as List);
     }

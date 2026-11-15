@@ -13,6 +13,7 @@ class Conversation {
     this.vanishMinutes = 60,
     this.planPinned = false,
     this.quietDays = 0,
+    this.daysChatting = 0,
   });
 
   final String id;
@@ -30,6 +31,13 @@ class Conversation {
   /// Days since either person last wrote. Drives the optional, kind
   /// Close the Loop nudge (never a public 'ghoster' label).
   int quietDays;
+
+  /// Days since the first message — drives the photo comfort rule.
+  /// Server-derived in production (first message timestamp).
+  final int daysChatting;
+
+  /// Set when I paused the chat ("back next week") instead of going quiet.
+  String? pausedLabel;
 }
 
 class ChatMessage {
@@ -48,6 +56,7 @@ class ChatMessage {
     this.expiresInLabel,
     this.unsent = false,
     this.reaction,
+    this.toneTag,
   });
 
   final String id;
@@ -82,6 +91,9 @@ class ChatMessage {
 
   /// Single reaction shown on the bubble (S-035 long-press reactions).
   String? reaction;
+
+  /// Optional tone tag ("joking", "serious"…) chosen by the sender.
+  final String? toneTag;
 
   /// Vanish mode: set when the message's timer has ended (S-036 animation —
   /// gentle fade + height collapse, 300ms). In production the Safety Vault

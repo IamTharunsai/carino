@@ -1,4 +1,5 @@
 import 'social.dart';
+import 'sync.dart';
 
 /// The four stated intentions (blueprint S-008 / EMBER spec).
 /// Intention is always visible on the card — nobody guesses what someone wants.
@@ -49,6 +50,8 @@ class Member {
     this.tasteAnswers = const {},
     this.highlights = const [],
     this.accessNote = '',
+    this.textingStyle = const TextingStyle(),
+    this.comfort = const ComfortRules(),
   });
 
   final String id;
@@ -131,6 +134,12 @@ class Member {
   /// Optional access needs (e.g. "Step-free venues, please"). Never a filter
   /// anyone else can use against the member.
   final String accessNote;
+
+  /// "How I text" card — the member's own answers, shown to matches.
+  final TextingStyle textingStyle;
+
+  /// Comfort rules the app enforces in chat and plans (shown to matches).
+  final ComfortRules comfort;
 
   String get firstName => name.split(' ').first;
 }

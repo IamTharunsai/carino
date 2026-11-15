@@ -142,3 +142,23 @@ overflow — keep adding new screens to it.
 - Brand fonts bundled: DM Serif Display (headlines) + Poppins (UI) in `assets/fonts` (OFL).
 - New: biometric app lock + passkey prompt (`local_auth`, Android FlutterFragmentActivity), Google/Apple sign-in (Supabase OAuth, redirect `carino://login-callback` must be configured), theme switch, heart burst + like options, chat themes/stickers/+ menu, pin/hide chats, Honest Status + Couples mode + bookings (`url_launcher`), referrals/promo, on-device analytics (`Services.analytics`).
 - Policy: AI never chats as the user; only labelled drafts and the labelled Away assistant.
+
+## Update (Nov 14) — Conversation Sync
+- Logic: `lib/models/sync.dart` (TextingStyle/paceNote/styleHints,
+  commonGround/groundedOpeners/findBridge, ComfortRules + callBlockedReason /
+  photoBlockedReason / firstMeetAllowed, ToneTag, Reflection + rankForMe,
+  PauseLength/pauseNotice). Tests: `test/sync_test.dart`,
+  `test/sync_screens_test.dart` (real fonts via `test/support/real_fonts.dart`).
+- Screens: chat (`conversation_screen.dart`: You-both strip at top of the
+  thread, plan bridge after the messages, tone tag, pause, comfort holds,
+  auto-scroll to newest), `you/sync_settings_screen.dart` (You → How I text &
+  comfort), profile card (`widgets/sync_widgets.dart` TextingCard), plan
+  composer daytime rule, post-plan private check-in, Decompress "Picked for
+  you · reason", conversation settings "Things to remember".
+- Data: `Member.textingStyle/comfort`, `Conversation.daysChatting/pausedLabel`,
+  `ChatMessage.toneTag`; prefs persisted under the `sync` key.
+- Backend: `0008_conversation_sync.sql` (conversation_prefs readable by
+  matches; private_reflections + private_notes owner-only; chat_pauses;
+  messages.tone_tag immutable; comfort triggers on messages + calls).
+- Booking from anywhere: `bookExperience(context, experience, mode)`.
+- Review-driven extras and store copy: `docs/REVIEW-GAPS.md`.

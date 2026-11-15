@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../config/env.dart';
 import '../../data/mock_data.dart';
+import '../../models/sync.dart' show rankForMe;
 import '../../models/wellbeing.dart';
 import '../../services/services.dart';
 import '../../theme/app_colors.dart';
@@ -35,6 +36,45 @@ String _price(int cents) =>
 // Decompress shelf
 // ============================================================================
 
+/// Opens the booking sheet (also used from chat's "You both" bridge).
+Future<void> bookExperience(BuildContext context, Experience e, BookMode mode) async {
+  final booked = await showGlassSheet<bool>(
+    context,
+    child: _BookingSheet(experience: e, initialMode: mode),
+  );
+  if (booked != true || !context.mounted) return;
+  Services.analytics.action('decompress_booked');
+  await showGlassSheet<void>(
+    context,
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Icon(Icons.check_circle, size: 44, color: AppColors.sparkCoral),
+        const SizedBox(height: 10),
+        Text('You\'re booked', style: Theme.of(context).textTheme.headlineSmall, textAlign: TextAlign.center),
+        const SizedBox(height: 6),
+        Text(
+          '${e.title} · ${e.timeLabel}. When you arrive, put your phone down — '
+          'Cariño keeps time and you get your Presence Score after.',
+          style: Theme.of(context).textTheme.bodyMedium,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 14),
+        SparkButton(
+          label: 'Start Phone-Down now',
+          icon: Icons.phonelink_lock_outlined,
+          onPressed: () {
+            Navigator.of(context).pop();
+            openPhoneDown(context, planTitle: e.title, durationMin: e.durationMin);
+          },
+        ),
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Later')),
+      ],
+    ),
+  );
+}
+
 class DecompressScreen extends StatefulWidget {
   const DecompressScreen({super.key});
 
@@ -46,49 +86,16 @@ class _DecompressScreenState extends State<DecompressScreen> {
   BookMode _mode = BookMode.solo;
   String? _category;
 
-  Future<void> _book(Experience e) async {
-    final booked = await showGlassSheet<bool>(
-      context,
-      child: _BookingSheet(experience: e, initialMode: _mode),
-    );
-    if (booked != true || !mounted) return;
-    Services.analytics.action('decompress_booked');
-    await showGlassSheet<void>(
-      context,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Icon(Icons.check_circle, size: 44, color: AppColors.sparkCoral),
-          const SizedBox(height: 10),
-          Text('You\'re booked', style: Theme.of(context).textTheme.headlineSmall, textAlign: TextAlign.center),
-          const SizedBox(height: 6),
-          Text(
-            '${e.title} · ${e.timeLabel}. When you arrive, put your phone down — '
-            'Cariño keeps time and you get your Presence Score after.',
-            style: Theme.of(context).textTheme.bodyMedium,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 14),
-          SparkButton(
-            label: 'Start Phone-Down now',
-            icon: Icons.phonelink_lock_outlined,
-            onPressed: () {
-              Navigator.of(context).pop();
-              openPhoneDown(context, planTitle: e.title, durationMin: e.durationMin);
-            },
-          ),
-          TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Later')),
-        ],
-      ),
-    );
-  }
+  Future<void> _book(Experience e) => bookExperience(context, e, _mode);
 
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     final categories = {for (final e in MockData.decompress) e.category}.toList();
-    final items = filterExperiences(MockData.decompress, category: _category, mode: _mode);
+    // Private check-ins (never shared) gently reorder the shelf, with a reason.
+    final items = rankForMe(
+        filterExperiences(MockData.decompress, category: _category, mode: _mode),
+        Services.prefs.reflections);
     return GlassScaffold(
       appBar: AppBar(title: const Text('Decompress')),
       body: ListView(
@@ -148,7 +155,7 @@ class _DecompressScreenState extends State<DecompressScreen> {
                 style: text.bodyMedium,
               ),
             ),
-          for (final e in items) ...[
+          for (final (:e, :why) in [for (final r in items) (e: r.experience, why: r.reason)]) ...[
             GlassContainer(
               onTap: () => _book(e),
               child: Row(
@@ -168,6 +175,8 @@ class _DecompressScreenState extends State<DecompressScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        if (why != null)
+                          Text('Picked for you · $why', style: text.labelSmall?.copyWith(color: AppColors.sparkCoral)),
                         Text(e.title, style: text.titleMedium),
                         Text('${e.partner} · ${e.venueType}', style: text.bodySmall),
                         Text('${e.timeLabel} · ${e.durationMin} min', style: text.bodySmall),

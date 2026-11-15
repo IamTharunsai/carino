@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/member.dart';
+import '../../models/sync.dart';
 import '../../services/services.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/glass_card.dart';
@@ -33,6 +34,8 @@ class _PostPlanFeedbackScreenState extends State<PostPlanFeedbackScreen> {
   final TextEditingController _comment = TextEditingController();
   bool _done = false;
   String? _tip;
+  final Set<ReflectTag> _liked = {};
+  final Set<ReflectTag> _disliked = {};
 
   Future<void> _save() async {
     final tip = await Services.ai.debriefTip(
@@ -40,6 +43,15 @@ class _PostPlanFeedbackScreenState extends State<PostPlanFeedbackScreen> {
       comfortable: _comfortable ?? true,
       worthwhile: _worthwhile ?? true,
     );
+    if (!mounted) return;
+    // Private check-in: only ever reorders MY suggestions; never shared.
+    Services.prefs.reflections.add(Reflection(
+      category: categoryForPlace(widget.placeType),
+      good: (_happened ?? false) && (_comfortable ?? true) && (_worthwhile ?? true),
+      liked: {..._liked},
+      disliked: {..._disliked},
+    ));
+    await Services.prefs.save();
     if (!mounted) return;
     setState(() {
       _tip = tip;
@@ -75,6 +87,35 @@ class _PostPlanFeedbackScreenState extends State<PostPlanFeedbackScreen> {
     );
   }
 
+  Widget _tags(String title, Set<ReflectTag> set, Set<ReflectTag> other) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: Theme.of(context).textTheme.titleSmall),
+        const SizedBox(height: 6),
+        Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: [
+            for (final t in ReflectTag.values)
+              FilterChip(
+                label: Text(t.label),
+                selected: set.contains(t),
+                onSelected: (on) => setState(() {
+                  if (on) {
+                    set.add(t);
+                    other.remove(t);
+                  } else {
+                    set.remove(t);
+                  }
+                }),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_done) {
@@ -105,7 +146,7 @@ class _PostPlanFeedbackScreenState extends State<PostPlanFeedbackScreen> {
                           Icon(Icons.auto_awesome_outlined,
                               size: 16, color: AppColors.sparkCoral),
                           SizedBox(width: 6),
-                          Text('Debrief · AI suggestion, just for you'),
+                          Expanded(child: Text('Debrief · AI suggestion, just for you')),
                         ],
                       ),
                       const SizedBox(height: 6),
@@ -173,6 +214,12 @@ class _PostPlanFeedbackScreenState extends State<PostPlanFeedbackScreen> {
               ),
             ),
           ],
+          const SizedBox(height: 12),
+          _tags('What felt good?', _liked, _disliked),
+          const SizedBox(height: 8),
+          _tags("What didn't?", _disliked, _liked),
+          Text('Private: this only tunes your own suggestions.',
+              style: Theme.of(context).textTheme.bodySmall),
           const SizedBox(height: 12),
           TextField(
             controller: _comment,

@@ -32,8 +32,8 @@ Legend: ✅ done in code · 🔑 needs you · ⚠️ decision/risk
 
 ## 3. Backend go-live
 1. 🔑 `supabase link` to your project, then `supabase db push` (applies
-   migrations 0001–0007). ✅ All six migrations are tested in
-   `backend/tests` (56 RLS assertions) — run `cd backend/tests && npm test`
+   migrations 0001–0008). ✅ All eight migrations are tested in
+   `backend/tests` (71 RLS assertions) — run `cd backend/tests && npm test`
    first.
 2. 🔑 Set Edge Function secrets: `ANTHROPIC_API_KEY`/`OPENAI_API_KEY`,
    verification vendor keys, `SCHEDULER_SECRET`; deploy all functions in
@@ -81,7 +81,7 @@ flutter build appbundle --release `
 | Biometric data never leaves the device | ✅ |
 
 ## 6. Test before submitting
-- ✅ `flutter test` (89) · `flutter analyze` · `cd backend/tests && npm test`.
+- ✅ `flutter test` (122) · `flutter analyze` · `cd backend/tests && npm test` (71).
 - ✅ Visual audit: `CAPTURE=1 flutter test test/screenshots/capture_test.dart`
   → `build/screens/` (also your store screenshots).
 - 🔑 **Real-device pass** (one Android, one iPhone) against the LIVE
@@ -125,3 +125,19 @@ flutter build appbundle --release `
   Android a Digital-Wellbeing-style approach; do not ship a claim that
   Cariño "locks apps" until then. iPhone currently counts any time away as
   phone-down — say so in the UI (it does).
+
+## Conversation Sync (added Nov 14)
+- ✅ How I text card + pace note, You both chips + grounded openers,
+  chat → Decompress plan bridge, tone tags, Pause-don't-ghost, private
+  "Things to remember" notes, private after-date check-ins that reorder
+  your own Decompress shelf.
+- ✅ Comfort rules enforced twice: in the app (photo/call/plan-time) and in
+  the database (migration 0008 triggers refuse photos before the
+  recipient's day count and direct calls before meeting).
+- ⚠️ "Daytime first meet" is enforced in the app only (plans store a time
+  label, not a timestamp). Add `plans.starts_at` before relying on it server-side.
+- 🔑 Live mode: wire `Services.prefs.myStyle/myComfort/matchNotes/reflections`
+  to `conversation_prefs` / `private_notes` / `private_reflections`
+  (demo stores them on-device). AI-01 prompt `openers-v4` receives only the
+  "You both" labels, never message text.
+- Complaint → answer table for store copy: `docs/REVIEW-GAPS.md`.

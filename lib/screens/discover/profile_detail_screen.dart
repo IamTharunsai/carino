@@ -5,6 +5,8 @@ import '../../widgets/glass_card.dart';
 import '../../widgets/safety_actions.dart';
 import '../../widgets/spark_button.dart';
 import '../../widgets/video_reply_sheet.dart';
+import '../../widgets/sync_widgets.dart';
+import '../../models/sync.dart' show comfortSummary;
 import 'discover_screen.dart' show whySuggested;
 import '../chats/games_screen.dart';
 import '../connect/spark_session_screen.dart';
@@ -149,6 +151,15 @@ class ProfileDetailScreen extends StatelessWidget {
                             style: Theme.of(context).textTheme.bodyMedium),
                       ),
                     ],
+                  ),
+                ],
+                if (!member.textingStyle.isEmpty ||
+                    comfortSummary(member.comfort).isNotEmpty) ...[
+                  const SizedBox(height: 14),
+                  TextingCard(
+                    title: 'How ${member.firstName} texts',
+                    style: member.textingStyle,
+                    comfort: member.comfort,
                   ),
                 ],
                 const SizedBox(height: 14),

@@ -171,6 +171,50 @@ try {
   await as(e); // unverified
   equal(await count('experiences'), 0);
 
+  // --- 0008 Conversation Sync -----------------------------------------------
+  const f = '00000000-0000-0000-0000-00000000000f';
+  const g = '00000000-0000-0000-0000-000000000010';
+  const m2 = '20000000-0000-0000-0000-000000000002';
+  await db.exec('reset role');
+  await db.exec(`insert into auth.users(id) values ('${f}'),('${g}');
+    insert into public.matches(id,user_a,user_b) values ('${m2}','${f}','${g}');`);
+  const conv2 = (await db.query(`select id from public.conversations where match_id='${m2}'`)).rows[0].id;
+  await as(f);
+  await db.exec(`insert into public.conversation_prefs(user_id,reply_pace,photos_after_days,no_calls_before_meet,loves)
+    values ('${f}','evenings',3,true,array['Film photography'])`);
+  await assert.rejects(db.exec(`update public.conversation_prefs set loves=array['a','b','c','d','e','f'] where user_id='${f}'`)); assertions++; // max 5 tags
+  await as(g);
+  equal(await count('conversation_prefs'), 1);          // matches can read the card
+  await denied(`insert into public.conversation_prefs(user_id) values ('${f}')`); // not yours
+  await db.exec(`insert into public.messages(conversation_id,sender,kind,body) values ('${conv2}','${g}','text','hi')`);
+  await assert.rejects(db.exec(`insert into public.messages(conversation_id,sender,kind) values ('${conv2}','${g}','photo')`),
+    e => /photos after 3 days/.test(e.message)); assertions++; // f's rule holds the photo
+  await as(f);
+  await db.exec(`insert into public.messages(conversation_id,sender,kind,body,tone_tag) values ('${conv2}','${f}','text','lol','joking')`);
+  await assert.rejects(db.exec(`insert into public.messages(conversation_id,sender,kind,body,tone_tag) values ('${conv2}','${f}','text','x','sarcastic')`)); assertions++;
+  await db.exec(`update public.messages set tone_tag='serious' where body='lol'`);
+  equal((await db.query(`select tone_tag from public.messages where body='lol'`)).rows[0].tone_tag, 'joking'); // immutable
+  await db.exec(`insert into public.private_reflections(user_id,category,good,liked) values ('${f}','Calm',true,array['quiet'])`);
+  await assert.rejects(db.exec(`insert into public.private_reflections(user_id,good,liked) values ('${f}',true,array['looks'])`)); assertions++;
+  await db.exec(`insert into public.private_notes(user_id,about_user,body) values ('${f}','${g}','Dog called Biscuit')`);
+  await db.exec(`insert into public.chat_pauses(conversation_id,user_id,back_label) values ('${conv2}','${f}','next week')`);
+  await as(g);
+  equal(await count('private_reflections'), 0);         // owner only
+  equal(await count('private_notes'), 0);               // owner only
+  equal(await count('chat_pauses'), 1);                 // both see the pause
+  await denied(`insert into public.chat_pauses(conversation_id,user_id,back_label) values ('${conv2}','${f}','tomorrow')`);
+  await as(outsider);
+  equal(await count('conversation_prefs'), 0);
+  equal(await count('chat_pauses'), 0);
+  await db.exec('reset role');
+  await assert.rejects(db.exec(`insert into public.calls(participants) values (array['${f}','${g}']::uuid[])`),
+    e => /no calls before meeting/.test(e.message)); assertions++;
+  await db.exec(`insert into public.trust_meetings values ('${f}','${g}',now())`);
+  await db.exec(`insert into public.calls(participants) values (array['${f}','${g}']::uuid[])`);
+  await as(g);
+  await db.exec(`insert into public.messages(conversation_id,sender,kind) values ('${conv2}','${g}','photo')`); // met: allowed
+  equal(await count('messages'), 3);
+
   await db.exec('reset role; set role anon');
   await denied('select * from public.social_preferences');
   await denied('select public.is_social_group_member(null)');

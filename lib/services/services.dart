@@ -1,9 +1,11 @@
+import 'dart:convert';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/mock_data.dart';
 import '../models/platform.dart';
 import '../models/social.dart';
+import '../models/sync.dart';
 import 'ai_service.dart';
 import 'analytics_service.dart';
 import 'biometric_service.dart';
@@ -65,6 +67,7 @@ class UserPrefs {
     ageBlockedUntil = blocked == null ? null : DateTime.tryParse(blocked);
     _sparkDay = sp.getString('sparkDay');
     _sparksUsed = sp.getInt('sparksUsed') ?? 0;
+    _loadSync(sp.getString('sync'));
   }
 
   Future<void> save() async {
@@ -81,6 +84,7 @@ class UserPrefs {
     }
     if (_sparkDay != null) await sp.setString('sparkDay', _sparkDay!);
     await sp.setInt('sparksUsed', _sparksUsed);
+    await sp.setString('sync', jsonEncode(_syncJson()));
   }
 
   /// Demo-mode stand-in for the server's verification_records badge.
@@ -136,6 +140,11 @@ class UserPrefs {
 
   /// Taste Quiz answers (question id -> pick).
   Map<String, String> tasteAnswers = {};
+
+  /// My answers, or the demo sample until the quiz is taken.
+  Map<String, String> get tastesOrSample => tasteAnswers.isNotEmpty
+      ? tasteAnswers
+      : const {'t2': 'Midnight pancakes', 't3': 'Coffee and a walk', 't7': 'Farmers market'};
 
   /// Calm mode: fewer animations, no celebration motion, plain language.
   /// A notifier so MaterialApp re-reads it app-wide the moment it flips.
@@ -231,6 +240,91 @@ class UserPrefs {
   /// Referral: your code; promo redeemed state.
   final String referralCode = 'CARINO-YOU7';
   String? redeemedPromo;
+
+  // --- Conversation Sync (Nov 14) -------------------------------------------
+  /// My "How I text" card and comfort rules — shown to my matches; the app
+  /// enforces the rules in chat (calls, photos) and in the plan composer.
+  TextingStyle myStyle = const TextingStyle();
+  ComfortRules myComfort = const ComfortRules();
+
+  /// Private after-plan check-ins. Never shared; only reorder MY shelf.
+  final List<Reflection> reflections = [];
+
+  /// "Things to remember" — private notes about a match (memberId -> note).
+  final Map<String, String> matchNotes = {};
+
+  T? _byName<T extends Enum>(List<T> values, Object? name) {
+    for (final v in values) {
+      if (v.name == name) return v;
+    }
+    return null;
+  }
+
+  Map<String, Object?> _syncJson() => {
+        'pace': myStyle.pace?.name,
+        'length': myStyle.length?.name,
+        'voice': myStyle.voice?.name,
+        'humour': myStyle.humour?.name,
+        'loves': myStyle.loves,
+        'avoid': myStyle.avoid,
+        'noCalls': myComfort.noCallsBeforeMeet,
+        'photoDays': myComfort.photosAfterDays,
+        'daytime': myComfort.daytimeFirstMeet,
+        'notes': matchNotes,
+        'reflections': [
+          for (final r in reflections)
+            {
+              'c': r.category,
+              'g': r.good,
+              'l': [for (final t in r.liked) t.name],
+              'd': [for (final t in r.disliked) t.name],
+            }
+        ],
+      };
+
+  void _loadSync(String? raw) {
+    if (raw == null) return;
+    try {
+      final j = jsonDecode(raw) as Map<String, dynamic>;
+      List<String> strs(Object? o) => [for (final x in (o as List? ?? const [])) '$x'];
+      myStyle = TextingStyle(
+        pace: _byName(ReplyPace.values, j['pace']),
+        length: _byName(MsgLength.values, j['length']),
+        voice: _byName(VoiceNotes.values, j['voice']),
+        humour: _byName(Humour.values, j['humour']),
+        loves: strs(j['loves']),
+        avoid: strs(j['avoid']),
+      );
+      myComfort = ComfortRules(
+        noCallsBeforeMeet: j['noCalls'] == true,
+        photosAfterDays: (j['photoDays'] as num?)?.toInt() ?? 0,
+        daytimeFirstMeet: j['daytime'] == true,
+      );
+      matchNotes
+        ..clear()
+        ..addAll({
+          for (final e in (j['notes'] as Map? ?? const {}).entries) '${e.key}': '${e.value}'
+        });
+      Set<ReflectTag> tags(Object? o) =>
+          {
+            for (final n in strs(o))
+              if (_byName(ReflectTag.values, n) case final t?) t
+          };
+      reflections
+        ..clear()
+        ..addAll([
+          for (final r in (j['reflections'] as List? ?? const []))
+            Reflection(
+              category: (r as Map)['c'] as String?,
+              good: r['g'] == true,
+              liked: tags(r['l']),
+              disliked: tags(r['d']),
+            )
+        ]);
+    } catch (_) {
+      // Corrupt local blob: keep defaults rather than crash on launch.
+    }
+  }
 
   /// Decompress bookings (demo store; production = partner bookings table).
   final List<String> bookings = [];

@@ -4,6 +4,7 @@ import '../models/member.dart';
 import '../models/message.dart';
 import '../models/platform.dart';
 import '../models/social.dart';
+import '../models/sync.dart';
 import '../models/wellbeing.dart';
 
 /// ─────────────────────────────────────────────────────────────────────────
@@ -52,6 +53,8 @@ class MockData {
       anthem: 'Golden Hour · JVKE',
       topArtists: ['SZA', 'Khruangbin', 'Mitski'],
       tasteAnswers: {'t1': 'Slow brunch', 't2': 'Midnight pancakes', 't3': 'Coffee and a walk', 't6': 'Voice notes'},
+      textingStyle: TextingStyle(pace: ReplyPace.evenings, length: MsgLength.long, voice: VoiceNotes.love, humour: Humour.playful, loves: ['Film photography', 'Café playlists'], avoid: ['Exes']),
+      comfort: ComfortRules(photosAfterDays: 3, daytimeFirstMeet: true),
     ),
     Member(
       id: 'm-dev',
@@ -99,6 +102,8 @@ class MockData {
       anthem: 'Dancing Queen · ABBA',
       topArtists: ['ABBA', 'Charli XCX'],
       tasteAnswers: {'t2': 'Midnight pancakes', 't4': 'Aux cord, always', 't8': 'Big group energy'},
+      textingStyle: TextingStyle(pace: ReplyPace.quick, length: MsgLength.short, voice: VoiceNotes.textOnly, humour: Humour.dry, loves: ['Karaoke picks', 'Climbing'], avoid: ['Work talk']),
+      comfort: ComfortRules(noCallsBeforeMeet: true),
       highlights: ['Won game night. The crown is heavy. 👑', 'Karaoke PB: 94 points'],
     ),
     Member(
@@ -443,6 +448,7 @@ class MockData {
           mode: ChatMode.keep,
           unreadCount: 1,
           planPinned: true,
+          daysChatting: 2,
           messages: [
             ChatMessage(id: 'a1', text: 'Okay your café-playlist prompt got me. Defend your ranking system 😄', fromMe: false, timeLabel: '10:02'),
             ChatMessage(id: 'a2', text: 'Simple: any café playing lo-fi remixes of itself loses a star automatically.', fromMe: true, timeLabel: '10:05'),
@@ -455,6 +461,7 @@ class MockData {
           mode: ChatMode.vanish,
           vanishMinutes: 60,
           quietDays: 6,
+          daysChatting: 9,
           messages: [
             ChatMessage(id: 's1', text: 'Two Truths and a Lie', fromMe: false, timeLabel: '09:41', isGameCard: true, gameTitle: 'Two Truths and a Lie', expiresInLabel: 'Vanish · 60 min after read'),
             ChatMessage(id: 's2', text: 'I guessed the llama one. I was WRONG?!', fromMe: true, timeLabel: '09:43', expiresInLabel: 'Vanish · 60 min after read'),

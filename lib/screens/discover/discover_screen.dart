@@ -425,9 +425,7 @@ bool fitsMe(Member m) => mutualFit(
 /// "Why you're seeing them": REAL taste overlaps first, then shared
 /// interests. Returns null when there is nothing true to say.
 String? whySuggested(Member member) {
-  final mine = Services.prefs.tasteAnswers.isNotEmpty
-      ? Services.prefs.tasteAnswers
-      : const {'t2': 'Midnight pancakes', 't3': 'Coffee and a walk', 't7': 'Farmers market'};
+  final mine = Services.prefs.tastesOrSample;
   final tastes = sharedTastes(mine, member.tasteAnswers);
   if (tastes.isNotEmpty) return 'You both picked ${tastes.take(2).join(' · ')}';
   final shared = member.interests

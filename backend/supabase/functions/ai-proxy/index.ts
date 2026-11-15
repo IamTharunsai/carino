@@ -16,7 +16,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const FEATURE_MODELS: Record<string, { provider: "anthropic" | "openai"; model: string; promptVersion: string }> = {
-  "AI-01": { provider: "anthropic", model: "claude-sonnet", promptVersion: "openers-v3" },
+  "AI-01": { provider: "anthropic", model: "claude-sonnet", promptVersion: "openers-v4" }, // v4: grounded in body.shared ("You both" labels only, never message content)
   "AI-02": { provider: "anthropic", model: "claude-sonnet", promptVersion: "replies-v3" },
   "AI-03": { provider: "anthropic", model: "claude-sonnet", promptVersion: "coach-v2" },
   "AI-04": { provider: "openai", model: "gpt-screen", promptVersion: "signals-v5" },

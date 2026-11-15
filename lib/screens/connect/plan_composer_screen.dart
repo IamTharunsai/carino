@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../data/mock_data.dart';
 import '../../models/member.dart';
+import '../../models/sync.dart';
 import '../../services/services.dart';
 import 'plan_detail_screen.dart';
 import '../../theme/app_colors.dart';
@@ -33,6 +34,13 @@ class _PlanComposerScreenState extends State<PlanComposerScreen> {
     if (a == 'Weekends') return const ['Sat · 11:00', 'Sat · 16:00', 'Sun · 12:00'];
     return const ['Tomorrow · 18:30', 'Sat · 11:00', 'Sun · 16:00'];
   }
+
+  bool _allowed(String t) => firstMeetAllowed(
+        t,
+        mine: Services.prefs.myComfort,
+        theirs: widget.member.comfort,
+        met: Services.trust.hasMet(widget.member.id),
+      );
 
   Future<void> _aiDraft() async {
     // AI-07: draft only. Nothing is sent until the member taps Send.
@@ -99,10 +107,21 @@ class _PlanComposerScreenState extends State<PlanComposerScreen> {
                   label: Text(t),
                   selected: _timeChip == t,
                   selectedColor: AppColors.emberCrimson,
-                  onSelected: (_) => setState(() => _timeChip = t),
+                  // Comfort rule: daytime first meet (either person's) greys
+                  // out evening times until you've met.
+                  onSelected: _allowed(t) ? (_) => setState(() => _timeChip = t) : null,
                 ),
             ],
           ),
+          if (_timeOptions.any((t) => !_allowed(t)))
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                "Evening times are off: a daytime first meet was asked for "
+                "(comfort rules). They open up once you've met.",
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ),
           const SizedBox(height: 14),
           GlassContainer(
             child: Column(
