@@ -30,18 +30,22 @@ Future<void> loadRealFonts() async {
   for (final name in ['Roboto', 'CupertinoSystemText', 'FlutterTest', 'CupertinoSystemDisplay']) {
     await family(name, dir, files);
   }
-  if (cache != null) await family('MaterialIcons', cache, ['materialicons-regular.otf']);
+  if (cache != null && File('$cache/materialicons-regular.otf').existsSync()) {
+    await family('MaterialIcons', cache, ['materialicons-regular.otf']);
+  }
 }
 
 /// `<flutter>/bin/cache/artifacts/material_fonts`, found via FLUTTER_ROOT or
-/// by walking up from the test runner binary; null when not downloaded.
+/// by walking up from the test runner binary; null unless Roboto is really
+/// there (CI images can have the folder with only some files in it).
 String? _materialFonts() {
   const rel = '/bin/cache/artifacts/material_fonts';
+  bool has(String root) => File('$root$rel/roboto-regular.ttf').existsSync();
   final env = Platform.environment['FLUTTER_ROOT'];
-  if (env != null && Directory('$env$rel').existsSync()) return '$env$rel';
+  if (env != null && has(env)) return '$env$rel';
   var dir = File(Platform.resolvedExecutable).parent;
   while (dir.parent.path != dir.path) {
-    if (Directory('${dir.path}$rel').existsSync()) return '${dir.path}$rel';
+    if (has(dir.path)) return '${dir.path}$rel';
     dir = dir.parent;
   }
   return null;
