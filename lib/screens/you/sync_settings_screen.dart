@@ -26,6 +26,7 @@ class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
   late bool _noCalls = _prefs.myComfort.noCallsBeforeMeet;
   late int _photoDays = _prefs.myComfort.photosAfterDays;
   late bool _daytime = _prefs.myComfort.daytimeFirstMeet;
+  late bool _opensFirst = _prefs.myComfort.opensFirst;
 
   static List<String> _split(String s) => [
         for (final p in s.split(','))
@@ -45,6 +46,7 @@ class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
         noCallsBeforeMeet: _noCalls,
         photosAfterDays: _photoDays,
         daytimeFirstMeet: _daytime,
+        opensFirst: _opensFirst,
       );
 
   @override
@@ -158,6 +160,13 @@ class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
             subtitle: const Text('Plans between 08:00 and 18:00 until you\'ve met.'),
             value: _daytime,
             onChanged: (v) => setState(() => _daytime = v),
+          ),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text("I'll message first"),
+            subtitle: const Text("Matches can't write until you do. Likes and plans still work."),
+            value: _opensFirst,
+            onChanged: (v) => setState(() => _opensFirst = v),
           ),
           const SizedBox(height: 12),
           Text('This is what matches see', style: text.titleSmall),

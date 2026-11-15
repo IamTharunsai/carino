@@ -58,7 +58,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             contentPadding: EdgeInsets.zero,
             leading: const CircleAvatar(child: Icon(Icons.person)),
             title: const Text('Your profile'),
-            subtitle: const Text('Completion, visibility, edit — S-043'),
+            subtitle: const Text('Completion, visibility, edit'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
@@ -199,7 +199,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
           const SizedBox(height: 12),
-          Text('${AppConfig.appName} · version 0.1.0 (scaffold build)',
+          Text('${AppConfig.appName} · version 0.1.0',
               style: text.bodySmall, textAlign: TextAlign.center),
         ],
       ),

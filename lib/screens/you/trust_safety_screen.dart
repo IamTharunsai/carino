@@ -179,7 +179,7 @@ class TrustSafetyScreen extends StatelessWidget {
             ),
           const SizedBox(height: 8),
           Text(
-            'Help & support: our AI assistant answers first and says it\'s AI in its first message — "Talk to a human" is always one tap away (S-053).',
+            'Help & support: our AI assistant answers first and says it\'s AI in its first message — "Talk to a human" is always one tap away.',
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],

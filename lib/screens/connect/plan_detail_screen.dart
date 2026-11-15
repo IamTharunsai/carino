@@ -209,7 +209,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                 Text(
                   '• Public place, your own transport.\n'
                   '• Tell a friend where you\'ll be.\n'
-                  '• Share-your-trip lives in Trust & Safety (S-052).\n'
+                  '• Share-your-trip lives in Trust & Safety.\n'
                   '• Leave anytime — no explanation owed.',
                   style: text.bodyMedium,
                 ),

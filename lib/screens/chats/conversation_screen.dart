@@ -85,6 +85,14 @@ class _ConversationScreenState extends State<ConversationScreen> {
 
   bool get _met => Services.trust.hasMet(_member.id);
 
+  /// "I'll message first": my composer waits until they've written.
+  String? get _firstHold => firstMessageHold(
+        theirs: _member.comfort,
+        theyHaveWritten: widget.conversation.messages
+            .any((m) => !m.fromMe && !m.isSystemNotice),
+        theirName: _member.firstName,
+      );
+
   /// "You both": real overlaps only, minus anything they asked not to discuss.
   List<String> get _chips => commonGround(
         myInterests: MockData.currentUser.interests,
@@ -261,7 +269,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
     super.initState();
     _member = MockData.memberById(widget.conversation.memberId);
     widget.conversation.unreadCount = 0;
-    if (_iHaveNotSpoken) _loadStarters();
+    if (_iHaveNotSpoken && _firstHold == null) _loadStarters();
   }
 
   Future<void> _loadStarters() async {
@@ -492,7 +500,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.calendar_month_outlined),
-            tooltip: 'Suggest a plan (S-039)',
+            tooltip: 'Suggest a plan',
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
                 builder: (_) => PlanComposerScreen(member: _member),
@@ -736,6 +744,19 @@ class _ConversationScreenState extends State<ConversationScreen> {
                   'ever change your mind.',
                   style: Theme.of(context).textTheme.bodyMedium,
                   textAlign: TextAlign.center,
+                ),
+              ),
+            )
+          else if (_firstHold case final hold?)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 18),
+              child: GlassContainer(
+                child: Row(
+                  children: [
+                    const Icon(Icons.shield_outlined, size: 18, color: AppColors.sparkCoral),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text(hold, style: Theme.of(context).textTheme.bodyMedium)),
+                  ],
                 ),
               ),
             )

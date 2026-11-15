@@ -253,13 +253,6 @@ class UserPrefs {
   /// "Things to remember" — private notes about a match (memberId -> note).
   final Map<String, String> matchNotes = {};
 
-  T? _byName<T extends Enum>(List<T> values, Object? name) {
-    for (final v in values) {
-      if (v.name == name) return v;
-    }
-    return null;
-  }
-
   Map<String, Object?> _syncJson() => {
         'pace': myStyle.pace?.name,
         'length': myStyle.length?.name,
@@ -270,6 +263,7 @@ class UserPrefs {
         'noCalls': myComfort.noCallsBeforeMeet,
         'photoDays': myComfort.photosAfterDays,
         'daytime': myComfort.daytimeFirstMeet,
+        'opensFirst': myComfort.opensFirst,
         'notes': matchNotes,
         'reflections': [
           for (final r in reflections)
@@ -288,10 +282,10 @@ class UserPrefs {
       final j = jsonDecode(raw) as Map<String, dynamic>;
       List<String> strs(Object? o) => [for (final x in (o as List? ?? const [])) '$x'];
       myStyle = TextingStyle(
-        pace: _byName(ReplyPace.values, j['pace']),
-        length: _byName(MsgLength.values, j['length']),
-        voice: _byName(VoiceNotes.values, j['voice']),
-        humour: _byName(Humour.values, j['humour']),
+        pace: ReplyPace.values.asNameMap()[j['pace']],
+        length: MsgLength.values.asNameMap()[j['length']],
+        voice: VoiceNotes.values.asNameMap()[j['voice']],
+        humour: Humour.values.asNameMap()[j['humour']],
         loves: strs(j['loves']),
         avoid: strs(j['avoid']),
       );
@@ -299,6 +293,7 @@ class UserPrefs {
         noCallsBeforeMeet: j['noCalls'] == true,
         photosAfterDays: (j['photoDays'] as num?)?.toInt() ?? 0,
         daytimeFirstMeet: j['daytime'] == true,
+        opensFirst: j['opensFirst'] == true,
       );
       matchNotes
         ..clear()
@@ -308,7 +303,7 @@ class UserPrefs {
       Set<ReflectTag> tags(Object? o) =>
           {
             for (final n in strs(o))
-              if (_byName(ReflectTag.values, n) case final t?) t
+              if (ReflectTag.values.asNameMap()[n] case final t?) t
           };
       reflections
         ..clear()

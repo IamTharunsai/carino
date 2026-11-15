@@ -150,6 +150,7 @@ class MockData {
       identityVisibility: {'orientation': 'hidden'},
       wantToMeet: ['Men'],
       tasteAnswers: {'t1': 'Sunrise hike', 't3': 'Coffee and a walk', 't7': 'Farmers market'},
+      comfort: ComfortRules(opensFirst: true),
     ),
     Member(
       id: 'm-rowan',

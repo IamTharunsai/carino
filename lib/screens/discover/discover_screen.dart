@@ -179,7 +179,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                 ),
                 IconButton(
                   icon: const Icon(Icons.public),
-                  tooltip: 'Worldwide (S-018)',
+                  tooltip: 'Worldwide',
                   onPressed: () => Navigator.of(context).push(
                     MaterialPageRoute<void>(
                         builder: (_) => const WorldwideScreen()),
@@ -187,7 +187,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                 ),
                 IconButton(
                   icon: const Icon(Icons.notifications_outlined),
-                  tooltip: 'Notifications (S-056)',
+                  tooltip: 'Notifications',
                   onPressed: () => Navigator.of(context).push(
                     MaterialPageRoute<void>(
                         builder: (_) => const NotificationsScreen()),
@@ -195,7 +195,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                 ),
                 IconButton(
                   icon: const Icon(Icons.tune),
-                  tooltip: 'Filters (S-017)',
+                  tooltip: 'Filters',
                   onPressed: _openFilters,
                 ),
               ],

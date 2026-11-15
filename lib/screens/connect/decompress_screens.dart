@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../config/env.dart';
 import '../../data/mock_data.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../models/care.dart';
 import '../../models/sync.dart' show rankForMe;
 import '../../models/wellbeing.dart';
 import '../../services/services.dart';
@@ -86,6 +88,60 @@ class _DecompressScreenState extends State<DecompressScreen> {
   BookMode _mode = BookMode.solo;
   String? _category;
 
+  /// "How are you, really?" — feeling first; it narrows the shelf gently.
+  Mood? _mood;
+
+  Widget _moodCard(TextTheme text) {
+    final care = _mood == null ? null : careFor(_mood!);
+    return GlassContainer(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('How are you, really?', style: text.titleMedium),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              for (final m in Mood.values)
+                ChoiceChip(
+                  label: Text('${m.emoji} ${m.label}'),
+                  selected: _mood == m,
+                  onSelected: (on) => setState(() => _mood = on ? m : null),
+                ),
+            ],
+          ),
+          if (care != null) ...[
+            const SizedBox(height: 10),
+            Text(care.line, style: text.bodyLarge),
+            const SizedBox(height: 4),
+            Text('One minute for you: ${care.oneMinute}', style: text.bodySmall),
+            const SizedBox(height: 8),
+            SparkButton(
+              label: 'Start my minute',
+              icon: Icons.self_improvement,
+              secondary: true,
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(
+                  builder: (_) => OneMinuteScreen(step: care.oneMinute))),
+            ),
+            if (care.showCrisisLine) ...[
+              const SizedBox(height: 8),
+              Text(
+                "If you're thinking about hurting yourself, you're not alone. "
+                'Call or text 988 (US) — free, 24/7.',
+                style: text.bodySmall,
+              ),
+              TextButton(
+                onPressed: () => launchUrl(Uri.parse('tel:988')),
+                child: const Text('Call 988'),
+              ),
+            ],
+          ],
+        ],
+      ),
+    );
+  }
+
   Future<void> _book(Experience e) => bookExperience(context, e, _mode);
 
   @override
@@ -93,8 +149,9 @@ class _DecompressScreenState extends State<DecompressScreen> {
     final text = Theme.of(context).textTheme;
     final categories = {for (final e in MockData.decompress) e.category}.toList();
     // Private check-ins (never shared) gently reorder the shelf, with a reason.
+    final source = _mood == null ? MockData.decompress : moodPicks(_mood!, MockData.decompress);
     final items = rankForMe(
-        filterExperiences(MockData.decompress, category: _category, mode: _mode),
+        filterExperiences(source, category: _category, mode: _mode),
         Services.prefs.reflections);
     return GlassScaffold(
       appBar: AppBar(title: const Text('Decompress')),
@@ -105,6 +162,8 @@ class _DecompressScreenState extends State<DecompressScreen> {
           const SizedBox(height: 4),
           Text('Go solo, with your circle, as a date — or join a small verified group already going.',
               style: text.bodyMedium),
+          const SizedBox(height: 12),
+          _moodCard(text),
           const SizedBox(height: 12),
           Wrap(
             spacing: 8,
@@ -594,6 +653,98 @@ class _PhoneDownScreenState extends State<PhoneDownScreen>
           ),
           TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Done')),
         ],
+      ),
+    );
+  }
+}
+
+
+// ============================================================================
+// One minute for you — a short, kind reset (no score, no streak)
+// ============================================================================
+
+class OneMinuteScreen extends StatefulWidget {
+  const OneMinuteScreen({super.key, required this.step});
+  final String step;
+
+  @override
+  State<OneMinuteScreen> createState() => _OneMinuteScreenState();
+}
+
+class _OneMinuteScreenState extends State<OneMinuteScreen>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _breath =
+      AnimationController(vsync: this, duration: const Duration(seconds: 4));
+  Timer? _tick;
+  int _left = 60;
+
+  @override
+  void initState() {
+    super.initState();
+    _tick = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (!mounted) return;
+      setState(() => _left--);
+      if (_left <= 0) {
+        t.cancel();
+        _breath.stop();
+      }
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Reduced motion: a still circle, same minute.
+    if (!MediaQuery.of(context).disableAnimations && _left > 0 && !_breath.isAnimating) {
+      _breath.repeat(reverse: true);
+    }
+  }
+
+  @override
+  void dispose() {
+    _tick?.cancel();
+    _breath.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    final done = _left <= 0;
+    return GlassScaffold(
+      appBar: AppBar(title: const Text('One minute for you')),
+      body: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            AnimatedBuilder(
+              animation: _breath,
+              builder: (_, __) => Container(
+                width: 140 + 80 * _breath.value,
+                height: 140 + 80 * _breath.value,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.emberCrimson.withValues(alpha: 0.25 + 0.2 * _breath.value),
+                ),
+                alignment: Alignment.center,
+                child: Text(done ? '✓' : '$_left', style: text.headlineMedium),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(done ? 'That was a minute just for you.' : widget.step,
+                style: text.titleMedium, textAlign: TextAlign.center),
+            const SizedBox(height: 8),
+            Text(done ? 'Come back any time.' : 'Breathe in as the circle grows, out as it shrinks.',
+                style: text.bodySmall, textAlign: TextAlign.center),
+            const SizedBox(height: 24),
+            SparkButton(
+              label: done ? 'Done' : 'Finish early',
+              secondary: !done,
+              onPressed: () => Navigator.of(context).maybePop(),
+            ),
+          ],
+        ),
       ),
     );
   }

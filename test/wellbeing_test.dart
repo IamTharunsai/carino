@@ -86,6 +86,10 @@ void main() {
       await tester.pumpWidget(MaterialApp(theme: AppTheme.dark(), home: const DecompressScreen()));
       await tester.pump();
       expect(tester.takeException(), isNull);
+      await tester.scrollUntilVisible(find.text('Sunset walk on the Scioto Mile'), 200,
+          scrollable: find.byType(Scrollable).first);
+      await tester.ensureVisible(find.text('Sunset walk on the Scioto Mile'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Sunset walk on the Scioto Mile'));
       await tester.pumpAndSettle();
       expect(find.text('Free'), findsWidgets);

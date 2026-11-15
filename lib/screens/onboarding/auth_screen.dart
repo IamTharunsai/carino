@@ -253,7 +253,7 @@ class _AuthScreenState extends State<AuthScreen> {
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute<void>(builder: (_) => const SettingsScreen()),
             ),
-            child: const Text('Preview Settings (S-050)'),
+            child: const Text('Preview Settings'),
           ),
         ],
       ),

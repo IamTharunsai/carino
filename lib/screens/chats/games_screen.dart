@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../data/mock_data.dart';
+import '../../models/care.dart' show personalDeck;
 import '../../models/experience.dart';
+import '../../models/message.dart' show GameQuestion;
 import '../../models/member.dart';
 import '../../services/services.dart';
 import '../../theme/app_colors.dart';
@@ -30,6 +32,13 @@ class GamesScreen extends StatefulWidget {
 enum _Game { thisOrThat, twoTruths, guessMyAnswer, buildOurDate, musicMatch, questionCards }
 
 class _GamesScreenState extends State<GamesScreen> {
+  /// This or That built from BOTH profiles — not a fixed template.
+  late final List<GameQuestion> _deck = personalDeck(
+    myInterests: MockData.currentUser.interests,
+    myTastes: Services.prefs.tastesOrSample,
+    them: widget.member,
+  );
+
   _Game _active = _Game.thisOrThat;
 
   /// Forgiving streak (sample: day 4, freeze unused). See ChemistryStreak.
@@ -81,7 +90,7 @@ class _GamesScreenState extends State<GamesScreen> {
   }
 
   String get _partnerPick {
-    final q = MockData.thisOrThatDeck[_totIndex];
+    final q = _deck[_totIndex];
     return q.options[_totIndex % q.options.length];
   }
 
@@ -110,7 +119,7 @@ class _GamesScreenState extends State<GamesScreen> {
   void _nextTot() {
     _timer?.cancel();
     setState(() {
-      _totIndex = (_totIndex + 1) % MockData.thisOrThatDeck.length;
+      _totIndex = (_totIndex + 1) % _deck.length;
       _totMine = null;
       _totWaiting = false;
       _totRevealed = false;
@@ -257,11 +266,14 @@ class _GamesScreenState extends State<GamesScreen> {
       };
 
   Widget _thisOrThat(BuildContext context) {
-    final question = MockData.thisOrThatDeck[_totIndex];
+    final question = _deck[_totIndex];
     return GlassContainer(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          Text('Made for you two · from both profiles',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.sparkCoral)),
+          const SizedBox(height: 4),
           Text(question.prompt, style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 14),
           Row(
@@ -417,7 +429,7 @@ class _GamesScreenState extends State<GamesScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Build a date together — the winning combo becomes a real plan draft (S-039).',
+            'Build a date together — the winning combo becomes a real plan draft.',
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 10),

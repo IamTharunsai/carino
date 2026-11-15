@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../config/app_config.dart';
+import '../../config/env.dart';
 import '../../data/mock_data.dart';
 import '../../models/member.dart';
 import '../../services/services.dart';
@@ -87,6 +88,8 @@ class ConnectScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 // S-027 pending invitations live here until they expire.
+                // Demo-only preview of the ring; live builds get real invites.
+                if (Env.useMockBackend)
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.ring_volume_outlined),

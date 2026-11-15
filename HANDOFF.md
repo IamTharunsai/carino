@@ -162,3 +162,18 @@ overflow — keep adding new screens to it.
   messages.tone_tag immutable; comfort triggers on messages + calls).
 - Booking from anywhere: `bookExperience(context, experience, mode)`.
 - Review-driven extras and store copy: `docs/REVIEW-GAPS.md`.
+
+## Update (Nov 14) — screen audit, care, red-team round 2
+- Removed internal spec codes (S-0xx, AI-0x) and "scaffold build" from all
+  user-visible text/tooltips; demo-only controls (incoming-call preview,
+  waitlist "batch opened") show only when `Env.useMockBackend`.
+- `lib/models/care.dart`: Mood/careFor/moodPicks (Decompress "How are you,
+  really?" + `OneMinuteScreen`), `personalDeck` (This or That built from both
+  profiles; GamesScreen uses it). `ComfortRules.opensFirst` +
+  `firstMessageHold` ("I'll message first").
+- Tests: `test/care_games_test.dart`, `test/personas_test.dart` (10,000 seeded
+  people, invariants), `test/prefs_roundtrip_test.dart`.
+- `0009_hardening_round2.sql`: client message insert guard (no system
+  notices, server time, rate limit, opens-first), `guard_plans`. Guards are
+  SECURITY INVOKER — `is_client()` is always false inside definer functions.
+- Security + scale write-up: `docs/SECURITY-AND-SCALE.md`.

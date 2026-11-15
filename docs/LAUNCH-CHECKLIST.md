@@ -32,11 +32,11 @@ Legend: ✅ done in code · 🔑 needs you · ⚠️ decision/risk
 
 ## 3. Backend go-live
 1. 🔑 `supabase link` to your project, then `supabase db push` (applies
-   migrations 0001–0008). ✅ All eight migrations are tested in
-   `backend/tests` (71 RLS assertions) — run `cd backend/tests && npm test`
+   migrations 0001–0009). ✅ All nine migrations are tested in
+   `backend/tests` (85 RLS + attack assertions) — run `cd backend/tests && npm test`
    first.
 2. 🔑 Set Edge Function secrets: `ANTHROPIC_API_KEY`/`OPENAI_API_KEY`,
-   verification vendor keys, `SCHEDULER_SECRET`; deploy all functions in
+   verification vendor keys, `JOB_SECRET (sent as the x-job-secret header)`; deploy all functions in
    `backend/supabase/functions` (`supabase functions deploy`).
 3. 🔑 Auth settings: enable Phone + Email OTP, Google, Apple; add redirect
    URL **`carino://login-callback`** (✅ already registered in the Android
@@ -81,7 +81,7 @@ flutter build appbundle --release `
 | Biometric data never leaves the device | ✅ |
 
 ## 6. Test before submitting
-- ✅ `flutter test` (122) · `flutter analyze` · `cd backend/tests && npm test` (71).
+- ✅ `flutter test` (134) · `flutter analyze` · `cd backend/tests && npm test` (85).
 - ✅ Visual audit: `CAPTURE=1 flutter test test/screenshots/capture_test.dart`
   → `build/screens/` (also your store screenshots).
 - 🔑 **Real-device pass** (one Android, one iPhone) against the LIVE
@@ -141,3 +141,12 @@ flutter build appbundle --release `
   (demo stores them on-device). AI-01 prompt `openers-v4` receives only the
   "You both" labels, never message text.
 - Complaint → answer table for store copy: `docs/REVIEW-GAPS.md`.
+
+## Red-team round 2 + care (added Nov 14)
+- ✅ Fixed: fake system notices, backdated messages, forged plan
+  confirmations/check-ins, message floods (30/min), AI payload cap — see
+  `docs/SECURITY-AND-SCALE.md` (attack table, residual risks, scale plan).
+- 🔑 Turn on Supabase Auth CAPTCHA + SMS rate limits; book an external pen test.
+- ✅ "How are you, really?" mood check-in on Decompress (crisis line 988 for
+  "Low" — 🔑 localise the number per country before launching outside the US),
+  One-minute reset, games built from both profiles, "I'll message first".

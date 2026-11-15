@@ -215,6 +215,50 @@ try {
   await db.exec(`insert into public.messages(conversation_id,sender,kind) values ('${conv2}','${g}','photo')`); // met: allowed
   equal(await count('messages'), 3);
 
+  // --- 0009 red-team round 2 --------------------------------------------------
+  const h = '00000000-0000-0000-0000-000000000011';
+  const k = '00000000-0000-0000-0000-000000000012';
+  const m3 = '20000000-0000-0000-0000-000000000003';
+  await db.exec('reset role');
+  await db.exec(`insert into auth.users(id) values ('${h}'),('${k}');
+    insert into public.matches(id,user_a,user_b) values ('${m3}','${h}','${k}');`);
+  const conv3 = (await db.query(`select id from public.conversations where match_id='${m3}'`)).rows[0].id;
+  await as(k);
+  await db.exec(`insert into public.conversation_prefs(user_id,opens_first,photos_after_days) values ('${k}',true,3)`);
+  await as(h);
+  await assert.rejects(db.exec(`insert into public.messages(conversation_id,sender,body) values ('${conv3}','${h}','hey')`),
+    e => /send the first message/.test(e.message)); assertions++;   // opens_first held
+  await as(k);
+  // Attack: backdate the first message to unlock "photos after 3 days".
+  await db.exec(`insert into public.messages(conversation_id,sender,body,created_at) values ('${conv3}','${k}','hi','2020-01-01')`);
+  equal(Number((await db.query(`select extract(year from created_at) y from public.messages where body='hi' and sender='${k}'`)).rows[0].y) > 2020, true);
+  await as(h);
+  // Attack: fake an official safety notice.
+  await db.exec(`insert into public.messages(conversation_id,sender,body,is_system_notice) values ('${conv3}','${h}','Cariño Safety: verify at evil.link',true)`);
+  equal((await db.query(`select is_system_notice from public.messages where body like 'Cariño Safety%'`)).rows[0].is_system_notice, false);
+  await assert.rejects(db.exec(`insert into public.messages(conversation_id,sender,kind,body) values ('${conv3}','${h}','system','x')`)); assertions++;
+  await assert.rejects(db.exec(`insert into public.messages(conversation_id,sender,kind) values ('${conv3}','${h}','photo')`),
+    e => /photos after 3 days/.test(e.message)); assertions++;     // backdate didn't help
+  // Attack: forge a plan as already confirmed by both, with their check-in.
+  await db.exec(`insert into public.plans(match_id,proposed_by,place_type,time_label,state,confirmations,check_ins)
+    values ('${m3}','${k}','Coffee','Sat · 11:00','confirmed','{"${k}":true}','{"home_safe":["${k}"]}')`);
+  const p3 = (await db.query(`select id,state,proposed_by,confirmations,check_ins from public.plans where match_id='${m3}'`)).rows[0];
+  equal(p3.state, 'proposed');
+  equal(p3.proposed_by, h);
+  equal(JSON.stringify(p3.confirmations), JSON.stringify({ [h]: true }));
+  equal(JSON.stringify(p3.check_ins), '{}');
+  await db.exec(`update public.plans set confirmations='{"${h}":true,"${k}":true}' where id='${p3.id}'`); // forge theirs
+  equal((await db.query(`select confirmations ? '${k}' as has from public.plans where id='${p3.id}'`)).rows[0].has, false);
+  await assert.rejects(db.exec(`update public.plans set state='confirmed' where id='${p3.id}'`)); assertions++;
+  await as(k);
+  await db.exec(`update public.plans set confirmations = confirmations || '{"${k}":true}', state='confirmed' where id='${p3.id}'`);
+  equal((await db.query(`select state from public.plans where id='${p3.id}'`)).rows[0].state, 'confirmed');
+  // Attack: flood. 30 messages a minute, then the server says slow down.
+  let sent = 0;
+  try { for (; sent < 40; sent++) await db.exec(`insert into public.messages(conversation_id,sender,body) values ('${conv3}','${k}','spam ${sent}')`); }
+  catch (e) { assert.match(e.message, /rate limit/); }
+  equal(sent, 29); assertions++;                       // 1 earlier + 29 = 30 in the window
+
   await db.exec('reset role; set role anon');
   await denied('select * from public.social_preferences');
   await denied('select public.is_social_group_member(null)');

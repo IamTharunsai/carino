@@ -433,7 +433,7 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen> {
                   children: [
                     const Icon(Icons.auto_awesome, size: 18),
                     const SizedBox(width: 6),
-                    Text('AI Profile Coach (AI-03)',
+                    Text('AI Profile Coach',
                         style: text.titleMedium),
                   ],
                 ),

@@ -7,6 +7,7 @@ import 'package:carino/models/message.dart';
 import 'package:carino/models/sync.dart';
 import 'package:carino/screens/chats/conversation_screen.dart';
 import 'package:carino/screens/chats/conversation_settings_screen.dart';
+import 'package:carino/screens/chats/games_screen.dart';
 import 'package:carino/screens/connect/decompress_screens.dart';
 import 'package:carino/screens/connect/plan_composer_screen.dart';
 import 'package:carino/screens/connect/post_plan_feedback_screen.dart';
@@ -180,6 +181,48 @@ void main() {
     await t.scrollUntilVisible(find.text('How Aria texts'), 200,
         scrollable: find.byType(Scrollable).first);
     expect(find.text('How Aria texts'), findsOneWidget);
+  });
+
+  testWidgets('How are you, really? Low shows care, a minute and 988', (t) async {
+    await show(t, const DecompressScreen());
+    await t.tap(find.text('🌧️ Low'));
+    await t.pumpAndSettle();
+    expect(find.textContaining("You don't have to fix it"), findsOneWidget);
+    expect(find.text('Call 988'), findsOneWidget);
+    expect(find.text('Spa hour: sauna + cold plunge'), findsNothing); // narrowed to what fits
+    await t.tap(find.text('Start my minute'));
+    await t.pump();
+    await t.pump(const Duration(milliseconds: 600));
+    expect(find.text('One minute for you'), findsOneWidget);
+    expect(find.text('60'), findsOneWidget);
+    await t.pump(const Duration(seconds: 61));
+    expect(find.text('That was a minute just for you.'), findsOneWidget);
+  });
+
+  testWidgets('games use a deck made for the two of you', (t) async {
+    await show(t, GamesScreen(member: MockData.memberById('m-aria')));
+    await t.scrollUntilVisible(find.text('Made for you two · from both profiles'), 200,
+        scrollable: find.byType(Scrollable).first);
+    expect(find.text('Made for you two · from both profiles'), findsOneWidget);
+  });
+
+  testWidgets("I'll message first: composer waits until they write", (t) async {
+    final c = Conversation(id: 'conv-priya', memberId: 'm-priya', mode: ChatMode.keep, messages: []);
+    await show(t, ConversationScreen(conversation: c));
+    expect(find.textContaining('prefers to send the first message'), findsOneWidget);
+    expect(find.byTooltip('Send'), findsNothing);
+  });
+
+  testWidgets("I'll message first is a setting I can turn on", (t) async {
+    await show(t, const SyncSettingsScreen());
+    await t.scrollUntilVisible(find.text("I'll message first"), 200,
+        scrollable: find.byType(Scrollable).first);
+    await t.tap(find.text("I'll message first"));
+    await t.pump();
+    await t.scrollUntilVisible(find.text('Save'), 200, scrollable: find.byType(Scrollable).first);
+    await t.tap(find.text('Save'));
+    await t.pumpAndSettle();
+    expect(Services.prefs.myComfort.opensFirst, isTrue);
   });
 
   testWidgets('things to remember: a private note per match', (t) async {

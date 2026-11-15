@@ -51,7 +51,11 @@ Deno.serve(async (req: Request) => {
     return json({ error: "rate_limited", retry_after_seconds: 60 }, 429);
   }
 
-  const body = await req.json().catch(() => ({}));
+  // Cost-abuse guard: drafts need tiny inputs; refuse oversized payloads.
+  const raw = await req.text();
+  if (raw.length > 8_000) return json({ error: "payload too large" }, 413);
+  let body: any = {};
+  try { body = JSON.parse(raw); } catch { /* empty body -> unknown feature */ }
   const feature = String(body.feature ?? "");
   const route = FEATURE_MODELS[feature];
   if (!route) return json({ error: "unknown feature" }, 400);

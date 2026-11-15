@@ -15,6 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:carino/config/app_config.dart';
 import 'package:carino/data/mock_data.dart';
+import 'package:carino/models/message.dart';
 import 'package:carino/models/social.dart';
 import 'package:carino/screens/chats/chat_list_screen.dart';
 import 'package:carino/screens/chats/conversation_screen.dart';
@@ -238,6 +239,17 @@ void main() {
       await t.drag(find.byType(Scrollable).first, const Offset(0, -300));
       await t.pumpAndSettle();
     }),
+    Shot('65_mood_low', () => const DecompressScreen(), (t) async {
+      await t.tap(find.text('🌧️ Low'));
+      await t.pumpAndSettle();
+    }),
+    Shot('66_one_minute', () => const OneMinuteScreen(step: 'Step outside for one minute of daylight.')),
+    Shot('67_games_personal', () => GamesScreen(member: MockData.memberById('m-aria')), (t) async {
+      await t.drag(find.byType(Scrollable).first, const Offset(0, -500));
+      await t.pumpAndSettle();
+    }),
+    Shot('68_opens_first', () => ConversationScreen(
+        conversation: Conversation(id: 'c-p', memberId: 'm-priya', mode: ChatMode.keep, messages: []))),
     Shot('64_profile_how_they_text', () => ProfileDetailScreen(member: MockData.memberById('m-aria')), (t) async {
       await t.drag(find.byType(Scrollable).first, const Offset(0, -900));
       await t.pumpAndSettle();

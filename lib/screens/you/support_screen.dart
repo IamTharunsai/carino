@@ -56,7 +56,7 @@ class _SupportScreenState extends State<SupportScreen> {
       _messages.add(const _Msg(
         true,
         'Thanks — I\'ve noted that. In the live product this routes to '
-            'the support model + ticketing (AI-07); anything account-'
+            'the support model + ticketing; anything account-'
             'specific creates a case a human can see. If this is urgent '
             'or about your safety, tap “Talk to a human” now.',
       ));

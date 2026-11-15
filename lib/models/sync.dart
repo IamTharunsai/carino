@@ -216,6 +216,7 @@ class ComfortRules {
     this.noCallsBeforeMeet = false,
     this.photosAfterDays = 0,
     this.daytimeFirstMeet = false,
+    this.opensFirst = false,
   });
 
   final bool noCallsBeforeMeet;
@@ -225,12 +226,26 @@ class ComfortRules {
 
   /// First meet between 08:00 and 18:00 only.
   final bool daytimeFirstMeet;
+
+  /// "I'll message first": matches can't write until this member does.
+  final bool opensFirst;
 }
+
+/// Held until they've written, when they chose to open the chat.
+String? firstMessageHold({
+  required ComfortRules theirs,
+  required bool theyHaveWritten,
+  required String theirName,
+}) =>
+    theirs.opensFirst && !theyHaveWritten
+        ? "$theirName prefers to send the first message. You'll get a notification the moment they write."
+        : null;
 
 List<String> comfortSummary(ComfortRules r) => [
       if (r.noCallsBeforeMeet) 'No calls before we\'ve met',
       if (r.photosAfterDays > 0) 'Photos after ${r.photosAfterDays} days of chatting',
       if (r.daytimeFirstMeet) 'First meet in the daytime',
+      if (r.opensFirst) 'Sends the first message',
     ];
 
 /// A call needs both people, so either person's rule applies.

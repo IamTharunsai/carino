@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../config/app_config.dart';
+import '../../config/env.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/spark_button.dart';
 
@@ -60,6 +61,7 @@ class _WaitlistScreenState extends State<WaitlistScreen> {
             // Scaffold affordance: in production the admission arrives as
             // a server push when the batch opens; this button stands in so
             // the flow can be walked end-to-end.
+            if (Env.useMockBackend) ...[
             SparkButton(
               label: 'Continue (demo: batch opened)',
               onPressed: widget.onAdmitted,
@@ -71,6 +73,7 @@ class _WaitlistScreenState extends State<WaitlistScreen> {
               style: Theme.of(context).textTheme.bodySmall,
               textAlign: TextAlign.center,
             ),
+            ],
           ],
         ),
       ),

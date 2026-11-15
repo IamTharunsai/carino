@@ -67,7 +67,7 @@ class _MomentsScreenState extends State<MomentsScreen> {
               ),
               IconButton(
                 icon: const Icon(Icons.add_circle_outline),
-                tooltip: 'Create a Moment (S-023)',
+                tooltip: 'Create a Moment',
                 onPressed: _createSheet,
               ),
             ],
