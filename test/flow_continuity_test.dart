@@ -176,4 +176,42 @@ void main() {
     await settle(t);
     expect(Services.prefs.liked, hasLength(1)); // super like counts as a like
   });
+
+  testWidgets('Daily Drop: a card I swipe leaves the Drop', (t) async {
+    await show(t, const DiscoverScreen());
+    await t.tap(find.textContaining('Daily Drop ·'));
+    await t.pump();
+    final before = int.parse(RegExp(r'Daily Drop · (\d+)')
+        .firstMatch((t.widget<Text>(find.textContaining('Daily Drop ·'))).data!)!.group(1)!);
+    await t.dragFrom(const Offset(180, 420), const Offset(-320, 0)); // pass
+    await settle(t);
+    final after = int.parse(RegExp(r'Daily Drop · (\d+)')
+        .firstMatch((t.widget<Text>(find.textContaining('Daily Drop ·'))).data!)!.group(1)!);
+    expect(after, before - 1);
+  });
+
+  testWidgets('view-once: I see the photo, it is spent when I close it', (t) async {
+    final c = MockData.chatWith(MockData.memberById('m-elena'));
+    c.messages.add(ChatMessage(id: 'vo', text: 'View-once photo', fromMe: false, timeLabel: 'now',
+        mediaAsset: 'assets/images/backdrop_match.jpg', viewOnce: true));
+    await show(t, ConversationScreen(conversation: c));
+    expect(c.messages.last.mediaConsumed, isFalse);
+    await t.tap(find.byType(Image).last);
+    await t.pumpAndSettle();
+    expect(c.messages.last.mediaConsumed, isFalse); // still viewing
+    await t.pageBack();
+    await t.pumpAndSettle();
+    expect(c.messages.last.mediaConsumed, isTrue);
+  });
+
+  testWidgets('AI switched off means AI drafts stay off', (t) async {
+    Services.prefs.aiConversationAssistant = false;
+    addTearDown(() => Services.prefs.aiConversationAssistant = true);
+    final c = MockData.conversations().firstWhere((x) => x.id == 'conv-aria');
+    await show(t, ConversationScreen(conversation: c));
+    await t.tap(find.byTooltip('Suggest replies (AI drafts)'));
+    await t.pump();
+    expect(find.textContaining('AI drafts are off'), findsOneWidget);
+    expect(find.text('AI drafts — tap to edit, you send it'), findsNothing);
+  });
 }

@@ -155,7 +155,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ButtonSegment(value: ThemeMode.system, icon: Icon(Icons.brightness_auto_outlined), label: Text('Auto')),
               ],
               selected: {mode},
-              onSelectionChanged: (v) => _prefs.themeMode.value = v.first,
+              onSelectionChanged: (v) {
+                _prefs.themeMode.value = v.first;
+                _prefs.save();
+              },
             ),
           ),
           const SizedBox(height: 8),

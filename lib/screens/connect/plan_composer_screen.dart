@@ -43,6 +43,11 @@ class _PlanComposerScreenState extends State<PlanComposerScreen> {
       );
 
   Future<void> _aiDraft() async {
+    if (!Services.prefs.aiConversationAssistant) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('AI drafts are off. Turn them on in Privacy Centre → AI features.')));
+      return;
+    }
     // AI-07: draft only. Nothing is sent until the member taps Send.
     setState(() => _drafting = true);
     final idea = MockData.planIdeas.firstWhere((p) => p.id == _selectedId,

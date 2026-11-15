@@ -40,6 +40,9 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   FiltersConfig _filters = const FiltersConfig();
   Intention? get _filter => _filters.intention;
   bool _showDrop = false;
+
+  /// Everyone I've liked or passed this session — gone from BOTH decks.
+  final Set<String> _swiped = {};
   Offset _drag = Offset.zero;
   bool _dragging = false;
 
@@ -51,7 +54,9 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
 
   List<Member> get _visibleDeck {
     // Reciprocal "I want to meet" applies to the Drop and the deck alike.
-    if (_showDrop) return MockData.dailyDrop.where(fitsMe).toList();
+    if (_showDrop) {
+      return MockData.dailyDrop.where((m) => fitsMe(m) && !_swiped.contains(m.id)).toList();
+    }
     return _deck.where((m) {
       if (Services.prefs.blocked.contains(m.id)) return false;
       if (!fitsMe(m)) return false;
@@ -129,6 +134,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     if (!mounted) return;
     setState(() {
       _deck.remove(member);
+      _swiped.add(member.id);
       _drag = Offset.zero;
       _leaving = false;
       _lastPassed = like ? null : member;
@@ -159,7 +165,10 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
             label: 'Undo',
             onPressed: () {
               setState(() {
-                if (_lastPassed != null) _deck.insert(0, _lastPassed!);
+                if (_lastPassed != null) {
+                  _deck.insert(0, _lastPassed!);
+                  _swiped.remove(_lastPassed!.id);
+                }
                 _lastPassed = null;
               });
             },
@@ -271,7 +280,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                 ),
                 ChoiceChip(
                   avatar: const Icon(Icons.local_fire_department_outlined, size: 16),
-                  label: Text('Daily Drop · ${MockData.dailyDrop.where(fitsMe).length}'),
+                  label: Text('Daily Drop · ${MockData.dailyDrop.where((m) => fitsMe(m) && !_swiped.contains(m.id)).length}'),
                   selected: _showDrop,
                   selectedColor: AppColors.emberCrimson,
                   onSelected: (_) => setState(() => _showDrop = true),

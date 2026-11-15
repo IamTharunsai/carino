@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../widgets/secure_screen.dart';
 import '../../data/mock_data.dart';
@@ -15,6 +17,7 @@ import '../../widgets/safety_actions.dart';
 import '../../widgets/spark_button.dart';
 import '../connect/plan_composer_screen.dart';
 import '../connect/plan_detail_screen.dart';
+import '../connect/spark_session_screen.dart';
 import 'conversation_settings_screen.dart';
 import 'games_screen.dart';
 import 'media_viewer_screen.dart';
@@ -50,6 +53,8 @@ class _ConversationScreenState extends State<ConversationScreen> {
 
   @override
   void dispose() {
+    _vanishTimer?.cancel();
+    if (_vanish && widget.conversation.vanishMinutes == 0) _dissolveRead();
     _composer.dispose();
     _scroll.dispose();
     super.dispose();
@@ -187,10 +192,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
       showComfortHold(context, hold, onPlan: _openComposer);
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('Video calls start as a Spark invite — ${_member.firstName} '
-          'chooses to accept. (Demo: no call is placed.)'),
-    ));
+    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const SparkPreCallScreen()));
   }
 
   Future<void> _pickTone() async {
@@ -284,6 +286,21 @@ class _ConversationScreenState extends State<ConversationScreen> {
     _member = MockData.memberById(widget.conversation.memberId);
     widget.conversation.unreadCount = 0;
     if (_iHaveNotSpoken && _firstHold == null) _loadStarters();
+    if (_vanish && widget.conversation.vanishMinutes > 0) {
+      _vanishTimer = Timer(Duration(minutes: widget.conversation.vanishMinutes), _dissolveRead);
+    }
+  }
+
+  Timer? _vanishTimer;
+
+  /// Vanish: everything read in this sitting dissolves (system notices and
+  /// game cards stay). In production the server sets dissolved_at.
+  void _dissolveRead() {
+    if (!_vanish) return;
+    for (final m in widget.conversation.messages) {
+      if (!m.isSystemNotice && !m.isGameCard) m.dissolved = true;
+    }
+    if (mounted) setState(() {});
   }
 
   Future<void> _loadStarters() async {
@@ -292,8 +309,9 @@ class _ConversationScreenState extends State<ConversationScreen> {
     // message" sit beside them in the UI.
     // Grounded in "You both" first; AI drafts (also given the overlaps) after.
     final chips = _chips;
-    final drafts = await Services.ai
-        .suggestOpeners(memberName: _member.firstName, shared: chips);
+    final drafts = Services.prefs.aiIcebreakers
+        ? await Services.ai.suggestOpeners(memberName: _member.firstName, shared: chips)
+        : const <String>[]; // AI icebreakers off: only the "You both" openers
     if (!mounted) return;
     setState(() => _starters =
         [...groundedOpeners(chips, _member.firstName), ...drafts].take(4).toList());
@@ -430,6 +448,11 @@ class _ConversationScreenState extends State<ConversationScreen> {
   }
 
   Future<void> _loadAiDrafts() async {
+    if (!Services.prefs.aiConversationAssistant) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('AI drafts are off. Turn them on in Privacy Centre → AI features.')));
+      return;
+    }
     // AI-01: suggestions are drafts — see honesty rules in AIService.
     setState(() => _aiLoading = true);
     final drafts = await Services.ai.suggestOpeners(memberName: _member.firstName);
@@ -801,7 +824,11 @@ class _ConversationScreenState extends State<ConversationScreen> {
                 Expanded(
                   child: TextField(
                     controller: _composer,
+                    maxLength: 1000,
+                    textInputAction: TextInputAction.send,
+                    onSubmitted: (_) => _send(),
                     decoration: InputDecoration(
+                      counterText: '',
                       hintText: 'Message ${_member.firstName}…',
                       border: const OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(999)),
@@ -967,16 +994,15 @@ class _ConversationScreenState extends State<ConversationScreen> {
                   style: TextStyle(fontStyle: FontStyle.italic))
             else if (msg.mediaAsset != null)
               GestureDetector(
-                onTap: () {
-                  // S-037: opening view-once media consumes it.
-                  if (msg.viewOnce) {
-                    setState(() => msg.mediaConsumed = true);
-                  }
-                  Navigator.of(context).push(
+                onTap: () async {
+                  if (msg.viewOnce && msg.mediaConsumed) return;
+                  await Navigator.of(context).push(
                     MaterialPageRoute<void>(
                       builder: (_) => MediaViewerScreen(message: msg),
                     ),
                   );
+                  // S-037: view-once is spent when you close it, not before.
+                  if (msg.viewOnce && mounted) setState(() => msg.mediaConsumed = true);
                 },
                 child: msg.viewOnce && msg.mediaConsumed
                     ? const Padding(
@@ -992,8 +1018,12 @@ class _ConversationScreenState extends State<ConversationScreen> {
                       )
                     : ClipRRect(
                         borderRadius: BorderRadius.circular(12),
-                        child: Image.asset(msg.mediaAsset!,
-                            width: 200, height: 140, fit: BoxFit.cover),
+                        child: ImageFiltered(
+                          enabled: !msg.fromMe && Services.prefs.sensitiveMediaBlur,
+                          imageFilter: ui.ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+                          child: Image.asset(msg.mediaAsset!,
+                              width: 200, height: 140, fit: BoxFit.cover),
+                        ),
                       ),
               )
             else

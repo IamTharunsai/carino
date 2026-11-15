@@ -110,6 +110,11 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen> {
   }
 
   Future<void> _coach() async {
+    if (!Services.prefs.aiProfileCoach) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Profile coach is off. Turn it on in Privacy Centre → AI features.')));
+      return;
+    }
     setState(() => _coachLoading = true);
     final tips = await Services.ai.profileCoachTips();
     if (!mounted) return;

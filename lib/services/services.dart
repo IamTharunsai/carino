@@ -335,6 +335,7 @@ class UserPrefs {
         'blocked': blocked.toList(),
         'muted': mutedChats.toList(),
         'notifLanguage': notifLanguage,
+        'theme': themeMode.value.name,
         'notifTone': notifTone.name,
         'streaks': streaks,
         'profile': {
@@ -391,6 +392,7 @@ class UserPrefs {
       if (pr['languages'] is List) languages = strs(pr['languages']);
       if (pr['interests'] is List) interests = strs(pr['interests']);
       notifLanguage = j['notifLanguage'] as String? ?? notifLanguage;
+      themeMode.value = ThemeMode.values.asNameMap()[j['theme']] ?? themeMode.value;
       notifTone = NotifTone.values.asNameMap()[j['notifTone']] ?? notifTone;
       blocked
         ..clear()
