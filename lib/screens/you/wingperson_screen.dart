@@ -5,6 +5,7 @@ import '../../services/services.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/spark_button.dart';
+import '../../widgets/copy_text.dart';
 import '../discover/profile_detail_screen.dart';
 
 /// Wingperson — invite one friend by link to look over your Daily Drop and
@@ -22,9 +23,7 @@ class _WingpersonScreenState extends State<WingpersonScreen> {
 
   Future<void> _start() async {
     const link = 'https://carino.app/wing/demo-K4P9';
-    try {
-      await Clipboard.setData(const ClipboardData(text: link));
-    } catch (_) {}
+    if (!await copyText(context, link)) return;
     if (!mounted) return;
     setState(() => Services.prefs.wingpersonActive = true);
     ScaffoldMessenger.of(context).showSnackBar(

@@ -8,6 +8,7 @@ import '../../theme/app_colors.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/spark_button.dart';
 import 'plan_detail_screen.dart';
+import '../../widgets/copy_text.dart';
 import 'spark_session_screen.dart';
 
 /// Real-world connection bundle: Events Near You, Speed Spark Nights and
@@ -297,9 +298,7 @@ class _GroupHangoutScreenState extends State<GroupHangoutScreen> {
 
   Future<void> _inviteFriend() async {
     const link = 'https://carino.app/hangout/invite/demo-7Q2X';
-    try {
-      await Clipboard.setData(const ClipboardData(text: link));
-    } catch (_) {}
+    if (!await copyText(context, link)) return;
     if (!mounted) return;
     setState(() => _friendInvited = true);
     ScaffoldMessenger.of(context).showSnackBar(

@@ -177,3 +177,24 @@ overflow — keep adding new screens to it.
   notices, server time, rate limit, opens-first), `guard_plans`. Guards are
   SECURITY INVOKER — `is_client()` is always false inside definer functions.
 - Security + scale write-up: `docs/SECURITY-AND-SCALE.md`.
+
+## Update (Nov 15) — merged the parallel build (`carino-source (1)`)
+- That folder was the Nov 13 first commit + another agent's rewrite around a
+  central `AppStore`. A blind copy would have deleted migrations 0003–0010
+  and today's work, so it was merged feature by feature into THIS
+  architecture: motion library (aurora backgrounds, Ken Burns, shimmer),
+  real tap/chime sounds (`audioplayers`, `assets/sounds`), particle match
+  overlay (`flutter_animate`), 3D swipe tilt + LIKE/PASS/SUPER stamps + flick
+  + swipe-up Super Like, scrollable sheets, and their bug fixes (Daily Drop
+  advances, view-once spent on close, Vanish dissolves, AI switches honoured,
+  keyboard send + 1000-char cap, video button → Spark lobby, photo blur,
+  theme saved). Their `AppStore`, chaos tests, Worldwide and Plans list
+  were NOT taken (they need the store). The folder stays on disk, ignored by
+  git and the analyzer.
+- Tests: `test/flutter_test_config.dart` freezes the looping backgrounds
+  (`stillBackgrounds`) so pumpAndSettle can finish.
+- Button audit: `AUDIT=1 flutter test test/audit/button_audit_test.dart`
+  (620 controls / 61 screens → `build/audit/buttons.csv`).
+- Other agent's source audit kept in `docs/CUSTOMER-WORKFLOW-REVIEW-2026-11-15.md`
+  and `docs/audit/` (26 findings; D01/D02/D05/D06/D09/D16/D17/D22-drop/D25
+  fixed today — the rest are listed there).

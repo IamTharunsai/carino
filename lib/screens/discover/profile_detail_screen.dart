@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/member.dart';
+import '../../services/services.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/safety_actions.dart';
@@ -217,7 +218,7 @@ class ProfileDetailScreen extends StatelessWidget {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                  'Video reply sent to ${member.firstName} privately — your like, with a hello.'),
+                                  "Video replies aren't connected in this preview yet — nothing was sent to ${member.firstName}."),
                             ),
                           );
                         },
@@ -234,7 +235,7 @@ class ProfileDetailScreen extends StatelessWidget {
                                   'Liked ${member.firstName} — anchored to this prompt. If it\'s mutual, your chat opens right here.'),
                             ),
                           );
-                          Navigator.of(context).pop();
+                          Navigator.of(context).pop(true);
                         },
                       ),
                     ],
@@ -338,11 +339,12 @@ class ProfileDetailScreen extends StatelessWidget {
                   title: const Text('Hide this profile'),
                   subtitle: const Text('No report — you just won\'t see them again.'),
                   onTap: () {
-                    Navigator.of(context).pop();
+                    Services.prefs.hiddenPeople.add(member.id);
+                    Services.prefs.save();
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                          content: Text('${member.firstName} hidden.')),
+                      SnackBar(content: Text("${member.firstName} hidden — you won't see them again.")),
                     );
+                    Navigator.of(context).maybePop(false); // leave the profile as a pass
                   },
                 ),
               ],

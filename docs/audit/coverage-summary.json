@@ -1,0 +1,15 @@
+{
+  "dart_files": 92,
+  "callback_bindings": 571,
+  "excluded_theme_colour_fields": 4,
+  "navigation_modal_external_calls": 273,
+  "widget_classes": 98,
+  "inputs_and_back_surfaces": 164,
+  "generated_direction_checks": 7994,
+  "event_and_lifecycle_sites": 81,
+  "native_and_backend_source_files_inventoried": 42,
+  "parse_errors": 0,
+  "files_changed_since_ast_scan": 0,
+  "all_direction_end_to_end_certified": false,
+  "warning": "Generated checks are a coverage debt ledger, not executed tests. Loop-created controls are templates, not every runtime item."
+}

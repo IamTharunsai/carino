@@ -1,0 +1,164 @@
+ID,Area,Customer action,Current destination or consequence,Gap or completion requirement,Finding,Source
+A001,Entry,Create account,Root age gate,Save and resume real onboarding state,F10,lib/screens/root_flow.dart
+A002,Entry,I already have an account,Existing session verification check or SignInScreen,Check admission and published profile as well,F08 F10,lib/screens/root_flow.dart
+A003,Entry,Terms Privacy or Guidelines,Summary bottom sheet,Provide full policy destination,F39,lib/screens/onboarding/welcome_screen.dart
+A004,Age,Submit adult DOB,Auth or verification intro,Connect authoritative DOB to identity and preserve draft,F07 F10,lib/screens/onboarding/age_gate_screen.dart
+A005,Age,Submit underage DOB,Blocked age state with persisted deadline,Validate birthday boundary on hardware and server,F38,lib/screens/onboarding/age_gate_screen.dart
+A006,Auth,Send code,Same screen code-entry stage,International number validation and network recovery,F11,lib/screens/onboarding/auth_screen.dart
+A007,Auth,Verify code,Verification intro or returning-account check,Expired code and accurate lockout states,F11,lib/screens/onboarding/auth_screen.dart
+A008,Auth,Resend code,Code request plus 30-second UI cooldown,Provider deadline and stale-code behavior,F11,lib/screens/onboarding/auth_screen.dart
+A009,Auth,Use different contact,Contact entry on same screen,Preserve correct request association during in-flight responses,F11,lib/screens/onboarding/auth_screen.dart
+A010,Auth,Continue with passkey during signup,Demo auth then unconditional completion callback,Reject unsuccessful live authentication,F09,lib/screens/onboarding/auth_screen.dart
+A011,Auth,Sign in with password,Verification check then Home or age gate,Signup has no password creation route,F08,lib/screens/onboarding/sign_in_screen.dart
+A012,Auth,Show password,Unmasks local field,Verify screen-reader label and safe focus,F38,lib/screens/onboarding/sign_in_screen.dart
+A013,Auth,Forgot password,OTP screen,Clarify access recovery versus resetting password,F08,lib/screens/onboarding/sign_in_screen.dart
+A014,Auth,Google or Apple,Demo session or external OAuth browser,Validate callback cancellation restoration and duplicate routing,F10 F11,lib/screens/onboarding/sign_in_screen.dart
+A015,Auth,Use passkey during returning sign-in,Biometric then demo sign-in or live unavailable message,Implement credential ceremony or disable unsupported action,F09,lib/screens/onboarding/sign_in_screen.dart
+A016,Verification,Start verification,Provider simulation screen,Real vendor session capture result and webhook,F12,lib/screens/root_flow.dart
+A017,Verification,Capture front and back,Timed simulated processing phases,Actual capture and resumable provider errors,F12,lib/screens/onboarding/verification_flow_screen.dart
+A018,Verification,Retake or upload,Local provider UI states,Real file/capture validation and permissions,F12,lib/screens/onboarding/verification_flow_screen.dart
+A019,Verification,Take live selfie and run match,Timed layers then result screen,Live mode remains pending without result subscription,F12,lib/screens/onboarding/verification_flow_screen.dart
+A020,Verification,Cancel,Verification intro,Preserve provider session and meaningful resume,F12,lib/screens/onboarding/verification_flow_screen.dart
+A021,Verification,OK notify me while pending,Pop routes until root,No enum-stage exit or status refresh,F12,lib/screens/onboarding/verification_flow_screen.dart
+A022,Verification,Retry failed check,Provider screen,Actual reason and provider retry state,F12,lib/screens/onboarding/verification_flow_screen.dart
+A023,Verification,Alternative route,SupportScreen,Real support escalation required,F12 F27,lib/screens/onboarding/verification_flow_screen.dart
+A024,Verification,Appeal,Backend appeal submission plus reference,Case linkage details errors and history,F27,lib/screens/onboarding/verification_flow_screen.dart
+A025,Onboarding,Continue intentions,IdentityScreen and local profile preferences,Server persistence and back/draft recovery,F10 F36,lib/screens/onboarding/intentions_screen.dart
+A026,Onboarding,Save identity,Quiz or return callback,Identity and audience choices not included in persisted profile blob,F28 F36,lib/screens/onboarding/identity_screen.dart
+A027,Onboarding,Skip identity,Next stage without saving editor changes,Explain skip versus save and neutral matching defaults,F28 F36,lib/screens/onboarding/identity_screen.dart
+A028,Onboarding,Pick skip or finish quiz,Next question or privacy setup,Save answers durably and avoid sample overlap for unanswered tastes,F36,lib/screens/onboarding/taste_quiz_screen.dart
+A029,Onboarding,Privacy choices then continue,Profile builder,Privacy values need persistence and enforcement,F28 F36,lib/screens/onboarding/privacy_setup_screen.dart
+A030,Onboarding,Notify when city opens,Local waitlist toggle,Actual registration notification and resume admission,F10 F12,lib/screens/onboarding/waitlist_screen.dart
+A031,Profile,Add photo,Next bundled sample image in slot,Real media picker upload moderation and saved gallery,F06,lib/screens/onboarding/profile_creation_screen.dart
+A032,Profile,Make main move or remove photo,Mutates editor-local slots,Persist gallery and revalidate main photo,F06,lib/screens/onboarding/profile_creation_screen.dart
+A033,Profile,Record or retake video,Local recorded boolean,Real recorder captions preview and upload,F06,lib/screens/onboarding/profile_creation_screen.dart
+A034,Profile,Record voice intro,Local toggle,Real recording playback save and cancel,F06,lib/screens/onboarding/profile_creation_screen.dart
+A035,Profile,Choose lifestyle,Editor-local set only,Save and render useful fields or remove collection,F06,lib/screens/onboarding/profile_creation_screen.dart
+A036,Profile,Get coach tips,AIService response shown in panel,Respect opt-out and handle request failure,F28,lib/screens/onboarding/profile_creation_screen.dart
+A037,Profile,Preview profile,Separate preview route,Use actual identity public component and audience policy,F07,lib/screens/onboarding/profile_creation_screen.dart
+A038,Profile,Publish profile directly,Completion callback without saving entered fields,Unify publishing operation,F05,lib/screens/onboarding/profile_creation_screen.dart
+A039,Profile,Looks right publish from preview,Save selected text fields then completion,Also save media and require successful persistence,F05 F06,lib/screens/onboarding/profile_creation_screen.dart
+A040,Permissions,Allow or Not now,Advance local primer index,No real OS request or durable permission result,F38,lib/screens/onboarding/permission_primers_screen.dart
+A041,Navigation,Tap bottom tab,IndexedStack changes selected child,Validate restored child state and readable labels,F35 F38,lib/screens/home_shell.dart
+A042,Dates,Heart swipe right or double-tap,Local liked ID then sample match or pending feedback,Real accepted like and shared match state,F02 F16,lib/screens/discover/discover_screen.dart
+A043,Dates,Pass or swipe left,Remove Nearby card and show Undo,Durable decision and exact-item undo,F16,lib/screens/discover/discover_screen.dart
+A044,Dates,Undo pass,Reinsert current _lastPassed,Old snackbar must capture its own member,F16,lib/screens/discover/discover_screen.dart
+A045,Dates,Prompt heart,Generic like handler,Keep specific prompt anchor,F15,lib/screens/discover/discover_screen.dart
+A046,Dates,Long-press heart,Like-options sheet,Provide visible discoverable alternative,F15 F35,lib/screens/experience/experience_screens.dart
+A047,Dates,Send like with note,Like event without stored note,Deliver exact note to correct recipient,F15,lib/screens/discover/discover_screen.dart
+A048,Dates,Send Spark,Spend allowance then generic local like,Atomic accepted delivery and preserved note,F15,lib/screens/experience/experience_screens.dart
+A049,Dates,Add gift,Gift picker then demo toast and like,Real priced delivery or labelled preview,F15,lib/screens/discover/discover_screen.dart
+A050,Dates,Open full profile then Like or Pass,Pop boolean handled by Dates,Use shared person-specific operation,F14,lib/screens/discover/discover_screen.dart
+A051,Dates,Nearby versus Daily Drop,Change source list,Drop decisions do not consume source cards,F13,lib/screens/discover/discover_screen.dart
+A052,Dates,Apply filters,Returned config changes Nearby filtering,Clarify and enforce Drop dealbreakers,F13,lib/screens/discover/discover_screen.dart
+A053,Dates,Reset demo deck,Reseed local deck and leave Drop,Hide demo-only reset in live product,F02,lib/screens/discover/discover_screen.dart
+A054,Dates,Worldwide,Feed request discarded and sample list rendered,Display mapped real worldwide members,F02,lib/screens/discover/worldwide_screen.dart
+A055,Worldwide,Profile Like or Pass,Profile closes with ignored return value,Record action before closing,F14,lib/screens/discover/worldwide_screen.dart
+A056,Match,Message celebration action,Replace overlay with correct conversation,Persist match and keep every list in sync,F16 F17,lib/screens/discover/discover_screen.dart
+A057,Match,Suggest plan celebration action,PlanComposerScreen for member,Create real shared proposal,F22,lib/screens/discover/discover_screen.dart
+A058,Match,Play game celebration action,GamesScreen for member,Real invite and independent answers,F37,lib/screens/discover/discover_screen.dart
+A059,Match,Close celebration,Back to previous screen with in-memory chat,Keep new match visible and durable,F16,lib/screens/discover/discover_screen.dart
+A060,Likes,Open inbound like with Plus,Full profile with ignored Like result,Shared accept/match operation,F14,lib/screens/connect/connect_screen.dart
+A061,Likes,See who with Plus,PaywallScreen,Correct purchase and refresh on return,F29,lib/screens/connect/connect_screen.dart
+A062,Likes,Undo outbound like,Remove local ID only,Save withdrawal and define already-matched policy,F16,lib/screens/you/likes_manager_screen.dart
+A063,Likes,Matched row in You liked,Status text with Undo action,Provide direct Message and Plan actions,F16,lib/screens/you/likes_manager_screen.dart
+A064,Likes,Pause discovery,Change prefs visibility,Enforce and persist discovery policy,F28,lib/screens/you/likes_manager_screen.dart
+A065,Likes,Not ready or daily limit,Local screen fields,Enforce actual introduction intake and persist,F36,lib/screens/you/likes_manager_screen.dart
+A066,Likes,Close kindly,Remove intro and show placed-in-chat toast,Actually create approved message and closure,F21,lib/screens/you/likes_manager_screen.dart
+A067,Chat list,Open conversation,ConversationScreen with shared local object,Load real durable conversation,F17,lib/screens/chats/chat_list_screen.dart
+A068,Chat list,Search,Local Keep conversation search,Real privacy-consistent index and empty results,F17 F18,lib/screens/chats/chat_list_screen.dart
+A069,Chat list,Close the loop,Hide via local _closed set and announce sent,Send actual goodbye and expose archive,F21,lib/screens/chats/chat_list_screen.dart
+A070,Chat list,Friends circles or new group,Social screens or group creation sheet,Real invitation membership and persisted groups,F02,lib/screens/chats/chat_list_screen.dart
+A071,Chat,Send text or sticker,Append to shared in-memory conversation,Delivery state retry and process persistence,F17,lib/screens/chats/conversation_screen.dart
+A072,Chat,AI starter or draft,Draft suggestions then editable composer,Respect consent before requests,F28,lib/screens/chats/conversation_screen.dart
+A073,Chat,Photo or view-once photo,Insert sample backdrop message,Picker preview upload and actual recipient,F20,lib/screens/chats/conversation_screen.dart
+A074,Chat,Voice note,Insert text describing 12-second note,Real recording and playback,F20,lib/screens/chats/conversation_screen.dart
+A075,Chat,Open view-once media,Consumed flag set then viewer sees consumed state,First view must display content,F19,lib/screens/chats/conversation_screen.dart
+A076,Chat,Report media,Snackbar instructs use of chat menu,Direct content-specific report,F20 F27,lib/screens/chats/media_viewer_screen.dart
+A077,Chat,Change Keep Vanish,Immediate local mode change,Mutual proposal and per-message enforced expiry,F18,lib/screens/chats/conversation_screen.dart
+A078,Chat,Reaction or unsend,Mutate message-local state,Recipient propagation limits and reconciliation,F17,lib/screens/chats/conversation_screen.dart
+A079,Chat,Pause or resume chat,Local system note and paused label,Durable shared policy and clear recipient outcome,F17,lib/screens/chats/conversation_screen.dart
+A080,Chat,Call,Call/pre-call screens after local comfort checks,Real availability permissions and room tokens,F26,lib/screens/chats/conversation_screen.dart
+A081,Chat settings,Private match note,Update prefs and save,Scope to account and secure durable storage,F04,lib/screens/chats/conversation_settings_screen.dart
+A082,Chat settings,Mute receipts or media blur,Local flags with differing lifetimes,Actual per-thread policy and persistence,F28 F36,lib/screens/chats/conversation_settings_screen.dart
+A083,Games,Answer This or That,Timed reveal of generated partner answer,Real second-person response or clearly labelled practice,F37,lib/screens/chats/games_screen.dart
+A084,Games,Skip or next question,Advance local question index,Maintain invitation state across devices,F37,lib/screens/chats/games_screen.dart
+A085,Plans,Enter Spark lobby,SparkPreCallScreen with sample inviter,Real eligible invitation/FIFO state,F26,lib/screens/connect/connect_screen.dart
+A086,Plans,Generic Suggest a plan,Composer targets fixed Aria,Ask which connection when no person selected,F35,lib/screens/connect/connect_screen.dart
+A087,Plans,Generic Play a game,Game targets fixed Sofia,Ask which connection and send real invite,F35 F37,lib/screens/connect/connect_screen.dart
+A088,Plans,Your plans,PlansListScreen reading sample plans,Read newly created shared plans,F25,lib/screens/connect/connect_screen.dart
+A089,Plans,Open match or archived match,Conversation or matched full profile,Enforce archive/reopen policy and real eligibility,F16,lib/screens/connect/connect_screen.dart
+A090,Plan composer,AI draft note,Fill local note text,Save exact reviewed note in proposal,F22,lib/screens/connect/plan_composer_screen.dart
+A091,Plan composer,Send plan suggestion,Replace composer with local detail and sent toast,Stored proposal plus recipient delivery,F22,lib/screens/connect/plan_composer_screen.dart
+A092,Plan detail,Confirm plan,Set local confirmed true and label Both confirmed,Recipient-only versioned acceptance,F23,lib/screens/connect/plan_detail_screen.dart
+A093,Plan detail,Propose change or Reschedule,Fresh composer without original plan ID,Update same proposal with new version,F24,lib/screens/connect/plan_detail_screen.dart
+A094,Plan detail,Decline kindly,Template sheet then toast without declined state,Send and save real decline,F24,lib/screens/connect/plan_detail_screen.dart
+A095,Plan detail,Cancel kindly,Local cancelled flag plus unsent message toast,Cancel everywhere and stop reminders/check-in,F24,lib/screens/connect/plan_detail_screen.dart
+A096,Plan detail,Write my own instead,Closes sheet,Open pre-addressed composer preserving plan context,F24,lib/screens/connect/plan_detail_screen.dart
+A097,Plan detail,Add to calendar,Integration-point snackbar,Calendar event export and error/cancel handling,F24,lib/screens/connect/plan_detail_screen.dart
+A098,Plan detail,I'm here or Home safe,Set local booleans,Real scoped check-in delivery,F24,lib/screens/connect/plan_detail_screen.dart
+A099,Plan detail,Add trusted contact,Update session prefs,Consent validation and durable account-safe state,F01,lib/screens/connect/plan_detail_screen.dart
+A100,Plan detail,Start date check-in,Local active boolean,Do not promise an unscheduled alert,F01,lib/screens/connect/plan_detail_screen.dart
+A101,Plan detail,I'm safe end check-in,Clear local active flag,Cancel scheduled alerts with acknowledgement,F01,lib/screens/connect/plan_detail_screen.dart
+A102,Plan detail,I need help now,Informational sheet including demo no-send caveat,Real explicit contact action or truthful unavailable fallback,F01,lib/screens/connect/plan_detail_screen.dart
+A103,Plan detail,Start Phone-Down,Local phone-down flow,Validate interruption and optional shared state,F38,lib/screens/connect/decompress_screens.dart
+A104,Plans history,Open past plan with feedback,PostPlanFeedbackScreen,Link saved reflection to actual completed plan,F24 F36,lib/screens/connect/plans_list_screen.dart
+A105,Stage,Tap play image,Decorative play icon on feed image,Actual playable media and caption/audio controls,F33,lib/screens/stage/stage_screen.dart
+A106,Stage,Publish post,Insert local sample-image feed item,Upload moderation persistence and audience enforcement,F02 F33,lib/screens/stage/stage_screen.dart
+A107,Stage,Report,Success snackbar only,Real content report and case receipt,F27,lib/screens/stage/stage_screen.dart
+A108,Stage,Make it a plan,PostToPlan sheet,Create visible durable plan and invite recipients,F25,lib/screens/stage/stage_screen.dart
+A109,Stage,Gift creator,Local demo acknowledgement,Real delivery or unavailable preview,F15,lib/screens/stage/stage_screen.dart
+A110,Moments,Create Moment,Local feed insertion with sample media,Real media moderation audience and expiry,F33,lib/screens/moments/moments_screen.dart
+A111,Moments,Heart,Toggle viewer-local reaction,Save reaction for specific Moment,F33,lib/screens/moments/moment_viewer_screen.dart
+A112,Moments,Reply text or send icon,Decorative row without input/send handler,Real private reply composer and consent,F33,lib/screens/moments/moment_viewer_screen.dart
+A113,Moments,Answer sticker,Local answer plus private-chat success toast,Actually deliver answer without unintended dating match,F33,lib/screens/moments/moment_viewer_screen.dart
+A114,Moments,Delete own Moment,Pop viewer and announce removed,Delete store item and propagate to feed,F33,lib/screens/moments/moment_viewer_screen.dart
+A115,Moments,Pin highlight,Add caption to prefs highlights,Persist link to content with visibility and expiry policy,F33 F36,lib/screens/moments/moment_viewer_screen.dart
+A116,Events,Going or save Spark Night,Screen-local selection,Real RSVP capacity cancellation and reminders,F25,lib/screens/connect/meet_irl_screens.dart
+A117,Events,Make plan from event,Select match and open plan flow,Use real event time/location and invite,F22 F25,lib/screens/connect/meet_irl_screens.dart
+A118,Hangout,Invite friend,Share fixed demo invite link,Real expiring invite acceptance and four-person consent,F34,lib/screens/connect/meet_irl_screens.dart
+A119,Tonight,Join hosted plan,Toggle local joined state,Capacity acknowledgement attendee policy and persistence,F25,lib/screens/connect/plans_hub_screens.dart
+A120,Hosting,Publish host plan,Append string to myPlans and announce Tonight visibility,Actually list plan and send scoped invites,F25,lib/screens/connect/plans_hub_screens.dart
+A121,Work social,Accept coffee match or request intro,Local state or request-sent toast,Real introducer approval and recipient interaction,F02,lib/screens/connect/plans_hub_screens.dart
+A122,Guilds,Join or dating visibility,Local membership prefs,Real membership and separately enforced dating consent,F28,lib/screens/connect/plans_hub_screens.dart
+A123,Decompress,Book experience,Local booking/myPlans strings and confirmation,Provider reservation reference and itinerary visibility,F25,lib/screens/connect/decompress_screens.dart
+A124,Spark,Accept incoming call,Replace ring with call UI,Real token media and race handling,F26,lib/screens/connect/incoming_call_screen.dart
+A125,Spark,Decline incoming call,Return false then missed-call promise,Real missed-call event only when intended,F26,lib/screens/connect/connect_screen.dart
+A126,Spark,Mic test or camera toggle,Simulated preview/test state,Actual permissions hardware check and media controls,F26,lib/screens/connect/spark_session_screen.dart
+A127,Spark,End call then Connect,Pop sheet and call,Record private choice and open chat only if mutual,F26,lib/screens/connect/spark_session_screen.dart
+A128,Spark,End call then Pass,Same pop route behavior,Record private decline and meaningful return destination,F26,lib/screens/connect/spark_session_screen.dart
+A129,You,Edit profile or avatar,ProfileCreationScreen with empty media slots,Load saved existing media and unify publish,F05 F06,lib/screens/you/you_screen.dart
+A130,You,Profile Aura plus chips,Display-only Chips,Provide direct task actions and truthful completion,F36,lib/screens/you/you_screen.dart
+A131,You,How I text and comfort,SyncSettingsScreen then saved prefs,Validate rules in every relevant action,F28,lib/screens/you/sync_settings_screen.dart
+A132,You,Facets or work facet,Audience/work editors using prefs,Server-backed audience enforcement and persistence,F28 F36,lib/screens/you/facets_screen.dart
+A133,You,Verification Centre,Status/explanation sheet with passed copy,Render actual current authoritative badge status,F36,lib/screens/you/you_screen.dart
+A134,You,Music connect,Local connected toggle,Real OAuth scopes disconnect and profile data,F36,lib/screens/you/you_screen.dart
+A135,You,Wingperson invite or revoke,Fixed demo link and active flag,Recipient acceptance expiration revoke and scoped picks,F34,lib/screens/you/wingperson_screen.dart
+A136,You,Relationship status,Local status/visibility update,Persist and enforce consistent discoverability policy,F28 F36,lib/screens/experience/experience_screens.dart
+A137,Couples,Link partner,Name and minimum-length code accepted locally,Real intended-account mutual consent,F34,lib/screens/experience/experience_screens.dart
+A138,Couples,Add memory/calendar or unlink,Mutate local lists and partner name,Shared durable space and revocation on both accounts,F34,lib/screens/experience/experience_screens.dart
+A139,Couples,Restaurant hotel or ride,Launch external search/booking service,Distinguish handoff from confirmed booking,F34,lib/screens/experience/experience_screens.dart
+A140,Referral,Copy/share code or redeem promo,Fixed code and local redeemed result text,Unique code real eligibility reward and idempotency,F34,lib/screens/experience/experience_screens.dart
+A141,Notifications,Tap row,Plans List or Likes Manager or generic Chat List,Open exact typed resource and handle stale target,F32,lib/screens/you/notifications_screen.dart
+A142,Notifications,Change language or tone,Update previews and local fields,Persist immediately and match real delivery policy,F32 F36,lib/screens/you/notifications_screen.dart
+A143,Settings,Your profile,TrustSafetyScreen,Wrong destination must open profile management,F31,lib/screens/you/settings_screen.dart
+A144,Settings,Notification/call/AI switches,Update prefs,Actual saved enforced policy,F28 F36,lib/screens/you/settings_screen.dart
+A145,Settings,Theme or Calm,App-wide notifier changes rendering,Save preference and validate both themes/OS motion,F36 F38,lib/screens/you/settings_screen.dart
+A146,Settings,Passkey setup,Integration-point snackbar,Real setup or honest unavailable state,F09,lib/screens/you/settings_screen.dart
+A147,Settings,Enable app lock,Biometric check then persisted flag,Hardware cancellation fallback and lifecycle verification,F38,lib/screens/you/settings_screen.dart
+A148,Settings,Revoke other session,Would remove displayed list string,Actual server revocation and recovery,F39,lib/screens/you/settings_screen.dart
+A149,Settings,Log out,Auth sign-out then pop to root,Clear account caches and route safely from overlays,F04 F10,lib/screens/you/settings_screen.dart
+A150,Privacy,Pause Incognito contacts distance or identity policy,Update local preferences,Persist enforce and reconcile inconsistent mode names,F28,lib/screens/you/privacy_centre_screen.dart
+A151,Privacy,Unblock,Remove from separately seeded local list,Unblock actual relationship on server and locally,F03,lib/screens/you/privacy_centre_screen.dart
+A152,Safety,Report person,Structured sheet then backend report and confirmation,Error recovery evidence references and actual case history,F27,lib/widgets/safety_actions.dart
+A153,Safety,Block person,Backend insertion or demo no-op then route pops,Shared state removal everywhere and accurate blocked list,F03,lib/widgets/safety_actions.dart
+A154,Safety,Appeal decision,Generic backend appeal plus toast,Case selection detail receipt and tracked status,F27,lib/widgets/safety_actions.dart
+A155,Support,Send support question,Canned local response,Actual support routing and saved ticket,F27,lib/screens/you/support_screen.dart
+A156,Support,Talk to a human,Human-requested snackbar only,Real ticket and operational acknowledgement,F27,lib/screens/you/support_screen.dart
+A157,Paywall,Choose monthly/annual,Change selector state only,Pass selected store product to purchase,F29,lib/screens/you/paywall_screen.dart
+A158,Paywall,Continue to checkout,Demo purchase call then unconditional active toast,Handle false cancelled pending and verified success,F29,lib/screens/you/paywall_screen.dart
+A159,Paywall,Restore purchases,Read in-memory Plus flag,Real store reconciliation and cross-device restore,F29,lib/services/payments_service.dart
+A160,Subscription,Manage or cancel,Integration-point snackbar,Open actual store management page,F29,lib/screens/you/settings_screen.dart
+A161,Privacy/Delete,Download data,Snackbar or exported boolean,Actual export request and retrievable file,F30,lib/screens/you/delete_account_screen.dart
+A162,Delete,Pause instead,Set local visibility then return,Enforce persisted pause without destroying account,F28 F30,lib/screens/you/delete_account_screen.dart
+A163,Delete,Confirm deletion,Live edge invocation or demo sign-out then root,Idempotency outcome reconciliation and local cleanup,F04 F30,lib/screens/you/delete_account_screen.dart

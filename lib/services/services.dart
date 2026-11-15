@@ -261,6 +261,9 @@ class UserPrefs {
   /// lists them with Unblock. Live: also the `blocks` table.
   final Set<String> blocked = {};
 
+  /// People I hid ("don't show me again" — softer than block, no report).
+  final Set<String> hiddenPeople = {};
+
   /// Chats I muted (conversation ids).
   final Set<String> mutedChats = {};
 
@@ -333,6 +336,7 @@ class UserPrefs {
         'notes': matchNotes,
         'liked': liked,
         'blocked': blocked.toList(),
+        'hiddenPeople': hiddenPeople.toList(),
         'muted': mutedChats.toList(),
         'notifLanguage': notifLanguage,
         'theme': themeMode.value.name,
@@ -356,6 +360,7 @@ class UserPrefs {
               'g': r.good,
               'l': [for (final t in r.liked) t.name],
               'd': [for (final t in r.disliked) t.name],
+              'n': r.note,
             }
         ],
       };
@@ -400,6 +405,9 @@ class UserPrefs {
       mutedChats
         ..clear()
         ..addAll(strs(j['muted']));
+      hiddenPeople
+        ..clear()
+        ..addAll(strs(j['hiddenPeople']));
       if (j['liked'] is List) {
         liked
           ..clear()
@@ -431,6 +439,7 @@ class UserPrefs {
               good: r['g'] == true,
               liked: tags(r['l']),
               disliked: tags(r['d']),
+              note: r['n'] as String? ?? '',
             )
         ]);
     } catch (_) {

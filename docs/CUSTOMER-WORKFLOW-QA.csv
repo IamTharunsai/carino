@@ -1,0 +1,125 @@
+ID,Priority,Workflow,Scenario,Expected customer outcome,Finding,Execution status
+Q001,P1,Startup,Cold launch with valid published verified account,Resume appropriate home destination without unnecessary sign-in,F10,Not run
+Q002,P1,Startup,Restored session expired,Clear sign-in recovery and no private content exposed,F10,Not run
+Q003,P1,Startup,Server unavailable during eligibility check,Explain inability to check and preserve previous work,F10 F11,Not run
+Q004,P1,Onboarding,Force-stop after each step,Resume exact saved draft without losing answers,F10 F36,Not run
+Q005,P1,Onboarding,Verified member quits before profile publication then signs in,Resume profile rather than bypass to Home,F10,Not run
+Q006,P1,Onboarding,Waitlisted verified member signs in again,Remain waitlisted until actual admission,F10,Not run
+Q007,P1,Onboarding,Back then forward through every stage,Answers retained and one consistent history,F10 F36,Not run
+Q008,P1,Age,Day before exactly on and after 21st birthday,Correct eligibility on client and server,F07,Not run
+Q009,P1,Age,Invalid leap-day and future DOB,Specific correction without crash,F07,Not run
+Q010,P1,Auth,New OTP user returns next day,Supported sign-in route without invented password,F08,Not run
+Q011,P1,Auth,Phone number from another country,Country-aware normalisation and correct delivery,F11,Not run
+Q012,P1,Auth,Invalid email or typo contact,Inline correction and preserved valid input,F11,Not run
+Q013,P1,Auth,Code never arrives,Resend eligibility and alternate contact/help route,F11,Not run
+Q014,P1,Auth,Expired or superseded code,Correct reason and request fresh code,F11,Not run
+Q015,P1,Auth,Network fails while verifying code,Retry without false wrong-code attempt consumption,F11,Not run
+Q016,P1,Auth,Wrong code until throttled then retry after deadline,Accurate wait time and functional recovery,F11,Not run
+Q017,P1,Auth,Passkey success cancel unsupported and lost credential,Only real auth advances and fallback remains available,F09,Not run
+Q018,P1,Auth,OAuth returns app closed/backgrounded,Exactly one routing transition after session,F10,Not run
+Q019,P1,Auth,OAuth cancelled or callback invalid,Clear retry without stuck busy state,F11,Not run
+Q020,P1,Auth,Lost phone/email and no session,Usable recovery/help path accessible signed out,F39,Not run
+Q021,P1,Verification,Vendor capture cancellation or camera denial,No false pass and resumable alternative,F12,Not run
+Q022,P1,Verification,Provider pending then real pass while app backgrounded,Authoritative refresh resumes next required step,F12,Not run
+Q023,P1,Verification,Provider fails for each actual reason,Specific reason retry alternative or tracked appeal,F12 F27,Not run
+Q024,P1,Verification,Double submit or restart midway,One resumable provider inquiry,F12,Not run
+Q025,P1,Profile,Main Publish after editing all profile fields,Same saved profile as preview publishing,F05,Not run
+Q026,P1,Profile,Preview Publish after editing all profile fields,Correct saved text media and audience after restart,F05 F06,Not run
+Q027,P1,Profile,Edit text on already published profile,Existing media preserved without re-adding,F06,Not run
+Q028,P1,Profile,Upload fails or moderation rejects photo,Specific actionable state and no false publication,F06,Not run
+Q029,P1,Profile,Change main photo after verification,Required verification state updated honestly,F06,Not run
+Q030,P1,Profile,Record cancel retake and upload video with captions,Real media playable and captions retained,F06,Not run
+Q031,P1,Profile,Preview public versus match audience,Exactly correct fields and verified identity shown,F07 F28,Not run
+Q032,P2,Profile,Publish with empty prompts or contradictory lifestyle,Requirements and input policy consistent,F06,Not run
+Q033,P0,Accounts,A logs out then B signs in same phone,No A profile notes likes partner or entitlements shown to B,F04,Not run
+Q034,P0,Accounts,Delete A then create B,Deleted local account data does not return,F04 F30,Not run
+Q035,P0,Discovery,Live account in an empty city,Honest empty state with no sample people,F02,Not run
+Q036,P1,Discovery,Like then Pass all Daily Drop cards,Each decision advances and count reaches zero,F13,Not run
+Q037,P1,Discovery,Apply age language intention and distance rules to Drop,Documented dealbreakers consistently enforced,F13,Not run
+Q038,P1,Discovery,Change preferences after skip all identity/taste questions,Neutral defaults without invented compatibility claims,F28 F36,Not run
+Q039,P1,Like,Heart when other person has not liked,One pending like with recipient delivery,F02 F16,Not run
+Q040,P1,Like,Heart when other person already liked,One match and conversation in every relevant list,F16,Not run
+Q041,P1,Like,Both members like simultaneously,Single authoritative match and no duplicate chats,F16,Not run
+Q042,P1,Like,Tap heart repeatedly during swipe animation,Exactly one action for intended member,F15 F16,Not run
+Q043,P1,Like,Full profile Like via every entry point,Same real effect from Dates Worldwide inbound likes and wingperson,F14,Not run
+Q044,P1,Like,Like with note including emoji then inspect recipient,Exact note retained and delivered,F15,Not run
+Q045,P1,Like,React to second prompt then inspect recipient,Correct prompt anchor retained,F15,Not run
+Q046,P1,Like,Spark with typed note,One allowance spent and note preserved,F15,Not run
+Q047,P1,Like,Spark exhausted for free and Plus accounts,Accurate reset and appropriate alternatives without pointless upgrade,F15,Not run
+Q048,P1,Like,Cancel options gift or checkout,No like allowance charge or gift delivered,F15,Not run
+Q049,P1,Like,Server accepts like but response is lost,Retry reconciles without duplicate send/spend,F15,Not run
+Q050,P1,Like,Kill app during pending like then reopen,Correct acknowledged pending/failed state restored,F16,Not run
+Q051,P1,Like,Target blocked deleted or ineligible during send,Safe unavailable response and no false match,F03 F16,Not run
+Q052,P1,Like,Withdraw pending like then restart,Consistent saved withdrawal on both sides per policy,F16,Not run
+Q053,P1,Like,Withdraw after mutual match,Clear separate unmatch consequences including active plans,F16,Not run
+Q054,P1,Pass,Tap old Undo after passing a newer person,Restore original intended member only,F16,Not run
+Q055,P1,Match,Message Plan Game and Close from celebration,Correct member and durable match without dead ends,F16 F22 F37,Not run
+Q056,P1,Chat,A sends to B online and offline,Delivered once and preserved after both restart,F17,Not run
+Q057,P1,Chat,Failed send then edit resend cancel,Visible recovery and no duplicate message,F17,Not run
+Q058,P1,Chat,Leave conversation with unsent draft then return,Draft preserved under intended policy,F17,Not run
+Q059,P1,Chat,Incoming message while scrolled up,Readable unread indication without losing reading position,F17,Not run
+Q060,P1,Chat,Open conversation then return to tab and shell badge,Unread counts agree immediately,F17,Not run
+Q061,P1,Chat,React unsend or edit state across two devices,Consistent permitted changes and tombstones,F17,Not run
+Q062,P1,Closure,Close kindly with template then inspect recipient and archive,Approved words delivered and chat findable after restart,F21,Not run
+Q063,P1,Closure,Goodbye send fails,Chat not falsely archived or announced sent,F21,Not run
+Q064,P0,Vanish,Propose mode and other member rejects,Mode unchanged with clear result,F18,Not run
+Q065,P0,Vanish,Both accept then read new message and await deadline,Only eligible new messages expire on both devices,F18,Not run
+Q066,P0,Vanish,Offline restart and clock change around expiry,Server timing preserved with no cached expired content,F18,Not run
+Q067,P1,Media,Open view-once photo for first time,Photo displays before becoming consumed,F19,Not run
+Q068,P1,Media,Reopen view-once or open simultaneously on another device,No second authorised view,F19,Not run
+Q069,P1,Media,Download/decode fails on first view,Disclosed recoverable policy without silent loss,F19,Not run
+Q070,P1,Media,Photo and voice capture denied interrupted or cancelled,No fake send with usable alternative,F20,Not run
+Q071,P1,Media,Report directly from media viewer,Selected content linked to a real case,F20 F27,Not run
+Q072,P0,Privacy,Disable all AI toggles then open chat and coach,No disabled AI requests occur,F28,Not run
+Q073,P0,Privacy,Pause Incognito hide distance and audience choices then inspect B,Policy actually enforced and retained after restart,F28,Not run
+Q074,P0,Block,Block via profile chat settings and call,Person removed consistently and contact prevented,F03,Not run
+Q075,P0,Block,Restart then inspect blocked list and unblock,Accurate state with explicit reconnection policy,F03,Not run
+Q076,P0,Block,Block while message/call/plan request in flight,Block wins and no unsafe continuation,F03,Not run
+Q077,P1,Plan,Send suggestion with note then inspect B and reopen A,Same persisted proposal and exact note,F22,Not run
+Q078,P1,Plan,Proposer tries to confirm own pending proposal,Cannot claim recipient acceptance,F23,Not run
+Q079,P1,Plan,Recipient accepts current version,Both phones list same confirmed plan and chat card,F23,Not run
+Q080,P1,Plan,One changes while other accepts old version,Stale acceptance rejected or reconciled clearly,F23 F24,Not run
+Q081,P1,Plan,Decline and cancel through each template,State saved and message delivered once,F24,Not run
+Q082,P1,Plan,Write my own instead,Actual pre-addressed editable composer,F24,Not run
+Q083,P1,Plan,Reschedule confirmed plan,Same ID new version with reacceptance and obsolete reminders cancelled,F24,Not run
+Q084,P1,Plan,Timezone daylight-saving past date or no legal comfort-rule time,Valid absolute time with clear alternatives,F24,Not run
+Q085,P1,Plan,Export calendar cancel permission deny or export twice,Correct event or clear failure with duplicate policy,F24,Not run
+Q086,P1,Plans,Post-to-plan Host-plan and Decompress booking,Created item visible in promised destinations after restart,F25,Not run
+Q087,P1,Events,Two people take last available place,Authoritative capacity and honest sold-out outcome,F25,Not run
+Q088,P0,Check-in,Start then kill app and miss deadline,Real authorised contact alert or explicitly unavailable feature,F01,Not run
+Q089,P0,Check-in,End check-in from second device before deadline,Escalation cancelled everywhere with acknowledgement,F01,Not run
+Q090,P0,Check-in,Contact delivery fails or contact invalid,No false promise of protection and actionable failure,F01,Not run
+Q091,P0,Check-in,Cancel or reschedule plan with active check-in,Old schedule cancelled and new consent accurate,F01 F24,Not run
+Q092,P1,Calls,Both accept versus only one accepts,Cameras/media start only on real mutual acceptance,F26,Not run
+Q093,P1,Calls,Denied mic camera no answer busy and network loss,Truthful recoverable call states and instant leave,F26,Not run
+Q094,P1,Calls,End then independent Connect/Pass decisions,Only mutual Connect creates one correct chat,F26,Not run
+Q095,P0,Reports,Submit from Stage profile chat Moment media and call,Every entry creates correct content-linked case receipt,F27,Not run
+Q096,P0,Reports,Offline timeout repeated tap and retry,No stuck sending false receipt or duplicate case,F27,Not run
+Q097,P0,Support,Talk to human then reopen cases,Actual durable ticket visible to support and member,F27,Not run
+Q098,P1,Appeals,Appeal a specific decision with details,Correct case and evidence context with tracked outcome,F27,Not run
+Q099,P1,Billing,Choose monthly versus annual then purchase,Correct real product and terms before confirmation,F29,Not run
+Q100,P1,Billing,Store cancel failure pending and unimplemented live purchase,Never show active before verified entitlement,F29,Not run
+Q101,P1,Billing,Restore on second device after reinstall,Correct store-backed entitlement restored,F29,Not run
+Q102,P1,Billing,Manage cancel refund or renewal failure,Real store destination and accurate access period,F29,Not run
+Q103,P1,Export,Request download wait retrieve expired link and failed preparation,Actual secure export with understandable status,F30,Not run
+Q104,P1,Delete,Double tap delete and timeout after possible server acceptance,Idempotent reconciliation and accurate outcome,F30,Not run
+Q105,P1,Delete,Successful delete then inspect both phones and restart,Profile removed and local account data cleared,F04 F30,Not run
+Q106,P2,Navigation,Settings Your profile,Actual profile editor/hub rather than safety centre,F31,Not run
+Q107,P2,Notifications,Tap message plan match safety and Drop event,Exact relevant resource or meaningful unavailable state,F32,Not run
+Q108,P2,Notifications,Open push signed out app closed target blocked/deleted,Authentication preserves intended safe destination,F32,Not run
+Q109,P2,Notifications,Quiet hours cap disabled category and safety exception,Copy and actual delivery policy agree,F32,Not run
+Q110,P2,Notifications,Change language/tone then force-stop and inspect real inbox,Preferences retained with clearly labelled previews,F32 F36,Not run
+Q111,P2,Stage/Moments,Play video reply react delete and reopen,Real playback delivery and durable deletion,F33,Not run
+Q112,P2,Couples,Wrong expired revoked reused and another person's code,No link without intended partner acceptance,F34,Not run
+Q113,P2,Couples,Unlink while shared content open on other device,Shared access revoked and future partner isolated,F34,Not run
+Q114,P2,Referral,Redeem promo twice across devices,Eligible offer applied once with correct terms,F34,Not run
+Q115,P2,Invites,Wingperson/hangout link opened without app,Install/sign-in continuation retains scoped invitation,F34,Not run
+Q116,P2,Preferences,Change every setting then restart/account switch,Documented device/account persistence and enforcement,F36,Not run
+Q117,P2,Games,Only A answers and B never participates,Honest waiting expiry or solo practice label,F37,Not run
+Q118,P2,Games,Reopen same day then next day with changed device clock,Streak not inflated by local screen recreation,F37,Not run
+Q119,P2,Accessibility,VoiceOver/TalkBack through all critical journeys,Labels focus outcomes and button alternatives are usable,F38,Not run
+Q120,P2,Accessibility,Large text small phone keyboard light theme and reduced motion,No blocked controls clipped essential text or lost state,F38,Not run
+Q121,P2,Interruption,Background call recording checkout upload and navigation,Resources stop safely and work resumes accurately,F38,Not run
+Q122,P2,Permissions,Deny permanently deny revoke and grant each OS permission,Feature-specific explanation Settings route and usable fallback,F38,Not run
+Q123,P2,Recovery,Revoke actual other device then use revoked session,Server access ceases with clear safe recovery,F39,Not run
+Q124,P2,Policies,Open full Terms Privacy Guidelines before signup,Readable current complete documents with accessible return,F39,Not run

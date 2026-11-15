@@ -1,0 +1,127 @@
+﻿ID,Priority,Issue,Detailed_evidence_and_acceptance,Execution_classification,Status
+D01,P1,Hide this profile does not hide it,"**Action:** open a profile → Hide this profile → return to discovery → revisit.
+
+**Source / reproduced baseline:** `profile_detail_screen.dart`, Hide handler, only pops and displays “hidden”. It records neither pass nor hidden-member state. A Dates caller receives `null`, so it does not remove the card. The customer has asked not to see this person again and can immediately see them again.
+
+**Build/done:** shared persisted hide/pass operation by member ID; every deck/list respects it; Back, restart, Daily Drop, Worldwide and other entry points agree. Define how hide differs from block and how to reverse it.",See explicit Source / Reproduced baseline / Verify statement and runtime logs,OPEN OR RECONCILIATION REQUIRED; no automatic closure from source edits
+D02,P1,the full-profile prompt heart sends no like at all,"**Action:** Dates → full profile → small heart on a prompt → return.
+
+**Source / reproduced baseline:** `profile_detail_screen.dart:235` announces a prompt-anchored like, then calls `pop()` without a result. The Dates caller needs a non-null boolean to commit. This is worse than losing the prompt anchor: this particular route creates no like.
+
+**Build/done:** record a typed anchored like through the shared service; do not claim success before acknowledgement. Verify recipient, outbound list, match creation, back destination and error recovery from every caller. Refines F14/F15.",See explicit Source / Reproduced baseline / Verify statement and runtime logs,OPEN OR RECONCILIATION REQUIRED; no automatic closure from source edits
+D03,P1,Invite to Spark can change the person,"**Action:** open someone other than Aria → Invite to Spark.
+
+**Source:** the profile opens `const SparkPreCallScreen()` without a member/invitation. Its `_inviter` always resolves `m-aria`. Generic lobby and Spark Nights use the same screen. The intended person/event is lost.
+
+**Build/done:** pass a real invitation/person/event ID; display and call only that resource; keep it through Full profile → Back, permissions and acceptance. Cancellation must return to the originating person/event.",See explicit Source / Reproduced baseline / Verify statement and runtime logs,OPEN OR RECONCILIATION REQUIRED; no automatic closure from source edits
+D04,P1,expired invitation and pool-off states do not disable acceptance,"**Action:** turn Spark pool off, or let invite countdown expire → Accept.
+
+**Source:** countdown computes an “Expired” label and pool toggle changes `_inPool`, but Accept still unconditionally replaces the route with the call screen. `_showDenied` also does not guard this action.
+
+**Build/done:** server-authoritative invite eligibility with expired/withdrawn/declined/busy states. Acceptance must fail safely when no longer valid, explain the result and restore an appropriate destination. Refines F26.",See explicit Source / Reproduced baseline / Verify statement and runtime logs,OPEN OR RECONCILIATION REQUIRED; no automatic closure from source edits
+D05,P2,Voice intro and Skip for now have empty handlers,"**Action:** tap profile Voice intro, or profile creation Video → Skip for now.
+
+**Baseline source:** profile voice playback had `onTap: () {}`; the video skip button had `onPressed: () {}`. Later edits replaced playback with a truthful sample-media preview sheet, and Skip now shows a skipped state with Add now to reverse it. Those inert-control symptoms are addressed in source. Actual playback/capture/persistence are still not implemented; the full media contract remains open.
+
+**Build/done:** actual playback, or clearly unavailable control; Skip should visibly mark video optional/skipped and move focus to the next task. Give captions, recording, stop, retake and cancel a coherent outcome. Refines F06/F20.",See explicit Source / Reproduced baseline / Verify statement and runtime logs,OPEN OR RECONCILIATION REQUIRED; no automatic closure from source edits
+D06,P1,video reply returns “sent” without media or a like,"**Action:** prompt → Reply with video → record at least five seconds → Send privately.
+
+**Source:** `video_reply_sheet.dart` only counts seconds; Send returns `true`. The profile shows a sent snackbar without creating a media/like object. No captions text is captured despite the automatic/editable captions promise.
+
+**Build/done:** real capture/preview/captions/upload/moderation/receipt; cancellation clears or retains a disclosed draft; receiver sees the right private clip and prompt, once. Never turn a timer into a delivery receipt.",See explicit Source / Reproduced baseline / Verify statement and runtime logs,OPEN OR RECONCILIATION REQUIRED; no automatic closure from source edits
+D07,P2,Plus filter rows do not change filter behavior,"**Action:** upgrade → Filters → Exact-intention matching or Worldwide distance → Apply.
+
+**Source:** `_plusGate` says “enabled” for Plus but mutates no filter config. The filter object has no corresponding advanced flags. Worldwide is also directly accessible from Dates. The wording, entitlement and actual result disagree.
+
+**Build/done:** define which features are free/paid; implement concrete filter values and result changes, loading/error/empty behavior and return-from-paywall refresh. Do not count a toast as enabling a filter.",See explicit Source / Reproduced baseline / Verify statement and runtime logs,OPEN OR RECONCILIATION REQUIRED; no automatic closure from source edits
+D08,P2,Question Cards' return target and paid deck are incomplete,"**Action:** open games from Plans/profile/match celebration → Question Cards → Answer in chat.
+
+**Source:** Answer in chat only pops. It returns to whichever caller opened Games, which may not be a chat, and transfers no question/draft. The Late-Night deck always opens Paywall, including when already Plus. Build Our Date opens a generic composer without producing the described winning combination.
+
+**Build/done:** open the correct existing/authorised conversation with an editable question context; preserve origin on cancellation. Entitled members must open actual paid content. Refines F37.",See explicit Source / Reproduced baseline / Verify statement and runtime logs,OPEN OR RECONCILIATION REQUIRED; no automatic closure from source edits
+D09,P1,feedback text is discarded and feedback is not tied to its plan,"**Action:** past plan → type private debrief note → Save → reopen.
+
+**Source / reproduced baseline:** `_comment` is displayed and disposed but never read by `_save`. Reflection stores category/good/tags, not note, member/plan ID or submission time. Saving is not guarded while awaiting AI; repeat taps can add multiple reflections. A sample plan's `feedbackPending` is not changed by that save.
+
+**Build/done:** save the explicitly promised data against a real plan; edit/reopen or explain retention; prevent duplicate submission; do not make AI availability a prerequisite to saving the customer's note. Refines F24/F36.",See explicit Source / Reproduced baseline / Verify statement and runtime logs,OPEN OR RECONCILIATION REQUIRED; no automatic closure from source edits
+D10,P1,group plan votes impersonate other members and leave no plan,"**Action:** group → Make it a plan → start vote → vote → majority.
+
+**Source:** `_vote` schedules fake votes for member IDs. `_checkWinner` clears the poll and appends “Plan set” text; it creates no plan record. Starting a new poll can overwrite the existing one without resolving it. Invalid empty vote form returns silently.
+
+**Build/done:** one real independent vote per member; clear tie/change/cancel/expiry rules; authorised host/poll replacement; saved confirmed plan visible in group and Plans. Use a clearly labelled practice preview until realtime is connected.",See explicit Source / Reproduced baseline / Verify statement and runtime logs,OPEN OR RECONCILIATION REQUIRED; no automatic closure from source edits
+D11,P1,group membership has no complete lifecycle,"**Action:** create/join group → want to leave, remove a member, report/block an individual or recover group history.
+
+**Source:** inspected group extras contain catch-up, Vanish and voice preview, but no group details/member-management/leave flow. New groups are inserted into a local screen list. Friend requests only announce sending; no pending/inbound/accept/decline/cancel lifecycle is implemented in these screens. Removing a friend does not itself specify what happens to shared groups or old content.
+
+**Build/done:** define roles, consent to membership, invite acceptance, leave/remove/report/block behavior, group visibility and durable history. Include zero-friends and no-eligible-invitee empty states. Do not silently equate membership with consent to dating.",See explicit Source / Reproduced baseline / Verify statement and runtime logs,OPEN OR RECONCILIATION REQUIRED; no automatic closure from source edits
+D12,P2,deleting one feed preference chip resets all preferences,"**Action:** Stage → ask for several preferences → remove one displayed chip.
+
+**Source:** every InputChip `onDeleted` clears `_ask` and resets all `FeedControls`, regardless of which chip was selected.
+
+**Build/done:** remove the indicated preference only, or label the control “Reset all” rather than implying individual deletion. Preserve the remaining filters and show the resulting feed/empty state.",See explicit Source / Reproduced baseline / Verify statement and runtime logs,OPEN OR RECONCILIATION REQUIRED; no automatic closure from source edits
+D13,P2,Moments lose state when moving backwards,"**Action:** answer/react on Moment A → next B → previous A.
+
+**Source:** `_next/_prev` reset `_reacted/_answered`, which are viewer-global values rather than per-Moment records. `_askMe` is not cleared in those navigation methods, so an unsent Ask Me answer can remain while the recipient changes. This creates both lost feedback and wrong-recipient draft risks.
+
+**Build/done:** store reaction/answer per content ID; scope unsent draft to its recipient; decide whether moving away saves/discards it. Verify next, previous, last-item close, reopening and expiry while the viewer is open.",See explicit Source / Reproduced baseline / Verify statement and runtime logs,OPEN OR RECONCILIATION REQUIRED; no automatic closure from source edits
+D14,P2,own Moments and highlights have incomplete lifecycle,"**Action:** create two Moments, pin one, delete/unpin it, restart and inspect public profile.
+
+**Source:** creation assigns one `_ownMoment` slot, replacing the previous current item. Highlights store captions rather than stable content IDs/media; own `prefs.me` does not include those highlights in its Member construction. No created-at/expiry timestamp drives the displayed “24h” value. The documented own-viewer list is not rendered in the inspected viewer.
+
+**Build/done:** define single versus multiple active Moments, actual expiry, audience-aware highlight retention, viewer-list privacy, duplicate captions and delete propagation. Pin/unpin must change the real profile, not just a local list. Refines F33/F36.",See explicit Source / Reproduced baseline / Verify statement and runtime logs,OPEN OR RECONCILIATION REQUIRED; no automatic closure from source edits
+D15,P1,hidden chats can become hard to recover on an unsupported device,"**Action:** long-press chat → Hide → open Hidden chats on a device without working authentication.
+
+**Source:** Hide persists the ID without proving the member can unlock it. `_openHidden` refuses when biometric/device authentication fails and only shows setup guidance. There is no alternate unhide/recovery action in that branch. The general app-lock enable flow is more careful and verifies unlock first.
+
+**Build/done:** validate unlock capability before hiding, explain requirements, and define a safe recovery path when credentials/plugin support changes. Verify system Back while locked; pointer/semantics blocking alone does not prove Back cannot mutate the underlying route. This is a source recovery gap; actual credential changes require hardware testing.",See explicit Source / Reproduced baseline / Verify statement and runtime logs,OPEN OR RECONCILIATION REQUIRED; no automatic closure from source edits
+D16,P2,Open Settings does nothing and error Support is unused,"**Action:** permission-denied card → Open Settings; generic error state → seek support.
+
+**Source / reproduced baseline:** `PermissionDeniedState` defaults to an empty handler. `AppErrorState.onSupport` is accepted but never rendered/used; only Retry appears. Permission instructions are Android-shaped even though iOS is supported.
+
+**Build/done:** actual platform Settings handoff, failure feedback, recheck on return and a rendered Support action. On unsupported platforms provide honest instructions without an enabled dead button.",See explicit Source / Reproduced baseline / Verify statement and runtime logs,OPEN OR RECONCILIATION REQUIRED; no automatic closure from source edits
+D17,P2,copy/share actions can announce success after failure,"**Action:** copy friend/wingperson/hangout/referral link or Presence summary when clipboard access fails.
+
+**Source:** several handlers catch clipboard exceptions and still show “Copied”; some also mark an invitation active or a friend invited. The member can then propose a hangout based only on that local flag, without an actual invitation recipient.
+
+**Build/done:** distinguish link creation, clipboard copy, external sharing and recipient acceptance. Report copy failure with a selectable fallback; do not advance acceptance-dependent steps because a link was copied. External launches need cancel/unsupported/offline return handling too.",See explicit Source / Reproduced baseline / Verify statement and runtime logs,OPEN OR RECONCILIATION REQUIRED; no automatic closure from source edits
+D18,P1,Back/cancel does not preserve all onboarding drafts,"**Action:** type answers → Back → forward; cancel verification → Back again; quit and sign in later.
+
+**Source:** RootFlow stores stage history but recreates local screen state; draft identity, quiz progress, media slots and unfinished auth input are not a complete saved draft. Cancel verification calls `_go(intro)`, adding history rather than explicitly replacing/removing the cancelled provider step. These are different from an intentional destructive “Discard”.
+
+**Build/done:** a documented stage/draft model; Back returns one meaningful step with retained work; cancellation does not resurrect cancelled work on the next Back; submitted operations reconcile instead of replaying. Verify both visible Back and native system Back. Refines F10/F36.",See explicit Source / Reproduced baseline / Verify statement and runtime logs,OPEN OR RECONCILIATION REQUIRED; no automatic closure from source edits
+D19,P2,edit-return paths do not consistently refresh their caller,"**Action:** You → edit profile/identity/tastes → save → return to You or another retained tab.
+
+**Source:** several handlers push then pop without awaiting the route or calling `setState`; mutable prefs are not a shared notifier for those fields. Intentions explicitly refreshes its caller, showing inconsistent patterns. Conversation settings can similarly change state without requesting its underlying conversation rebuild.
+
+**Build/done:** appropriate shared observable state or explicit route results. Verify immediate updated text, deck eligibility and privacy on the first returned frame; tab-switching must not be required to make a save appear.",See explicit Source / Reproduced baseline / Verify statement and runtime logs,OPEN OR RECONCILIATION REQUIRED; no automatic closure from source edits
+D20,P1,chat actions can lose context or override customer work,"**Action:** type an unsent message → tap AI draft/starter; open pinned plan; unsend an old message; use Translate.
+
+**Source:** draft/starter selection directly replaces `_composer.text` without preserving existing text. Pinned plan opens hard-coded Coffee/Saturday rather than a plan ID. Unsend describes a window but checks only ownership. Translation defaults to English without a target-language selector, and its direct-chat consent path needs review. “Add yours” in Their style merely closes the sheet instead of opening the editor. Direct chat has no keyboard `onSubmitted` send equivalent.
+
+**Build/done:** preserve/confirm replacement of drafts, route using real IDs, enforce actual unsend limits, clear translation/consent/original rules and honest shortcuts. Specify keyboard Enter versus newline behavior, with an accessible Send alternative.",See explicit Source / Reproduced baseline / Verify statement and runtime logs,OPEN OR RECONCILIATION REQUIRED; no automatic closure from source edits
+D21,P1,safety evidence guidance can discourage preserving missing evidence,"**Action:** open Trust & Safety → money/scam guide → follow its evidence guidance.
+
+**Source:** the guide says not to screenshot because the sealed vault already has the evidence. The inspected UI/report payload does not establish that promised capture exists for every source. A sample screenshot notification is not evidence of a functioning retention system.
+
+**Build/done:** make evidence guidance accurate to the actual system and explicitly link retained evidence to the case/content IDs. Do not assert a safety backup exists until the collection/retention/access workflow is implemented and verified. Refines F18/F27.",See explicit Source / Reproduced baseline / Verify statement and runtime logs,OPEN OR RECONCILIATION REQUIRED; no automatic closure from source edits
+D22,P1,partial block fixes still leave cross-surface holes,"**Latest-source reconciliation:** a persisted `blocked` set, local backend updates, Nearby exclusion, Chat List exclusion and shared Privacy Centre unblock were added during review. This supersedes the original statement that demo blocking has no state at all.
+
+**Remaining source issue:** Daily Drop returns before the Nearby block check. Worldwide, inbound likes, sample matches, Moments, groups and already-open screens need the same authoritative policy. `applyBlock/removeBlock` mutate local state before a live write; failure lacks rollback/reconciliation in those methods. Hiding a row is not sufficient to revoke an already-open conversation or active call.
+
+**Build/done:** one authoritative relationship policy, immediate local safe state, explicit pending/failure reconciliation and verification from both accounts across every surface. Keep F03 open until that broader contract passes.",See explicit Source / Reproduced baseline / Verify statement and runtime logs,OPEN OR RECONCILIATION REQUIRED; no automatic closure from source edits
+D23,P2,"feedback, access needs and discovery filtering can over-assume intent","**Action:** add an access note unrelated to mobility → Events; skip tastes/identity; change availability.
+
+**Source:** Events enables step-free filtering whenever `accessNote` is nonempty, regardless of its content. Tastes can fall back to sample answers, and empty “want to meet” falls back through sample identity. Generic plan-time chips can have no allowed time when Tonight meets a daytime-first rule.
+
+**Build/done:** explicit optional preferences and neutral unanswered values; never infer a mobility restriction or taste from unrelated text/sample data. Explain no-valid-time states and offer another day/custom time without overriding comfort rules.",See explicit Source / Reproduced baseline / Verify statement and runtime logs,OPEN OR RECONCILIATION REQUIRED; no automatic closure from source edits
+D24,P2,form edge cases need explicit small-step behavior,"**Source:** prompt deselection/reselection creates a fresh controller and loses the prior answer; empty language selection is allowed; six-photo Move later is enabled even on the last slot; some empty submit handlers silently return; partner/event/couple times are strings without dates; cost-split records are explicitly session-only and have no real payment claim.
+
+**Build/done:** define whether each field is optional, keep deselected drafts or warn, disable unavailable reordering, show validation near its field and maintain focus. Preserve exact decimal/currency and paid-mark reset behavior for the transparent local cost calculator. Do not classify the calculator as money transfer merely because its button says paid.",See explicit Source / Reproduced baseline / Verify statement and runtime logs,OPEN OR RECONCILIATION REQUIRED; no automatic closure from source edits
+D25,P1,startup failures do not have a customer recovery surface,"**Action:** launch when backend initialisation or local preference loading throws.
+
+**Source:** `main()` awaits services before `runApp` without a top-level recoverable loading/error branch. Remote config has a fallback, but that is not a complete startup strategy.
+
+**Build/done:** bounded startup loading, recoverable error/retry, support/build identification and safe offline behavior. Never display the normal home or demo people simply to hide a failed eligibility check.",See explicit Source / Reproduced baseline / Verify statement and runtime logs,OPEN OR RECONCILIATION REQUIRED; no automatic closure from source edits
+D26,P2,visual accessibility needs measurements and hardware evidence,"**Fresh render observations:** enabled secondary actions use crimson text against dark surfaces, and the chat's large context/plan/booking panels compete with conversation space. The captured chat render shows the context card partially scrolled under the pinned sections; this alone does not prove an unreachable control. Some emoji render as missing-glyph boxes in the widget-test host, which needs real-device comparison before calling it an app font defect.
+
+**Verify/done:** measure actual composited contrast, inspect long labels/large text/light theme/small screens, test keyboard and modal height, reachable focus and screen-reader actions for custom GestureDetector cards. The full capture set is one phone size/dark theme, not all devices. Avoid a universal accessibility score based on those captures.",See explicit Source / Reproduced baseline / Verify statement and runtime logs,OPEN OR RECONCILIATION REQUIRED; no automatic closure from source edits

@@ -10,6 +10,7 @@ import '../../services/services.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/spark_button.dart';
+import '../../widgets/copy_text.dart';
 import '../you/paywall_screen.dart';
 
 /// Experience upgrade (Nov 14): cinematic like burst, like-with-a-note /
@@ -632,9 +633,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
                   label: 'Copy invite link',
                   icon: Icons.link,
                   onPressed: () async {
-                    try {
-                      await Clipboard.setData(ClipboardData(text: 'https://carino.app/join/$code'));
-                    } catch (_) {}
+                    if (!await copyText(context, 'https://carino.app/join/$code')) return;
                     Services.analytics.action('referral_copied');
                     if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(

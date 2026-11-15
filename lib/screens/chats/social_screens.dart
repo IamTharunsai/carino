@@ -10,6 +10,7 @@ import '../../services/services.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/safety_actions.dart';
+import '../../widgets/copy_text.dart';
 import '../../widgets/spark_button.dart';
 
 /// Social Phase 1: Friends & circles, new groups, and group chats with a
@@ -51,10 +52,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
             icon: Icons.link,
             secondary: true,
             onPressed: () async {
-              try {
-                await Clipboard.setData(const ClipboardData(
-                    text: 'https://carino.app/add/you-demo'));
-              } catch (_) {}
+              if (!await copyText(context, 'https://carino.app/add/you-demo')) return;
               if (!mounted) return;
               Navigator.of(context).pop();
               ScaffoldMessenger.of(context).showSnackBar(

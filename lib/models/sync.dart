@@ -326,7 +326,11 @@ class Reflection {
     required this.good,
     this.liked = const {},
     this.disliked = const {},
+    this.note = '',
   });
+
+  /// The member's private debrief note (only they ever see it).
+  final String note;
 
   /// Decompress category of the plan, or null when it didn't map to one.
   final String? category;

@@ -17,13 +17,50 @@ Future<void> main() async {
     runApp(const _MisconfiguredApp());
     return;
   }
-  await Services.backend.initialize();
-  // Server-driven UI config — falls back to compiled defaults offline/mock;
-  // can never hide safety surfaces (see RemoteConfigService hard limits).
-  await Services.remoteConfig.fetch();
-  // Persisted gates (app lock, hidden chats, under-21 block) before UI.
-  await Services.prefs.load();
+  try {
+    await Services.backend.initialize().timeout(const Duration(seconds: 15));
+    // Server-driven UI config — falls back to compiled defaults offline/mock;
+    // can never hide safety surfaces (see RemoteConfigService hard limits).
+    await Services.remoteConfig.fetch().timeout(const Duration(seconds: 10));
+    // Persisted gates (app lock, hidden chats, under-21 block) before UI.
+    await Services.prefs.load();
+  } catch (e) {
+    debugPrint('[startup] failed: $e');
+    runApp(const _StartupFailedApp());
+    return;
+  }
   runApp(const CarinoApp());
+}
+
+/// Start-up couldn't finish (offline, server down). Never shows the home
+/// screen or sample people to hide it — just a calm retry.
+class _StartupFailedApp extends StatelessWidget {
+  const _StartupFailedApp();
+
+  @override
+  Widget build(BuildContext context) => MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.wifi_off, size: 40),
+                  const SizedBox(height: 12),
+                  const Text("Cariño couldn't start", style: TextStyle(fontSize: 20)),
+                  const SizedBox(height: 8),
+                  const Text('Check your connection and try again. Nothing was lost.',
+                      textAlign: TextAlign.center),
+                  const SizedBox(height: 16),
+                  FilledButton(onPressed: main, child: const Text('Try again')),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
 }
 
 class CarinoApp extends StatelessWidget {

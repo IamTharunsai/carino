@@ -11,6 +11,7 @@ import '../../models/wellbeing.dart';
 import '../../services/services.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/glass_card.dart';
+import '../../widgets/copy_text.dart';
 import '../../widgets/spark_button.dart';
 
 /// Decompress: a bookable shelf of offline stress-relief experiences, and
@@ -642,9 +643,7 @@ class _PhoneDownScreenState extends State<PhoneDownScreen>
             label: 'Copy to share',
             icon: Icons.ios_share,
             onPressed: () async {
-              try {
-                await Clipboard.setData(ClipboardData(text: shareText));
-              } catch (_) {}
+              if (!await copyText(context, shareText)) return;
               Services.analytics.action('presence_shared');
               if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(

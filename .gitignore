@@ -56,3 +56,6 @@ android/key.properties
 *.jks
 *.keystore
 .env
+
+# Local copies of the project dropped in for merging — never commit them
+carino-source*/

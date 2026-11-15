@@ -41,6 +41,10 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   Intention? get _filter => _filters.intention;
   bool _showDrop = false;
 
+  /// Blocked or hidden: never shown in any deck.
+  bool _gone(Member m) =>
+      Services.prefs.blocked.contains(m.id) || Services.prefs.hiddenPeople.contains(m.id);
+
   /// Everyone I've liked or passed this session — gone from BOTH decks.
   final Set<String> _swiped = {};
   Offset _drag = Offset.zero;
@@ -55,10 +59,10 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   List<Member> get _visibleDeck {
     // Reciprocal "I want to meet" applies to the Drop and the deck alike.
     if (_showDrop) {
-      return MockData.dailyDrop.where((m) => fitsMe(m) && !_swiped.contains(m.id)).toList();
+      return MockData.dailyDrop.where((m) => fitsMe(m) && !_swiped.contains(m.id) && !_gone(m)).toList();
     }
     return _deck.where((m) {
-      if (Services.prefs.blocked.contains(m.id)) return false;
+      if (_gone(m)) return false;
       if (!fitsMe(m)) return false;
       if (_filter != null && m.intention != _filter) return false;
       if (m.age < _filters.ageMin || m.age > _filters.ageMax) return false;

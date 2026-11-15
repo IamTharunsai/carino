@@ -10,6 +10,7 @@ import 'package:carino/screens/discover/discover_screen.dart';
 import 'package:carino/screens/discover/profile_detail_screen.dart';
 import 'package:carino/screens/you/likes_manager_screen.dart';
 import 'package:carino/screens/you/notifications_screen.dart';
+import 'package:carino/screens/connect/post_plan_feedback_screen.dart';
 import 'package:carino/screens/onboarding/intentions_screen.dart';
 import 'package:carino/screens/onboarding/verification_flow_screen.dart';
 import 'package:carino/screens/you/settings_screen.dart';
@@ -213,5 +214,32 @@ void main() {
     await t.pump();
     expect(find.textContaining('AI drafts are off'), findsOneWidget);
     expect(find.text('AI drafts — tap to edit, you send it'), findsNothing);
+  });
+
+  testWidgets('Hide this profile: they are gone and it is remembered', (t) async {
+    Services.prefs.hiddenPeople.clear();
+    await show(t, ProfileDetailScreen(member: MockData.memberById('m-dev')));
+    await t.scrollUntilVisible(find.text('Hide this profile'), 300, scrollable: find.byType(Scrollable).first);
+    await t.ensureVisible(find.text('Hide this profile'));
+    await t.pumpAndSettle();
+    await t.tap(find.text('Hide this profile'));
+    await t.pumpAndSettle();
+    expect(Services.prefs.hiddenPeople, contains('m-dev'));
+  });
+
+  testWidgets('after-date note is saved with the check-in, once', (t) async {
+    Services.prefs.reflections.clear();
+    await show(t, PostPlanFeedbackScreen(member: MockData.memberById('m-aria'), placeType: 'Coffee'));
+    await t.tap(find.text('Yes').first);
+    await t.pump();
+    await t.scrollUntilVisible(find.widgetWithText(TextField, 'Private debrief note (only you see it)'), 200,
+        scrollable: find.byType(Scrollable).first);
+    await t.enterText(find.widgetWithText(TextField, 'Private debrief note (only you see it)'), 'Loved the café');
+    await t.scrollUntilVisible(find.text('Save feedback'), 200, scrollable: find.byType(Scrollable).first);
+    await t.tap(find.text('Save feedback'));
+    await t.tap(find.text('Save feedback'), warnIfMissed: false); // impatient double tap
+    await t.pumpAndSettle();
+    expect(Services.prefs.reflections, hasLength(1));
+    expect(Services.prefs.reflections.single.note, 'Loved the café');
   });
 }

@@ -34,10 +34,13 @@ class _PostPlanFeedbackScreenState extends State<PostPlanFeedbackScreen> {
   final TextEditingController _comment = TextEditingController();
   bool _done = false;
   String? _tip;
+  bool _saving = false;
   final Set<ReflectTag> _liked = {};
   final Set<ReflectTag> _disliked = {};
 
   Future<void> _save() async {
+    if (_saving) return;
+    setState(() => _saving = true);
     final tip = await Services.ai.debriefTip(
       happened: _happened ?? false,
       comfortable: _comfortable ?? true,
@@ -50,6 +53,7 @@ class _PostPlanFeedbackScreenState extends State<PostPlanFeedbackScreen> {
       good: (_happened ?? false) && (_comfortable ?? true) && (_worthwhile ?? true),
       liked: {..._liked},
       disliked: {..._disliked},
+      note: _comment.text.trim(),
     ));
     await Services.prefs.save();
     if (!mounted) return;
@@ -234,7 +238,7 @@ class _PostPlanFeedbackScreenState extends State<PostPlanFeedbackScreen> {
           const SizedBox(height: 16),
           SparkButton(
             label: 'Save feedback',
-            onPressed: _happened == null ? null : _save,
+            onPressed: _happened == null || _saving ? null : _save,
           ),
         ],
       ),

@@ -1,0 +1,40 @@
+{
+  "baseline_12_probes": true,
+  "targeted_17_probes_final": "00:16 +17: All tests passed!",
+  "probe_meaning": "11 defect reproductions, one publishing comparison, five Back/cancel/lock checks; passing is not product completion",
+  "full_local_suite": "00:33 +166 ~129: All tests passed!",
+  "full_local_exit_code": 0,
+  "sources_changed_during_full_local_suite": [],
+  "sources_changed_after_full_local_suite": [
+    "lib/screens/chats/conversation_screen.dart",
+    "lib/screens/chats/social_screens.dart",
+    "lib/screens/discover/discover_screen.dart",
+    "lib/screens/discover/profile_detail_screen.dart",
+    "lib/screens/you/support_screen.dart",
+    "lib/screens/you/trust_graph_screen.dart",
+    "test/audit/button_audit_test.dart",
+    "test/experience_test.dart",
+    "test/flow_continuity_test.dart",
+    "test/remaining_features_test.dart",
+    "test/sync_screens_test.dart"
+  ],
+  "capture_cases_completed": 68,
+  "capture_combined_initial_command": "Nonzero because initial probe harness failed compilation; all 68 capture cases completed",
+  "button_sweep": {
+    "final_result": "02:41 +61: All tests passed!",
+    "warning": "Single-tap observation sweep; does not complete workflows or recursively test revealed controls.",
+    "observations": 620,
+    "outcomes": {
+      "next step": 15,
+      "opens sheet": 118,
+      "changes on page": 309,
+      "DEAD — nothing happens": 33,
+      "opens screen": 98,
+      "shows message": 31,
+      "goes back": 16
+    }
+  },
+  "source_files_changed_since_census": [],
+  "parse_errors_in_census": 0,
+  "all_direction_live_end_to_end_certified": false
+}

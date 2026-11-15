@@ -1,0 +1,34 @@
+﻿screen,button,outcome,detail,review
+Sign in,Use a passkey (Face / fingerprint),DEAD — nothing happens,,Native authentication not faithfully exercised by this sweep; inspect error/fallback on device
+Age check,November,DEAD — nothing happens,,Harness tapped selected wheel text; must scroll picker to test a changed DOB
+Age check,15,DEAD — nothing happens,,Harness tapped selected wheel text; must scroll picker to test a changed DOB
+Age check,2026,DEAD — nothing happens,,Harness tapped selected wheel text; must scroll picker to test a changed DOB
+Intentions,Monogamy,DEAD — nothing happens,,Likely same-state selection/default reset; no visible change can be expected
+Intentions,Chat first,DEAD — nothing happens,,Likely same-state selection/default reset; no visible change can be expected
+Intentions,This week,DEAD — nothing happens,,Likely same-state selection/default reset; no visible change can be expected
+About you,Everyone,DEAD — nothing happens,,Likely same-state selection/default reset; no visible change can be expected
+About you,Everyone,DEAD — nothing happens,,Likely same-state selection/default reset; no visible change can be expected
+About you,Matches,DEAD — nothing happens,,Likely same-state selection/default reset; no visible change can be expected
+Privacy setup,Discovery,DEAD — nothing happens,,Likely same-state selection/default reset; no visible change can be expected
+Games,This or That,DEAD — nothing happens,,Likely same-state selection/default reset; no visible change can be expected
+Stage tab,Feed,DEAD — nothing happens,,Likely same-state selection/default reset; no visible change can be expected
+Moments,All,DEAD — nothing happens,,Likely same-state selection/default reset; no visible change can be expected
+Dates tab,Nearby,DEAD — nothing happens,,Likely same-state selection/default reset; no visible change can be expected
+Filters,Everyone,DEAD — nothing happens,,Likely same-state selection/default reset; no visible change can be expected
+Filters,Any,DEAD — nothing happens,,Likely same-state selection/default reset; no visible change can be expected
+Filters,Reset,DEAD — nothing happens,,Likely same-state selection/default reset; no visible change can be expected
+Decompress,Solo reset,DEAD — nothing happens,,Likely same-state selection/default reset; no visible change can be expected
+Decompress,All,DEAD — nothing happens,,Likely same-state selection/default reset; no visible change can be expected
+Events,All,DEAD — nothing happens,,Likely same-state selection/default reset; no visible change can be expected
+Group hangout,Bowling,DEAD — nothing happens,,Likely same-state selection/default reset; no visible change can be expected
+Host a plan,Sat · 10:00,DEAD — nothing happens,,Likely same-state selection/default reset; no visible change can be expected
+How I text & comfort,Any time,DEAD — nothing happens,,Likely same-state selection/default reset; no visible change can be expected
+Settings,App lock,DEAD — nothing happens,,Native authentication not faithfully exercised by this sweep; inspect error/fallback on device
+Settings,Dark,DEAD — nothing happens,,Likely same-state selection/default reset; no visible change can be expected
+Settings,Log out,DEAD — nothing happens,,Isolated Settings fixture lacks RootFlow routing; verify sign-out in authenticated full app
+Notifications,English,DEAD — nothing happens,,Likely same-state selection/default reset; no visible change can be expected
+Notifications,Calm,DEAD — nothing happens,,Likely same-state selection/default reset; no visible change can be expected
+Likes & introductions,5 / day,DEAD — nothing happens,,Likely same-state selection/default reset; no visible change can be expected
+Plus (paywall),Monthly,DEAD — nothing happens,,Likely same-state selection/default reset; no visible change can be expected
+Facets,Public,DEAD — nothing happens,,Likely same-state selection/default reset; no visible change can be expected
+Couples,Single,DEAD — nothing happens,,Likely same-state selection/default reset; no visible change can be expected

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../config/app_config.dart';
 import '../theme/app_colors.dart';
@@ -230,10 +231,14 @@ class PermissionDeniedState extends StatelessWidget {
             // openAppSettings() in production. Until then the default
             // action says so honestly instead of doing nothing.
             onPressed: onOpenSettings ??
-                () => ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('Open system settings (demo)')),
-                    ),
+                () async {
+                  // iOS supports this link; elsewhere the steps above apply.
+                  final ok = await launchUrl(Uri.parse('app-settings:')).catchError((_) => false);
+                  if (!ok && context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text('Open your phone\'s Settings app and follow the steps above.')));
+                  }
+                },
           ),
         ],
       ),
