@@ -150,6 +150,20 @@ class BackendService {
     });
   }
 
+  /// Stripe Checkout URL for {kind: 'plus_web'} or {kind: 'booking',
+  /// booking_id}. Null in demo mode or when payments aren't configured.
+  Future<String?> checkoutUrl(Map<String, dynamic> body) async {
+    if (!isLive) return null;
+    try {
+      final res = await client.functions.invoke('stripe-checkout', body: body);
+      final d = res.data;
+      return d is Map ? d['url'] as String? : null;
+    } catch (e) {
+      debugPrint('[Backend] checkout failed: $e');
+      return null;
+    }
+  }
+
   /// "Download my data": the export-data Edge Function's JSON, or null in
   /// demo mode (no server account to export).
   Future<String?> exportMyData() async {

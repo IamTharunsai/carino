@@ -1,0 +1,6 @@
+flutter/
+carino-source*/
+build/
+.dart_tool/
+android/
+ios/

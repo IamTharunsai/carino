@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../config/env.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import '../../config/app_config.dart';
 import '../../services/services.dart';
 import '../../theme/app_colors.dart';
@@ -34,13 +37,27 @@ class _PaywallScreenState extends State<PaywallScreen> {
 
   Future<void> _subscribe() async {
     setState(() => _busy = true);
-    await Services.payments.purchaseDemoPlus();
+    String message;
+    if (Env.useMockBackend) {
+      await Services.payments.purchaseDemoPlus();
+      message = '${AppConfig.plusName} active (demo — no payment taken)';
+    } else if (kIsWeb) {
+      // Website: Stripe Checkout (store rules only cover the phone apps).
+      final url = await Services.backend.checkoutUrl({'kind': 'plus_web', 'plan': _plan});
+      if (url != null) {
+        await launchUrl(Uri.parse(url), webOnlyWindowName: '_self');
+        if (mounted) setState(() => _busy = false);
+        return;
+      }
+      message = "Checkout isn't available right now. Nothing was charged — please try again later.";
+    } else {
+      // Phone apps: App Store / Google Play billing only (Guideline 3.1.1).
+      message = '${AppConfig.plusName} is bought through the App Store or Google Play. '
+          "It isn't on sale in this build yet — nothing was charged.";
+    }
     if (!mounted) return;
     setState(() => _busy = false);
-    // Success = quiet check, StoreKit system sounds (ANIMATION sheet).
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${AppConfig.plusName} active (demo entitlement)')),
-    );
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
   Widget _compareRow(String label, String free, String plus) {

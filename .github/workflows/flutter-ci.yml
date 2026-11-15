@@ -23,7 +23,12 @@ jobs:
       - run: flutter pub get
       - run: flutter analyze --no-fatal-infos > analyze.log 2>&1 || (grep -v '^ *info' analyze.log | tail -9 | sed 's/^/::error::/'; exit 1)
       - run: flutter test --reporter github   # failures show as annotations on the run
-      - run: flutter build apk --release
+      - run: flutter build apk --release --dart-define=USE_MOCK_BACKEND=true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: carino-android-demo
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 14
 
   ios:
     runs-on: macos-latest
@@ -36,4 +41,13 @@ jobs:
       - run: flutter pub get
       # ponytail: unsigned build proves it compiles; signing + TestFlight upload
       # needs Apple certs as secrets — add fastlane/match once the dev account is live.
-      - run: flutter build ios --release --no-codesign
+      # Demo build (sample data) so it runs without live keys.
+      - run: flutter build ios --release --no-codesign --dart-define=USE_MOCK_BACKEND=true
+      # Unsigned .ipa for testers: sign + install from Windows/Linux with
+      # xtool (xtool.sh) using your own Apple ID. Not for the App Store.
+      - run: mkdir -p Payload && cp -R build/ios/iphoneos/Runner.app Payload/ && zip -qr carino-unsigned.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: carino-ios-unsigned
+          path: carino-unsigned.ipa
+          retention-days: 14

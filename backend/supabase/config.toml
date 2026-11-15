@@ -40,3 +40,6 @@ verify_jwt = false
 verify_jwt = true
 [functions.delete-account]
 verify_jwt = true
+
+[functions.stripe-webhook]
+verify_jwt = false   # Stripe signs requests itself; checked in the function

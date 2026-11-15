@@ -59,3 +59,6 @@ android/key.properties
 
 # Local copies of the project dropped in for merging — never commit them
 carino-source*/
+
+# Flutter SDK cloned by the Vercel build
+/flutter/
