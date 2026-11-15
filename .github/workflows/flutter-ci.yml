@@ -16,7 +16,7 @@ jobs:
           cache: true
       - run: flutter pub get
       - run: flutter analyze --no-fatal-infos
-      - run: flutter test
+      - run: flutter test --reporter github   # failures show as annotations on the run
       - run: flutter build apk --release
 
   ios:
