@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../config/app_config.dart';
-import '../../data/mock_data.dart';
 import '../../models/experience.dart';
 import '../../services/services.dart';
 import '../../services/verification_service.dart';
@@ -29,12 +28,18 @@ import 'sync_settings_screen.dart';
 /// S-043 My Profile (You tab) — hub to Edit (S-044), Intentions (S-045),
 /// Verification Centre (S-046), Privacy Centre (S-047), Trust & Safety
 /// Centre (S-052), Plus (S-054), Settings (S-050) and Delete (S-055).
-class YouScreen extends StatelessWidget {
+class YouScreen extends StatefulWidget {
   const YouScreen({super.key});
 
   @override
+  State<YouScreen> createState() => _YouScreenState();
+}
+
+class _YouScreenState extends State<YouScreen> {
+
+  @override
   Widget build(BuildContext context) {
-    const me = MockData.currentUser;
+    final me = Services.prefs.me;
     return GlassScaffold(
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 110),
@@ -210,7 +215,10 @@ class YouScreen extends StatelessWidget {
               MaterialPageRoute<void>(
                 builder: (_) => IntentionsScreen(
                   initial: me.intention,
-                  onDone: (_) => Navigator.of(context).pop(),
+                  onDone: (_) {
+                    Navigator.of(context).pop();
+                    setState(() {}); // show the new intention right away
+                  },
                 ),
               ),
             ),

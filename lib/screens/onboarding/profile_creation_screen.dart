@@ -41,12 +41,26 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen> {
   final TextEditingController _captions = TextEditingController();
   bool _voiceRecorded = false;
 
-  final TextEditingController _bio = TextEditingController();
-  final TextEditingController _boundaries = TextEditingController();
-  final Map<String, TextEditingController> _promptAnswers = {};
-  final Set<String> _prompts = {};
-  final Set<String> _languages = {'English'};
+  // Edit mode: start from what was saved last time.
+  final TextEditingController _bio = TextEditingController(text: Services.prefs.bio);
+  final TextEditingController _boundaries =
+      TextEditingController(text: Services.prefs.boundaries);
+  final Map<String, TextEditingController> _promptAnswers = {
+    for (final e in Services.prefs.promptAnswers.entries)
+      e.key: TextEditingController(text: e.value)
+  };
+  late final Set<String> _prompts = {...Services.prefs.promptAnswers.keys};
+  final Set<String> _languages = {...Services.prefs.languages};
   final Set<String> _lifestyle = {};
+
+  /// Interests drive "You both", why-you're-seeing-them, games built for
+  /// two, and plan suggestions — so they're asked here, not guessed.
+  late final Set<String> _interests = {...Services.prefs.interests};
+  static const List<String> _interestOptions = [
+    'Coffee', 'Live music', 'Hiking', 'Ceramics', 'Yoga', 'Kayaking',
+    'Board games', 'Cooking', 'Photography', 'Farmers markets', 'Bouldering',
+    'Jazz', 'Comedy shows', 'Trail running', 'Book clubs', 'Travel',
+  ];
 
   bool _coachLoading = false;
   List<String> _coachTips = const [];
@@ -395,6 +409,28 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen> {
             ],
           ),
           const SizedBox(height: 14),
+          Text('Interests · pick up to 8', style: text.titleMedium),
+          Text('These power "You both", games and plan ideas.', style: text.bodySmall),
+          Wrap(
+            spacing: 8,
+            runSpacing: 4,
+            children: [
+              for (final i in _interestOptions)
+                FilterChip(
+                  label: Text(i),
+                  selected: _interests.contains(i),
+                  selectedColor: AppColors.emberCrimson,
+                  onSelected: (sel) => setState(() {
+                    if (!sel) {
+                      _interests.remove(i);
+                    } else if (_interests.length < 8) {
+                      _interests.add(i);
+                    }
+                  }),
+                ),
+            ],
+          ),
+          const SizedBox(height: 14),
           Text('Lifestyle', style: text.titleMedium),
           Wrap(
             spacing: 8,
@@ -546,6 +582,17 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen> {
                 onPressed: _canPublish
                     ? () {
                         Navigator.of(ctx).pop();
+                        Services.prefs
+                          ..bio = _bio.text.trim()
+                          ..boundaries = _boundaries.text.trim()
+                          ..promptAnswers = {
+                            for (final p in _prompts)
+                              if ((_promptAnswers[p]?.text.trim() ?? '').isNotEmpty)
+                                p: _promptAnswers[p]!.text.trim()
+                          }
+                          ..languages = _languages.toList()
+                          ..interests = _interests.toList()
+                          ..save();
                         widget.onPublished();
                       }
                     : null,

@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/mock_data.dart';
+import '../models/member.dart';
 import '../models/platform.dart';
 import '../models/social.dart';
 import '../models/sync.dart';
@@ -241,6 +242,53 @@ class UserPrefs {
   final String referralCode = 'CARINO-YOU7';
   String? redeemedPromo;
 
+  // --- My profile: what onboarding collects, used everywhere ----------------
+  Intention intention = MockData.currentUser.intention;
+  String structure = 'Monogamy';
+  String pace = 'Chat first';
+  String availability = 'This week';
+  String bio = '';
+  String boundaries = '';
+  Map<String, String> promptAnswers = {};
+  List<String> languages = const ['English'];
+
+  /// Empty until the member picks some (then the demo sample is replaced).
+  List<String> interests = const [];
+
+  /// "Me" as everyone else sees it — the demo base, overridden by every
+  /// answer the member actually gave. Screens read THIS, not MockData.
+  Member get me {
+    const b = MockData.currentUser;
+    return Member(
+      id: b.id,
+      name: b.name,
+      age: b.age,
+      city: b.city,
+      distanceBand: b.distanceBand,
+      intention: intention,
+      photoAsset: b.photoAsset,
+      headline: bio.isEmpty ? b.headline : bio,
+      prompts: promptAnswers.isEmpty
+          ? b.prompts
+          : [for (final e in promptAnswers.entries) PromptAnswer(e.key, e.value)],
+      interests: interests.isEmpty ? b.interests : interests,
+      languages: languages,
+      structure: structure,
+      pace: pace,
+      availability: availability,
+      boundaries: boundaries,
+      gender: gender.isEmpty ? b.gender : gender,
+      pronouns: pronouns.isEmpty ? b.pronouns : pronouns,
+      orientation: orientation,
+      wantToMeet: wantToMeet,
+      identityVisibility: identityVisibility,
+      tasteAnswers: tastesOrSample,
+      accessNote: accessNote,
+      textingStyle: myStyle,
+      comfort: myComfort,
+    );
+  }
+
   // --- Conversation Sync (Nov 14) -------------------------------------------
   /// My "How I text" card and comfort rules — shown to my matches; the app
   /// enforces the rules in chat (calls, photos) and in the plan composer.
@@ -265,6 +313,17 @@ class UserPrefs {
         'daytime': myComfort.daytimeFirstMeet,
         'opensFirst': myComfort.opensFirst,
         'notes': matchNotes,
+        'profile': {
+          'intention': intention.name,
+          'structure': structure,
+          'pace': pace,
+          'availability': availability,
+          'bio': bio,
+          'boundaries': boundaries,
+          'prompts': promptAnswers,
+          'languages': languages,
+          'interests': interests,
+        },
         'reflections': [
           for (final r in reflections)
             {
@@ -295,6 +354,18 @@ class UserPrefs {
         daytimeFirstMeet: j['daytime'] == true,
         opensFirst: j['opensFirst'] == true,
       );
+      final pr = j['profile'] as Map? ?? const {};
+      intention = Intention.values.asNameMap()[pr['intention']] ?? intention;
+      structure = pr['structure'] as String? ?? structure;
+      pace = pr['pace'] as String? ?? pace;
+      availability = pr['availability'] as String? ?? availability;
+      bio = pr['bio'] as String? ?? bio;
+      boundaries = pr['boundaries'] as String? ?? boundaries;
+      promptAnswers = {
+        for (final e in (pr['prompts'] as Map? ?? const {}).entries) '${e.key}': '${e.value}'
+      };
+      if (pr['languages'] is List) languages = strs(pr['languages']);
+      if (pr['interests'] is List) interests = strs(pr['interests']);
       matchNotes
         ..clear()
         ..addAll({

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../services/services.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/spark_button.dart';
-import '../you/settings_screen.dart';
 
 /// S-003 Auth — passkey / phone / email.
 ///
@@ -248,12 +247,6 @@ class _AuthScreenState extends State<AuthScreen> {
                 ),
               ],
             ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (_) => const SettingsScreen()),
-            ),
-            child: const Text('Preview Settings'),
           ),
         ],
       ),

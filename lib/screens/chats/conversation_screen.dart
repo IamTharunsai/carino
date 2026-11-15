@@ -95,7 +95,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
 
   /// "You both": real overlaps only, minus anything they asked not to discuss.
   List<String> get _chips => commonGround(
-        myInterests: MockData.currentUser.interests,
+        myInterests: Services.prefs.me.interests,
         theirInterests: _member.interests,
         myTastes: Services.prefs.tastesOrSample,
         theirTastes: _member.tasteAnswers,

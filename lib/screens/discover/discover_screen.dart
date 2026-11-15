@@ -429,7 +429,7 @@ String? whySuggested(Member member) {
   final tastes = sharedTastes(mine, member.tasteAnswers);
   if (tastes.isNotEmpty) return 'You both picked ${tastes.take(2).join(' · ')}';
   final shared = member.interests
-      .where(MockData.currentUser.interests.toSet().contains)
+      .where(Services.prefs.me.interests.toSet().contains)
       .toList();
   if (shared.isNotEmpty) return 'You both like ${shared.take(2).join(' · ')}';
   return null;

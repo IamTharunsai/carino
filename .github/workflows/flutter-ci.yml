@@ -10,6 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # Same JDK as the dev machines; the runner default crashes AGP lint
+      # (lintVitalAnalyzeRelease NoSuchMethodError in url_launcher_android).
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
@@ -18,9 +24,6 @@ jobs:
       - run: flutter analyze --no-fatal-infos
       - run: flutter test --reporter github   # failures show as annotations on the run
       - run: flutter build apk --release
-      - name: Show build error (temporary)
-        if: failure()
-        run: flutter build apk --release 2>&1 | grep -iE "error|what went wrong|failed|exception|> " | head -9 | sed 's/^/::warning::/'
 
   ios:
     runs-on: macos-latest

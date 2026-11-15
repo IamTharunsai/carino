@@ -32,7 +32,8 @@ class VerificationProviderScreen extends StatefulWidget {
       _VerificationProviderScreenState();
 }
 
-enum _Phase { idFront, idBack, processing, selfie, matching, done }
+// Three layers, three visible steps: ID -> liveness -> photo match.
+enum _Phase { idFront, idBack, processing, selfie, livenessCheck, matchIntro, matching, done }
 
 class _VerificationProviderScreenState
     extends State<VerificationProviderScreen> {
@@ -60,6 +61,13 @@ class _VerificationProviderScreenState
       case _Phase.processing:
         break;
       case _Phase.selfie:
+        setState(() => _phase = _Phase.livenessCheck);
+        _timer = Timer(const Duration(seconds: 2), () {
+          if (mounted) setState(() => _phase = _Phase.matchIntro);
+        });
+      case _Phase.livenessCheck:
+        break;
+      case _Phase.matchIntro:
         setState(() => _phase = _Phase.matching);
         _timer = Timer(const Duration(seconds: 2), () async {
           if (!mounted) return;
@@ -79,6 +87,8 @@ class _VerificationProviderScreenState
         _Phase.idBack => 'Photograph your ID — back',
         _Phase.processing => 'Reading your document…',
         _Phase.selfie => 'Live selfie',
+        _Phase.livenessCheck => 'Checking it\'s really you…',
+        _Phase.matchIntro => 'Last check: photo match',
         _Phase.matching => 'Matching your selfie…',
         _Phase.done => 'Checks complete',
       };
@@ -92,14 +102,25 @@ class _VerificationProviderScreenState
           'The provider is checking the document and your date of birth against the 21+ rule.',
         _Phase.selfie =>
           'Centre your face and follow the prompt. This proves a real person is here — a photo of a photo won\'t pass.',
+        _Phase.livenessCheck =>
+          'The provider confirms a live person took the selfie — not a photo or a screen.',
+        _Phase.matchIntro =>
+          'We compare your selfie with your ID photo, and later with your main profile photo, so the face people see is yours.',
         _Phase.matching =>
-          'Your selfie is being matched to your ID photo and your first profile photo.',
+          'Your selfie is being matched to your ID photo.',
         _Phase.done => 'All three layers passed.',
       };
 
   @override
   Widget build(BuildContext context) {
-    final busy = _phase == _Phase.processing || _phase == _Phase.matching;
+    final busy = _phase == _Phase.processing ||
+        _phase == _Phase.livenessCheck ||
+        _phase == _Phase.matching;
+    final step = _phase.index <= _Phase.processing.index
+        ? 1
+        : _phase.index <= _Phase.livenessCheck.index
+            ? 2
+            : 3;
     return GlassScaffold(
       appBar: AppBar(
         title: const Text('Verification'),
@@ -142,7 +163,10 @@ class _VerificationProviderScreenState
                 ],
               ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 8),
+            Text('Step $step of 3 · ${const ['ID document', 'Liveness', 'Photo match'][step - 1]}',
+                style: Theme.of(context).textTheme.labelMedium),
+            const SizedBox(height: 12),
             Text(_title, style: Theme.of(context).textTheme.headlineMedium),
             const SizedBox(height: 8),
             Text(_body, style: Theme.of(context).textTheme.bodyLarge),
@@ -154,9 +178,11 @@ class _VerificationProviderScreenState
                       ? const CircularProgressIndicator(
                           color: AppColors.sparkCoral)
                       : Icon(
-                          _phase == _Phase.selfie
-                              ? Icons.face_retouching_natural
-                              : Icons.badge_outlined,
+                          switch (_phase) {
+                            _Phase.selfie => Icons.face_retouching_natural,
+                            _Phase.matchIntro => Icons.compare_outlined,
+                            _ => Icons.badge_outlined,
+                          },
                           size: 64,
                           color: AppColors.sparkCoral,
                         ),
@@ -174,20 +200,28 @@ class _VerificationProviderScreenState
             const SizedBox(height: 16),
             if (!busy) ...[
               SparkButton(
-                label: _phase == _Phase.selfie
-                    ? 'Take live selfie'
-                    : 'Capture',
-                icon: Icons.camera_alt_outlined,
+                label: switch (_phase) {
+                  _Phase.selfie => 'Take live selfie',
+                  _Phase.matchIntro => 'Run photo match',
+                  _ => 'Capture',
+                },
+                icon: _phase == _Phase.matchIntro
+                    ? Icons.compare_outlined
+                    : Icons.camera_alt_outlined,
                 onPressed: _advance,
               ),
               const SizedBox(height: 8),
+              // Retake/upload only make sense for the ID photos; a liveness
+              // selfie can never be uploaded.
+              if (_phase == _Phase.idFront || _phase == _Phase.idBack)
               Row(
                 children: [
                   Expanded(
                     child: SparkButton(
                       label: 'Retake',
                       secondary: true,
-                      onPressed: () => setState(() {}),
+                      onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Photo cleared — line it up and capture again.'))),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -212,7 +246,7 @@ class _VerificationProviderScreenState
   bool _layerDone(VerificationLayer layer) => switch (layer) {
         VerificationLayer.document =>
           _phase.index >= _Phase.selfie.index,
-        VerificationLayer.liveness => _phase == _Phase.done,
+        VerificationLayer.liveness => _phase.index >= _Phase.matchIntro.index,
         VerificationLayer.photoMatch => _phase == _Phase.done,
       };
 }

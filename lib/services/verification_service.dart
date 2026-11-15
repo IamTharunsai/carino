@@ -21,7 +21,7 @@ enum VerificationLayer {
   /// Layer 3 — photo-match (blueprint S-006): the live selfie is matched
   /// against the ID photo AND the first profile photo, so the person in
   /// the profile is the person who shows up.
-  photoMatch('Photo match', 'Selfie matched to your ID and profile photo.');
+  photoMatch('Photo match', 'Selfie matched to your ID now, and to your main profile photo when you add it.');
 
   const VerificationLayer(this.label, this.tagline);
   final String label;

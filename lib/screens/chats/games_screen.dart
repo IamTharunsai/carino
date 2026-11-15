@@ -34,7 +34,7 @@ enum _Game { thisOrThat, twoTruths, guessMyAnswer, buildOurDate, musicMatch, que
 class _GamesScreenState extends State<GamesScreen> {
   /// This or That built from BOTH profiles — not a fixed template.
   late final List<GameQuestion> _deck = personalDeck(
-    myInterests: MockData.currentUser.interests,
+    myInterests: Services.prefs.me.interests,
     myTastes: Services.prefs.tastesOrSample,
     them: widget.member,
   );

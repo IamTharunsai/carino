@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/member.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/glass_card.dart';
+import '../../services/services.dart';
 import '../../widgets/spark_button.dart';
 
 /// S-008 Intentions Setup — chosen BEFORE discovery, shown on the card.
@@ -23,9 +24,9 @@ class IntentionsScreen extends StatefulWidget {
 
 class _IntentionsScreenState extends State<IntentionsScreen> {
   Intention? _selected;
-  String _structure = 'Monogamy';
-  String _pace = 'Chat first';
-  String _availability = 'This week';
+  String _structure = Services.prefs.structure;
+  String _pace = Services.prefs.pace;
+  String _availability = Services.prefs.availability;
 
   static const List<String> _structures = [
     'Monogamy',
@@ -139,7 +140,17 @@ class _IntentionsScreenState extends State<IntentionsScreen> {
           SparkButton(
             label: 'Continue',
             onPressed:
-                _selected == null ? null : () => widget.onDone(_selected!),
+                _selected == null
+                    ? null
+                    : () {
+                        Services.prefs
+                          ..intention = _selected!
+                          ..structure = _structure
+                          ..pace = _pace
+                          ..availability = _availability
+                          ..save();
+                        widget.onDone(_selected!);
+                      },
           ),
         ],
       ),

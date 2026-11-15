@@ -4,6 +4,7 @@ import '../../services/services.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/spark_button.dart';
 import 'paywall_screen.dart';
+import 'privacy_centre_screen.dart';
 import 'trust_safety_screen.dart';
 
 /// S-050 Settings — account home: profile row (-> S-043 completion),
@@ -178,6 +179,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
               ),
           const Divider(),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.privacy_tip_outlined),
+            title: const Text('Privacy Centre'),
+            subtitle: const Text('Who can find you, activity status, contacts, AI features'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const PrivacyCentreScreen()),
+            ),
+          ),
           ListTile(
             contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.shield_outlined),
