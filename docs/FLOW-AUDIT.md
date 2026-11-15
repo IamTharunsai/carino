@@ -16,7 +16,6 @@ profile → permissions → home.
 | Bio, prompts, boundaries, languages from profile creation were thrown away | Saved; editing the profile starts from them |
 | Interests were never asked, yet "You both", games and plan ideas depend on them | "Interests · pick up to 8" in profile creation, saved and used everywhere |
 | Verification promised a match to "your profile photo" before you've added one | Copy now says the profile photo is matched when you add it |
-
 | Swipe/like: every like on the demo deck became a match | Swipe right or double-tap = like; swipe left = pass; the card flies off; a match only when they already liked you |
 | Nowhere to see who I liked | "You liked" in You → Likes & introductions (waiting / matched, undo) |
 | "It's a spark" buttons (Message / Plan / Game) all just closed | Each opens the chat, plan composer or games; the match lands in Chats |
