@@ -21,7 +21,7 @@ jobs:
           channel: stable
           cache: true
       - run: flutter pub get
-      - run: flutter analyze --no-fatal-infos > analyze.log 2>&1 || (grep -E ' error | warning ' analyze.log | head -9 | sed 's/^/::error::/'; exit 1)
+      - run: flutter analyze --no-fatal-infos > analyze.log 2>&1 || (grep -v '^ *info' analyze.log | tail -9 | sed 's/^/::error::/'; exit 1)
       - run: flutter test --reporter github   # failures show as annotations on the run
       - run: flutter build apk --release
 
