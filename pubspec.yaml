@@ -16,6 +16,8 @@ dependencies:
   supabase_flutter: ^2.9.0
   local_auth: ^3.0.2
   url_launcher: ^6.3.3
+  flutter_animate: ^4.5.2
+  audioplayers: ^6.4.0
   shared_preferences: ^2.5.6
   # --- Remaining production integrations (hosting phase; accounts needed) ---
   # revenuecat (purchases_flutter): ^8.x  # PaymentsService (RevenueCat)
@@ -35,6 +37,7 @@ flutter:
     - assets/images/backdrop_match.jpg
     - assets/images/logo.png
     - assets/images/app_icon.png
+    - assets/sounds/
   # Brand type (SIL Open Font License, licences in assets/fonts/OFL-*.txt):
   # DM Serif Display for romantic headlines, Poppins for everything else.
   fonts:

@@ -18,6 +18,8 @@ class FiltersConfig {
     this.maxDistanceMi = 25,
     this.language,
     this.verifiedOnly = true,
+    this.exactIntention = false,
+    this.worldwideDistance = false,
   });
 
   final Intention? intention;
@@ -27,13 +29,23 @@ class FiltersConfig {
   final String? language;
   final bool verifiedOnly;
 
+  /// Plus: only members whose intention matches the current user's own
+  /// intention exactly (Discover honours this in its deck filter).
+  final bool exactIntention;
+
+  /// Plus: relaxes the max-distance cap entirely (Discover honours this
+  /// in its deck filter).
+  final bool worldwideDistance;
+
   bool get isDefault =>
       intention == null &&
       ageMin == 21 &&
       ageMax == 45 &&
       maxDistanceMi == 25 &&
       language == null &&
-      verifiedOnly;
+      verifiedOnly &&
+      !exactIntention &&
+      !worldwideDistance;
 }
 
 /// S-017 Filters — the full screen the lite sheet grows into:
@@ -58,6 +70,8 @@ class _FiltersScreenState extends State<FiltersScreen> {
   late double _distance = widget.initial.maxDistanceMi.toDouble();
   late String? _language = widget.initial.language;
   late bool _verifiedOnly = widget.initial.verifiedOnly;
+  late bool _exactIntention = widget.initial.exactIntention;
+  late bool _worldwideDistance = widget.initial.worldwideDistance;
 
   static const List<String> _languages = [
     'Any',
@@ -86,6 +100,8 @@ class _FiltersScreenState extends State<FiltersScreen> {
               _distance = 25;
               _language = null;
               _verifiedOnly = true;
+              _exactIntention = false;
+              _worldwideDistance = false;
             }),
             child: const Text('Reset'),
           ),
@@ -174,22 +190,49 @@ class _FiltersScreenState extends State<FiltersScreen> {
           ),
           const Divider(),
           Text('Plus filters', style: text.titleMedium),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.lock_outline),
-            title: const Text('Exact-intention matching'),
-            subtitle: const Text('Only people whose intention matches yours, exactly.'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => _plusGate(context),
-          ),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.lock_outline),
-            title: const Text('Worldwide distance'),
-            subtitle: const Text('Remove the distance cap entirely.'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => _plusGate(context),
-          ),
+          if (Services.payments.isPlus) ...[
+            // Plus members get REAL toggles, persisted into FiltersConfig
+            // on Apply and honoured by Discover's deck filter.
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Exact-intention matching'),
+              subtitle: const Text(
+                  'Only people whose intention matches yours, exactly.'),
+              value: _exactIntention,
+              activeThumbColor: AppColors.emberCrimson,
+              onChanged: (v) => setState(() => _exactIntention = v),
+            ),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Worldwide distance'),
+              subtitle: const Text('Remove the distance cap entirely.'),
+              value: _worldwideDistance,
+              activeThumbColor: AppColors.emberCrimson,
+              onChanged: (v) => setState(() => _worldwideDistance = v),
+            ),
+            Text(
+              'Demo note: these apply to Discover and the Daily Drop the '
+              'moment you tap Apply — no server round-trip in the demo.',
+              style: text.bodySmall,
+            ),
+          ] else ...[
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.lock_outline),
+              title: const Text('Exact-intention matching'),
+              subtitle: const Text('Only people whose intention matches yours, exactly.'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => _plusGate(context),
+            ),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.lock_outline),
+              title: const Text('Worldwide distance'),
+              subtitle: const Text('Remove the distance cap entirely.'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => _plusGate(context),
+            ),
+          ],
           if (_tooNarrow) ...[
             const SizedBox(height: 10),
             GlassContainer(
@@ -229,6 +272,8 @@ class _FiltersScreenState extends State<FiltersScreen> {
                 maxDistanceMi: _distance.round(),
                 language: _language,
                 verifiedOnly: _verifiedOnly,
+                exactIntention: _exactIntention,
+                worldwideDistance: _worldwideDistance,
               ),
             ),
           ),

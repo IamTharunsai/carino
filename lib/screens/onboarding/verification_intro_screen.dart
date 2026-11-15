@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../config/app_config.dart';
+import '../../config/env.dart';
 import '../../services/verification_service.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/glass_card.dart';
@@ -138,12 +139,17 @@ class _VerificationIntroScreenState extends State<VerificationIntroScreen> {
           ),
           Text(
             'Unverified accounts can\'t browse or message anyone. That\'s '
-            'the rule that keeps this place real.\n\n'
-            'Demo build: the provider SDK is stubbed (VerificationService) '
-            'and the checks pass so the flow can be walked end-to-end.',
+            'the rule that keeps this place real.',
             style: Theme.of(context).textTheme.bodySmall,
             textAlign: TextAlign.center,
           ),
+          if (Env.useMockBackend)
+            Text(
+              'Demo build: the provider SDK is stubbed (VerificationService) '
+              'and the checks pass so the flow can be walked end-to-end.',
+              style: Theme.of(context).textTheme.bodySmall,
+              textAlign: TextAlign.center,
+            ),
         ],
       ),
     );

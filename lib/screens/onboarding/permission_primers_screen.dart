@@ -88,9 +88,14 @@ class _PermissionPrimersScreenState extends State<PermissionPrimersScreen> {
                     child: Container(
                       height: 4,
                       decoration: BoxDecoration(
-                        color: i <= _index
+                        // Filled = COMPLETED primers only (i < _index);
+                        // the current one reads as in-progress (coral),
+                        // the rest stay faint.
+                        color: i < _index
                             ? AppColors.emberCrimson
-                            : AppColors.softRose.withValues(alpha: 0.3),
+                            : i == _index
+                                ? AppColors.sparkCoral
+                                : AppColors.softRose.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -100,15 +105,28 @@ class _PermissionPrimersScreenState extends State<PermissionPrimersScreen> {
               ],
             ),
             const Spacer(),
-            Icon(primer.icon, size: 56, color: AppColors.sparkCoral),
-            const SizedBox(height: 16),
-            Text(primer.title,
-                style: Theme.of(context).textTheme.headlineMedium,
-                textAlign: TextAlign.center),
-            const SizedBox(height: 10),
-            Text(primer.body,
-                style: Theme.of(context).textTheme.bodyLarge,
-                textAlign: TextAlign.center),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 250),
+              switchInCurve: Curves.easeOut,
+              switchOutCurve: Curves.easeIn,
+              child: KeyedSubtree(
+                key: ValueKey<int>(_index),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(primer.icon, size: 56, color: AppColors.sparkCoral),
+                    const SizedBox(height: 16),
+                    Text(primer.title,
+                        style: Theme.of(context).textTheme.headlineMedium,
+                        textAlign: TextAlign.center),
+                    const SizedBox(height: 10),
+                    Text(primer.body,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                        textAlign: TextAlign.center),
+                  ],
+                ),
+              ),
+            ),
             const Spacer(),
             SparkButton(
               label: 'Allow',
@@ -119,6 +137,12 @@ class _PermissionPrimersScreenState extends State<PermissionPrimersScreen> {
               label: 'Not now',
               secondary: true,
               onPressed: () => _answer(false),
+            ),
+            TextButton(
+              // Skip the whole primer run — declining everything is a
+              // legitimate choice, never a punishment path.
+              onPressed: widget.onDone,
+              child: const Text('Skip all'),
             ),
             const SizedBox(height: 6),
             Text(

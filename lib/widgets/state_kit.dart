@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../config/app_config.dart';
 import '../theme/app_colors.dart';
 import 'glass_card.dart';
@@ -64,7 +65,9 @@ class AppEmptyState extends StatelessWidget {
   }
 }
 
-/// Loading skeleton — surface-colour blocks in the shape of the content.
+/// Loading skeleton — surface-colour blocks in the shape of the content,
+/// with a soft shimmer sweep so the wait reads as alive, not frozen.
+/// The sweep is disabled when Reduce Motion is on.
 class AppLoadingSkeleton extends StatelessWidget {
   const AppLoadingSkeleton({super.key, this.cards = 2});
 
@@ -80,7 +83,7 @@ class AppLoadingSkeleton extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
           ),
         );
-    return ListView(
+    final content = ListView(
       padding: const EdgeInsets.all(16),
       children: [
         for (var i = 0; i < cards; i++) ...[
@@ -97,6 +100,10 @@ class AppLoadingSkeleton extends StatelessWidget {
         ),
       ],
     );
+    if (MediaQuery.of(context).disableAnimations) return content;
+    return content
+        .animate(onPlay: (c) => c.repeat())
+        .shimmer(duration: 1500.ms, color: AppColors.warmIvory.withValues(alpha: 0.14));
   }
 }
 
@@ -114,12 +121,47 @@ class AppErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppEmptyState(
-      icon: Icons.cloud_off_outlined,
-      title: 'That didn\'t load',
-      body: message,
-      actionLabel: 'Retry',
-      onAction: onRetry,
+    if (onSupport == null) {
+      return AppEmptyState(
+        icon: Icons.cloud_off_outlined,
+        title: 'That didn\'t load',
+        body: message,
+        actionLabel: 'Retry',
+        onAction: onRetry,
+      );
+    }
+    // With a support route, BOTH actions render: Retry first, then the
+    // human path (S-059: an error state always offers Support, S-053).
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: GlassContainer(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.cloud_off_outlined,
+                  size: 36, color: AppColors.sparkCoral),
+              const SizedBox(height: 12),
+              Text('That didn\'t load',
+                  style: Theme.of(context).textTheme.titleMedium,
+                  textAlign: TextAlign.center),
+              const SizedBox(height: 6),
+              Text(message,
+                  style: Theme.of(context).textTheme.bodySmall,
+                  textAlign: TextAlign.center),
+              const SizedBox(height: 14),
+              SparkButton(label: 'Retry', onPressed: onRetry),
+              const SizedBox(height: 8),
+              SparkButton(
+                label: 'Talk to support',
+                icon: Icons.support_agent_outlined,
+                secondary: true,
+                onPressed: onSupport,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -185,8 +227,13 @@ class PermissionDeniedState extends StatelessWidget {
             icon: Icons.settings_outlined,
             secondary: true,
             // INTEGRATION POINT: app_settings / permission_handler
-            // openAppSettings() in production.
-            onPressed: onOpenSettings ?? () {},
+            // openAppSettings() in production. Until then the default
+            // action says so honestly instead of doing nothing.
+            onPressed: onOpenSettings ??
+                () => ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('Open system settings (demo)')),
+                    ),
           ),
         ],
       ),

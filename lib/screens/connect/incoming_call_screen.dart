@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../config/app_config.dart';
 import '../../models/member.dart';
@@ -13,106 +14,146 @@ import 'spark_session_screen.dart';
 /// notification shows a GENERIC label ("Cariño · incoming video") — never
 /// a name or photo (S-009 generic previews). Declining leaves a missed-
 /// call state in the chat; nothing about a decline is ever announced.
-class IncomingCallScreen extends StatelessWidget {
+///
+/// The ring is REAL: after 30 seconds unanswered it ends as a miss and
+/// returns false — the same result as Decline and as backing out, so
+/// every exit path lands on the one missed-call note, never on a tell.
+class IncomingCallScreen extends StatefulWidget {
   const IncomingCallScreen({super.key, required this.member});
 
   final Member member;
 
   @override
+  State<IncomingCallScreen> createState() => _IncomingCallScreenState();
+}
+
+class _IncomingCallScreenState extends State<IncomingCallScreen> {
+  Timer? _ringTimer;
+  bool _answered = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // 30s ring timeout → missed (returns false, like a decline).
+    _ringTimer = Timer(const Duration(seconds: 30), () {
+      if (mounted && !_answered) Navigator.of(context).pop(false);
+    });
+  }
+
+  @override
+  void dispose() {
+    _ringTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.midnight,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            children: [
-              const SizedBox(height: 24),
-              Text(
-                '${AppConfig.appName} · Spark video invite',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.copyWith(color: AppColors.softRose),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                'On your lock screen this shows only as “incoming video” — '
-                'never a name or photo.',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(color: AppColors.softRose),
-                textAlign: TextAlign.center,
-              ),
-              const Spacer(),
-              CircleAvatar(
-                radius: 52,
-                backgroundImage: AssetImage(member.photoAsset),
-              ),
-              const SizedBox(height: 16),
-              Text('${member.name}, ${member.age}',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        color: AppColors.warmIvory,
-                      )),
-              const SizedBox(height: 4),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(member.intention.label,
-                      style: const TextStyle(color: AppColors.softRose)),
-                  const SizedBox(width: 6),
-                  if (member.verified)
-                    const Icon(Icons.verified,
-                        size: 15, color: AppColors.sparkCoral),
-                ],
-              ),
-              const Spacer(),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Column(
-                    children: [
-                      GlassIconButton(
-                        icon: Icons.call_end,
-                        semanticLabel: 'Decline',
-                        filled: true,
-                        onPressed: () => Navigator.of(context).pop(false),
-                      ),
-                      const SizedBox(height: 6),
-                      const Text('Decline',
-                          style: TextStyle(color: AppColors.warmIvory)),
-                    ],
-                  ),
-                  Column(
-                    children: [
-                      GlassIconButton(
-                        icon: Icons.videocam,
-                        semanticLabel: 'Accept video',
-                        onPressed: () => Navigator.of(context).pushReplacement(
-                          MaterialPageRoute<void>(
-                            builder: (_) => SparkCallScreen(member: member),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      const Text('Accept',
-                          style: TextStyle(color: AppColors.warmIvory)),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              TextButton(
-                onPressed: () => SafetyActions.showForMember(
-                  context,
-                  member: member,
-                  surface: 'Incoming call',
+    final member = widget.member;
+    return PopScope(
+      // Back is a decline too — it returns false rather than vanishing.
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) Navigator.of(context).pop(false);
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.midnight,
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              children: [
+                const SizedBox(height: 24),
+                Text(
+                  '${AppConfig.appName} · Spark video invite',
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.copyWith(color: AppColors.softRose),
                 ),
-                child: const Text('Report or block'),
-              ),
-              const SizedBox(height: 8),
-            ],
+                const SizedBox(height: 6),
+                Text(
+                  'On your lock screen this shows only as “incoming video” — '
+                  'never a name or photo.',
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: AppColors.softRose),
+                  textAlign: TextAlign.center,
+                ),
+                const Spacer(),
+                CircleAvatar(
+                  radius: 52,
+                  backgroundImage: AssetImage(member.photoAsset),
+                ),
+                const SizedBox(height: 16),
+                Text('${member.name}, ${member.age}',
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          color: AppColors.warmIvory,
+                        )),
+                const SizedBox(height: 4),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(member.intention.label,
+                        style: const TextStyle(color: AppColors.softRose)),
+                    const SizedBox(width: 6),
+                    if (member.verified)
+                      const Icon(Icons.verified,
+                          size: 15, color: AppColors.sparkCoral),
+                  ],
+                ),
+                const Spacer(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Column(
+                      children: [
+                        GlassIconButton(
+                          icon: Icons.call_end,
+                          semanticLabel: 'Decline',
+                          filled: true,
+                          onPressed: () => Navigator.of(context).pop(false),
+                        ),
+                        const SizedBox(height: 6),
+                        const Text('Decline',
+                            style: TextStyle(color: AppColors.warmIvory)),
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        GlassIconButton(
+                          icon: Icons.videocam,
+                          semanticLabel: 'Accept video',
+                          onPressed: () {
+                            _answered = true;
+                            _ringTimer?.cancel();
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute<void>(
+                                builder: (_) =>
+                                    SparkCallScreen(member: member),
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 6),
+                        const Text('Accept',
+                            style: TextStyle(color: AppColors.warmIvory)),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                TextButton(
+                  onPressed: () => SafetyActions.showForMember(
+                    context,
+                    member: member,
+                    surface: 'Incoming call',
+                  ),
+                  child: const Text('Report or block'),
+                ),
+                const SizedBox(height: 8),
+              ],
+            ),
           ),
         ),
       ),
