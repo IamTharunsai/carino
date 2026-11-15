@@ -1,11 +1,11 @@
 {
-    "name": "carino",
-    "short_name": "carino",
+    "name": "Cariño",
+    "short_name": "Cariño",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Verified people, real plans.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
