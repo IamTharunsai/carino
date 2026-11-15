@@ -17,6 +17,9 @@ jobs:
       - run: flutter pub get
       - run: flutter analyze --no-fatal-infos
       - run: flutter test --reporter github   # failures show as annotations on the run
+      - name: Debug sync_screens on failure (temporary)
+        if: failure()
+        run: flutter test test/sync_screens_test.dart 2>&1 | grep -v '^\s*$' | tail -25 | sed 's/^/::warning::/'
       - run: flutter build apk --release
 
   ios:
