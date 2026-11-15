@@ -154,4 +154,26 @@ void main() {
     await t.pumpAndSettle();
     expect(find.byType(NotificationsScreen), findsNothing); // navigated, not a dead tap
   });
+
+  testWidgets('dragging shows the LIKE stamp; swipe up is a Super Like', (t) async {
+    Services.prefs.liked.clear();
+    await show(t, const DiscoverScreen());
+    const centre = Offset(180, 380);
+    final g = await t.startGesture(centre);
+    Future<void> move(Offset by) async {
+      for (var i = 0; i < 10; i++) {
+        await g.moveBy(by / 10);
+        await t.pump(const Duration(milliseconds: 16));
+      }
+    }
+    await move(const Offset(100, 0));
+    expect(find.text('LIKE'), findsOneWidget);
+    await move(const Offset(-200, 0));
+    expect(find.text('PASS'), findsOneWidget);
+    await move(const Offset(100, -200));
+    expect(find.text('SUPER LIKE'), findsOneWidget);
+    await g.up();
+    await settle(t);
+    expect(Services.prefs.liked, hasLength(1)); // super like counts as a like
+  });
 }

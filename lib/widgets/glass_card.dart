@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
+import 'motion.dart';
 
 /// Frosted-glass surface (blueprint DESIGN SYSTEM).
 /// Glass is for SURFACES (cards, sheets, nav) — primary actions stay solid.
@@ -12,6 +13,7 @@ class GlassContainer extends StatelessWidget {
     required this.child,
     this.padding = const EdgeInsets.all(16),
     this.radius = AppTheme.radiusCard,
+    this.borderRadius,
     this.opacity,
     this.onTap,
   });
@@ -19,6 +21,10 @@ class GlassContainer extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
   final double radius;
+
+  /// Overrides [radius] when a non-uniform corner shape is needed
+  /// (e.g. sheets: rounded TOP corners only).
+  final BorderRadius? borderRadius;
 
   /// Defaults to the card tint (0.60); sheets pass AppColors.glassSheetOpacity.
   final double? opacity;
@@ -30,8 +36,9 @@ class GlassContainer extends StatelessWidget {
     final fill = brightness == Brightness.dark
         ? AppColors.glassFillDark(opacity ?? AppColors.glassCardOpacity)
         : AppColors.glassFillLight((opacity ?? AppColors.glassCardOpacity) + 0.15);
+    final corners = borderRadius ?? BorderRadius.circular(radius);
     final content = ClipRRect(
-      borderRadius: BorderRadius.circular(radius),
+      borderRadius: corners,
       child: BackdropFilter(
         filter: ImageFilter.blur(
           sigmaX: AppColors.glassBlurSigma,
@@ -41,7 +48,7 @@ class GlassContainer extends StatelessWidget {
           padding: padding,
           decoration: BoxDecoration(
             color: fill,
-            borderRadius: BorderRadius.circular(radius),
+            borderRadius: corners,
             border: Border.all(color: AppColors.glassBorder(brightness), width: 1),
           ),
           child: Material(type: MaterialType.transparency, child: child),
@@ -50,7 +57,7 @@ class GlassContainer extends StatelessWidget {
     );
     final shadowed = DecoratedBox(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(radius),
+        borderRadius: corners,
         boxShadow: AppColors.glassShadow,
       ),
       child: content,
@@ -74,9 +81,12 @@ class OnboardingBack extends InheritedWidget {
   bool updateShouldNotify(OnboardingBack oldWidget) => onBack != oldWidget.onBack;
 }
 
-/// Scaffold with a full-bleed photographic background (approved imagery)
-/// under a soft theme scrim — the "first-eye" look of the brand.
-/// Text over photography keeps a scrim so contrast passes WCAG AA.
+/// Scaffold with a full-bleed background under a soft theme scrim — the
+/// "first-eye" look of the brand. With a photographic [backgroundAsset]
+/// the photo gets a very subtle slow Ken Burns drift; without one, the
+/// living [AuroraBackground] (drifting crimson/coral/plum blobs) renders
+/// instead of a flat gradient. Both respect Reduce Motion.
+/// Text over imagery keeps a scrim so contrast passes WCAG AA.
 class GlassScaffold extends StatelessWidget {
   const GlassScaffold({
     super.key,
@@ -117,19 +127,9 @@ class GlassScaffold extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           if (backgroundAsset != null)
-            Image.asset(backgroundAsset!, fit: BoxFit.cover)
+            KenBurnsImage(asset: backgroundAsset!)
           else
-            DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: isDark
-                      ? [AppColors.midnight, AppColors.plumCharcoal]
-                      : [AppColors.porcelain, const Color(0xFFF3E2E4)],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-              ),
-            ),
+            const AuroraBackground(),
           // Scrim for legibility (never invert/desaturate the imagery).
           DecoratedBox(
             decoration: BoxDecoration(
@@ -153,7 +153,9 @@ class GlassScaffold extends StatelessWidget {
   }
 }
 
-/// Shows a modal glass sheet (radius 24 top corners, 80% tint per blueprint).
+/// Shows a modal glass sheet (radius 24 TOP corners only, 80% tint per
+/// blueprint). Content scrolls when it outgrows the sheet — long sheets
+/// (report trees, guides) must never clip or overflow.
 Future<T?> showGlassSheet<T>(BuildContext context, {required Widget child}) {
   return showModalBottomSheet<T>(
     context: context,
@@ -161,11 +163,18 @@ Future<T?> showGlassSheet<T>(BuildContext context, {required Widget child}) {
     backgroundColor: Colors.transparent,
     builder: (ctx) => Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
-      child: GlassContainer(
-        radius: AppTheme.radiusCard,
-        opacity: AppColors.glassSheetOpacity,
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
-        child: child,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(ctx).size.height * 0.92,
+        ),
+        child: GlassContainer(
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(AppTheme.radiusCard),
+          ),
+          opacity: AppColors.glassSheetOpacity,
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
+          child: SingleChildScrollView(child: child),
+        ),
       ),
     ),
   );

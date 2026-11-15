@@ -17,6 +17,11 @@ import '../theme/app_colors.dart';
 /// Animated aurora backdrop: three soft radial blobs drifting on slow,
 /// offset sine paths over the theme base colour. Static when the member
 /// (or OS) has reduced motion on.
+/// Freezes the looping backgrounds (Aurora, Ken Burns). Set by
+/// test/flutter_test_config.dart so widget tests can settle; the app never
+/// sets it — users get motion unless their phone's Reduce Motion is on.
+bool stillBackgrounds = false;
+
 class AuroraBackground extends StatefulWidget {
   const AuroraBackground({super.key});
 
@@ -41,7 +46,7 @@ class _AuroraBackgroundState extends State<AuroraBackground>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final reduce = MediaQuery.of(context).disableAnimations;
+    final reduce = stillBackgrounds || MediaQuery.of(context).disableAnimations;
     if (reduce != _reduceMotion) {
       _reduceMotion = reduce;
       if (reduce) {
@@ -161,7 +166,7 @@ class _KenBurnsImageState extends State<KenBurnsImage>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final reduce = MediaQuery.of(context).disableAnimations;
+    final reduce = stillBackgrounds || MediaQuery.of(context).disableAnimations;
     if (reduce != _reduceMotion) {
       _reduceMotion = reduce;
       if (reduce) {

@@ -169,6 +169,21 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     }
   }
 
+  /// Swipe up = Super Like (a "Spark"): 1 a day free, 5 with Plus.
+  void _superLike(Member m) {
+    final ok = Services.prefs.useSpark(DateTime.now(), isPlus: Services.payments.isPlus);
+    if (!ok) {
+      setState(() {
+        _drag = Offset.zero;
+        _dragging = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('No Super Likes left today — you get a new one at midnight.')));
+      return;
+    }
+    _commit(like: true, spark: true);
+  }
+
   /// Full profile; its Pass / Like act on this card.
   Future<void> _openProfile(Member m) async {
     final like = await Navigator.of(context).push<bool>(
@@ -359,9 +374,12 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
 
   Widget _deckStack(BuildContext context, List<Member> deck) {
     final top = deck.first;
-    final progress = _drag.dx / 140; // -1 .. 1
+    final progress = _drag.dx / 110; // -1 .. 1 at the commit threshold
     final likeGlow = progress.clamp(0, 1).toDouble();
     final passFade = (-progress).clamp(0, 1).toDouble();
+    final superGlow = (-_drag.dy / 110).clamp(0, 1).toDouble() * (1 - likeGlow - passFade).clamp(0, 1);
+    // The card behind grows into place as the top one leaves.
+    final lift = (_drag.distance / 110).clamp(0, 1).toDouble();
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
@@ -370,7 +388,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
           if (deck.length > 1)
             Positioned.fill(
               child: Transform.scale(
-                scale: 0.96,
+                scale: 0.96 + 0.04 * lift,
                 child: _MemberCard(member: deck[1], interactive: false),
               ),
             ),
@@ -380,11 +398,15 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
               onTap: () => _openProfile(top),
               onPanStart: (_) => setState(() => _dragging = true),
               onPanUpdate: (d) => setState(() => _drag += d.delta),
-              onPanEnd: (_) {
-                if (_drag.dx > 110) {
+              onPanEnd: (d) {
+                // Distance OR a quick flick commits; swipe up = Super Like.
+                final v = d.velocity.pixelsPerSecond;
+                if (_drag.dx > 110 || (v.dx > 750 && _drag.dx > 30)) {
                   _commit(like: true);
-                } else if (_drag.dx < -110) {
+                } else if (_drag.dx < -110 || (v.dx < -750 && _drag.dx < -30)) {
                   _commit(like: false);
+                } else if (_drag.dy < -110 || (v.dy < -750 && _drag.dy < -30)) {
+                  _superLike(top);
                 } else {
                   setState(() {
                     _drag = Offset.zero;
@@ -395,9 +417,12 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
               child: AnimatedContainer(
                 duration: Duration(milliseconds: _dragging ? 0 : 280),
                 curve: Curves.easeOutBack,
+                transformAlignment: Alignment.center,
                 transform: Matrix4.identity()
-                  ..translateByDouble(_drag.dx, _drag.dy * 0.4, 0, 1)
-                  ..rotateZ(_drag.dx / 900),
+                  ..setEntry(3, 2, 0.0012) // perspective for the 3D tilt
+                  ..translateByDouble(_drag.dx, _drag.dy * 0.55, 0, 1)
+                  ..rotateZ(_drag.dx * 0.00085)
+                  ..rotateY(_drag.dx * 0.00045),
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
@@ -418,6 +443,58 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                             border: Border.all(
                               color: AppColors.sparkCoral.withValues(alpha: likeGlow),
                               width: 3,
+                            ),
+                          ),
+                        ),
+                      ),
+                    // LIKE / PASS / SUPER LIKE stamps fade + grow in with the drag.
+                    if (likeGlow > 0.05)
+                      Positioned(
+                        top: 36,
+                        left: 24,
+                        child: IgnorePointer(
+                          child: Opacity(
+                            opacity: likeGlow,
+                            child: Transform.rotate(
+                              angle: -0.25,
+                              child: Transform.scale(
+                                scale: 0.8 + 0.2 * likeGlow,
+                                child: const _Stamp(label: 'LIKE', color: AppColors.sparkCoral),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    if (passFade > 0.05)
+                      Positioned(
+                        top: 36,
+                        right: 24,
+                        child: IgnorePointer(
+                          child: Opacity(
+                            opacity: passFade,
+                            child: Transform.rotate(
+                              angle: 0.25,
+                              child: Transform.scale(
+                                scale: 0.8 + 0.2 * passFade,
+                                child: const _Stamp(label: 'PASS', color: AppColors.warmIvory),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    if (superGlow > 0.05)
+                      Positioned(
+                        bottom: 160,
+                        left: 0,
+                        right: 0,
+                        child: IgnorePointer(
+                          child: Center(
+                            child: Opacity(
+                              opacity: superGlow,
+                              child: Transform.scale(
+                                scale: 0.8 + 0.2 * superGlow,
+                                child: const _SuperStamp(),
+                              ),
                             ),
                           ),
                         ),
@@ -666,6 +743,76 @@ class _MemberCard extends StatelessWidget {
                   ],
                 ],
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Stamp extends StatelessWidget {
+  const _Stamp({required this.label, required this.color});
+
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.25),
+        border: Border.all(color: color, width: 3),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 22,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 2,
+        ),
+      ),
+    );
+  }
+}
+
+/// The Super Like stamp: gradient pill + star + glow — visibly a
+/// different, rarer action than a plain LIKE.
+class _SuperStamp extends StatelessWidget {
+  const _SuperStamp();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [AppColors.emberCrimson, AppColors.sparkCoral],
+        ),
+        borderRadius: BorderRadius.circular(999),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.sparkCoral.withValues(alpha: 0.65),
+            blurRadius: 22,
+            spreadRadius: 4,
+          ),
+        ],
+      ),
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.star, size: 18, color: AppColors.warmIvory),
+          SizedBox(width: 6),
+          Text(
+            'SUPER LIKE',
+            style: TextStyle(
+              color: AppColors.warmIvory,
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.5,
             ),
           ),
         ],
