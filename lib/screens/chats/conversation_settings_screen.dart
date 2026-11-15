@@ -28,7 +28,6 @@ class ConversationSettingsScreen extends StatefulWidget {
 class _ConversationSettingsScreenState
     extends State<ConversationSettingsScreen> {
   final UserPrefs _prefs = Services.prefs;
-  bool _muted = false;
   late final _note = TextEditingController(
       text: Services.prefs.matchNotes[widget.member.id] ?? '');
 
@@ -119,8 +118,11 @@ class _ConversationSettingsScreenState
             contentPadding: EdgeInsets.zero,
             title: const Text('Mute notifications'),
             subtitle: const Text('For this conversation only.'),
-            value: _muted,
-            onChanged: (v) => setState(() => _muted = v),
+            value: _prefs.mutedChats.contains(conv.id),
+            onChanged: (v) => setState(() {
+              v ? _prefs.mutedChats.add(conv.id) : _prefs.mutedChats.remove(conv.id);
+              _prefs.save();
+            }),
           ),
           const Divider(),
           ListTile(

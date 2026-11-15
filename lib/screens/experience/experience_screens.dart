@@ -744,7 +744,13 @@ class InsightsScreen extends StatelessWidget {
                 ),
             ],
             const SizedBox(height: 12),
-            TextButton(onPressed: a.clear, child: const Text('Clear my activity')),
+            TextButton(
+                onPressed: () {
+                  a.clear();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Your activity on this phone is cleared.')));
+                },
+                child: const Text('Clear my activity')),
           ],
         ),
       ),

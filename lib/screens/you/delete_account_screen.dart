@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../config/app_config.dart';
 import '../../services/services.dart';
 import '../../widgets/glass_card.dart';
@@ -54,13 +55,25 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
                 const SizedBox(height: 10),
                 SparkButton(
                   label: _exported
-                      ? 'Export requested ✓'
+                      ? 'Export done ✓'
                       : 'Download my data first',
                   secondary: true,
                   icon: Icons.download_outlined,
                   onPressed: _exported
                       ? null
-                      : () => setState(() => _exported = true),
+                      : () async {
+                          final data = await Services.backend.exportMyData();
+                          if (!mounted) return;
+                          if (data != null) {
+                            await Clipboard.setData(ClipboardData(text: data));
+                          }
+                          if (!mounted) return;
+                          setState(() => _exported = true);
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text(data == null
+                                  ? 'This demo has no account data on our servers to export.'
+                                  : 'Your data is copied — paste it into a file before deleting.')));
+                        },
                 ),
               ],
             ),

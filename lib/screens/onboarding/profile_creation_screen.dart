@@ -38,6 +38,7 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen> {
   int _sampleCursor = 0;
 
   bool _videoRecorded = false;
+  bool _videoSkipped = false;
   final TextEditingController _captions = TextEditingController();
   bool _voiceRecorded = false;
 
@@ -279,7 +280,20 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen> {
                   ],
                 ),
                 const SizedBox(height: 10),
-                if (!_videoRecorded)
+                if (_videoSkipped && !_videoRecorded)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text('Skipped — add a video intro any time from You → Edit profile.',
+                            style: Theme.of(context).textTheme.bodySmall),
+                      ),
+                      TextButton(
+                        onPressed: () => setState(() => _videoSkipped = false),
+                        child: const Text('Add now'),
+                      ),
+                    ],
+                  )
+                else if (!_videoRecorded)
                   Row(
                     children: [
                       Expanded(
@@ -295,7 +309,7 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen> {
                         child: SparkButton(
                           label: 'Skip for now',
                           secondary: true,
-                          onPressed: () {},
+                          onPressed: () => setState(() => _videoSkipped = true),
                         ),
                       ),
                     ],

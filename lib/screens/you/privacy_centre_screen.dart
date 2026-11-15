@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../data/mock_data.dart';
 import '../../services/services.dart';
 import '../../widgets/glass_card.dart';
@@ -18,7 +19,6 @@ class PrivacyCentreScreen extends StatefulWidget {
 
 class _PrivacyCentreScreenState extends State<PrivacyCentreScreen> {
   final UserPrefs _prefs = Services.prefs;
-  final List<String> _blocked = ['m-marcus'];
 
   Widget _toggle(String title, String body, bool value, ValueChanged<bool> f) {
     return SwitchListTile(
@@ -79,7 +79,7 @@ class _PrivacyCentreScreenState extends State<PrivacyCentreScreen> {
               'Lock screen shows “new message” — never names or content.',
               _prefs.genericPreviews, (v) => _prefs.genericPreviews = v),
           _toggle('Exclude my contacts',
-              'Never show you to people in your contacts (hashed on-device).',
+              'Never show you to people in your contacts. Starts when contact matching launches — nothing is read today.',
               _prefs.excludeContacts, (v) => _prefs.excludeContacts = v),
           const Divider(),
           Text('AI features — your call, per feature', style: text.titleMedium),
@@ -96,9 +96,9 @@ class _PrivacyCentreScreenState extends State<PrivacyCentreScreen> {
           const Divider(),
           Text('Blocked people', style: text.titleMedium),
           const SizedBox(height: 6),
-          if (_blocked.isEmpty)
+          if (_prefs.blocked.isEmpty)
             Text('Nobody is blocked.', style: text.bodyMedium),
-          for (final id in _blocked)
+          for (final id in _prefs.blocked.toList())
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: CircleAvatar(
@@ -108,7 +108,10 @@ class _PrivacyCentreScreenState extends State<PrivacyCentreScreen> {
               title: Text(MockData.memberById(id).name),
               subtitle: const Text('Blocked · hidden both ways'),
               trailing: TextButton(
-                onPressed: () => setState(() => _blocked.remove(id)),
+                onPressed: () async {
+                  await Services.backend.removeBlock(id);
+                  if (mounted) setState(() {});
+                },
                 child: const Text('Unblock'),
               ),
             ),
@@ -118,12 +121,20 @@ class _PrivacyCentreScreenState extends State<PrivacyCentreScreen> {
             leading: const Icon(Icons.download_outlined),
             title: const Text('Download my data'),
             subtitle: const Text(
-                'Profile, settings, and your messages — prepared within 48h and emailed as a file.'),
-            onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                  content: Text(
-                      'Data export requested — we\'ll email the download link (demo).')),
-            ),
+                'Everything you gave us — profile, settings, messages, plans — as one file.'),
+            onTap: () async {
+              final data = await Services.backend.exportMyData();
+              if (!context.mounted) return;
+              if (data == null) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text('This demo has no account data on our servers to export.')));
+                return;
+              }
+              await Clipboard.setData(ClipboardData(text: data));
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text('Your data (${(data.length / 1024).ceil()} KB) is copied — paste it into a file to keep it.')));
+            },
           ),
           ListTile(
             contentPadding: EdgeInsets.zero,

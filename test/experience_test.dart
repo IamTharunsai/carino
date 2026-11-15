@@ -204,6 +204,7 @@ void main() {
       expect(find.text('Scam Shield'), findsNothing);
       await tester.enterText(find.byType(TextField).last,
           'my investment platform pays 40%, try crypto with me');
+      await tester.pump();
       await tester.tap(find.byTooltip('Send'));
       await tester.pumpAndSettle();
       expect(find.text('Before you send'), findsOneWidget);

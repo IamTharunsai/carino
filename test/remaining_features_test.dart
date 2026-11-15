@@ -141,6 +141,7 @@ void main() {
     await tester.tap(find.text('Enable in demo'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField), 'See you there');
+    await tester.pump();
     await tester.tap(find.byTooltip('Send'));
     await tester.pumpAndSettle();
     expect(group.messages.last.expiresAt, isNotNull);

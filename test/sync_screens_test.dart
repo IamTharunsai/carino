@@ -101,6 +101,7 @@ void main() {
     await t.tap(find.text('joking'));
     await t.pumpAndSettle();
     await t.enterText(find.byType(TextField), 'Your café audit is ruthless');
+    await t.pump();
     await t.tap(find.byTooltip('Send'));
     await t.pumpAndSettle();
     expect(c.messages.last.toneTag, 'joking');

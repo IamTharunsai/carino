@@ -85,6 +85,20 @@ class _ConversationScreenState extends State<ConversationScreen> {
 
   bool get _met => Services.trust.hasMet(_member.id);
 
+  /// iOS reported a screenshot in a Vanish chat: say so to both people.
+  /// Live: the server posts the notice (report_screenshot RPC) so the other
+  /// person sees it too — clients can't post system notices themselves.
+  void _screenshotTaken() {
+    Services.backend.reportScreenshot(widget.conversation.id);
+    setState(() => widget.conversation.messages.add(ChatMessage(
+          id: 'shot-${DateTime.now().millisecondsSinceEpoch}',
+          text: 'You took a screenshot — ${_member.firstName} was notified.',
+          fromMe: true,
+          timeLabel: 'now',
+          isSystemNotice: true,
+        )));
+  }
+
   /// "I'll message first": my composer waits until they've written.
   String? get _firstHold => firstMessageHold(
         theirs: _member.comfort,
@@ -477,7 +491,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
       });
     }
     // Vanish: block screenshots on Android while the chat is open.
-    return SecureScreen(enabled: _vanish, child: GlassScaffold(
+    return SecureScreen(enabled: _vanish, onScreenshot: _screenshotTaken, child: GlassScaffold(
       appBar: AppBar(
         title: GestureDetector(
           // S-038: tapping the person opens Conversation Settings.
@@ -804,10 +818,14 @@ class _ConversationScreenState extends State<ConversationScreen> {
                   tooltip: 'Suggest replies (AI drafts)',
                   onPressed: _aiLoading ? null : _loadAiDrafts,
                 ),
-                IconButton(
-                  icon: const Icon(Icons.send, color: AppColors.emberCrimson),
-                  tooltip: 'Send',
-                  onPressed: _send,
+                ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: _composer,
+                  builder: (_, v, __) => IconButton(
+                    icon: const Icon(Icons.send),
+                    color: AppColors.emberCrimson,
+                    tooltip: 'Send',
+                    onPressed: v.text.trim().isEmpty ? null : _send,
+                  ),
                 ),
               ],
             ),

@@ -53,6 +53,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     // Reciprocal "I want to meet" applies to the Drop and the deck alike.
     if (_showDrop) return MockData.dailyDrop.where(fitsMe).toList();
     return _deck.where((m) {
+      if (Services.prefs.blocked.contains(m.id)) return false;
       if (!fitsMe(m)) return false;
       if (_filter != null && m.intention != _filter) return false;
       if (m.age < _filters.ageMin || m.age > _filters.ageMax) return false;
@@ -166,6 +167,14 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
         ),
       );
     }
+  }
+
+  /// Full profile; its Pass / Like act on this card.
+  Future<void> _openProfile(Member m) async {
+    final like = await Navigator.of(context).push<bool>(
+      MaterialPageRoute<bool>(builder: (_) => ProfileDetailScreen(member: m)),
+    );
+    if (like != null && mounted) _commit(like: like);
   }
 
   /// A new match always gets a chat; then go where they tapped.
@@ -368,6 +377,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
           Positioned.fill(
             child: GestureDetector(
               onDoubleTap: () => _commit(like: true), // double-tap = like
+              onTap: () => _openProfile(top),
               onPanStart: (_) => setState(() => _dragging = true),
               onPanUpdate: (d) => setState(() => _drag += d.delta),
               onPanEnd: (_) {
@@ -395,15 +405,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                       member: top,
                       interactive: true,
                       onReactPrompt: () => _commit(like: true),
-                      onOpen: () async {
-                        // Pass / Like inside the full profile act on this card.
-                        final like = await Navigator.of(context).push<bool>(
-                          MaterialPageRoute<bool>(
-                            builder: (_) => ProfileDetailScreen(member: top),
-                          ),
-                        );
-                        if (like != null && mounted) _commit(like: like);
-                      },
+                      onOpen: () => _openProfile(top),
                       onLike: () => _commit(like: true),
                       onLikeOptions: () => _likeOptions(top),
                       onPass: () => _commit(like: false),

@@ -7,10 +7,35 @@ import 'package:flutter/widgets.dart';
 /// (blueprint rule: never promise prevention). Nested screens are counted
 /// so leaving one secure screen never unprotects another.
 class SecureScreen extends StatefulWidget {
-  const SecureScreen({super.key, required this.child, this.enabled = true});
+  const SecureScreen({super.key, required this.child, this.enabled = true, this.onScreenshot});
 
   final Widget child;
   final bool enabled;
+
+  /// iOS reports screenshots (it can't block them); Android blocks instead.
+  final VoidCallback? onScreenshot;
+
+  static final List<VoidCallback> _listeners = [];
+  static bool _listening = false;
+  static void _listen() {
+    if (_listening) return;
+    _listening = true;
+    const MethodChannel('carino/screenshots').setMethodCallHandler((call) async {
+      if (call.method == 'taken') {
+        for (final l in List.of(_listeners)) {
+          l();
+        }
+      }
+    });
+  }
+
+  /// Test seam: behave as if the OS reported a screenshot.
+  @visibleForTesting
+  static void debugScreenshot() {
+    for (final l in List.of(_listeners)) {
+      l();
+    }
+  }
 
   static const MethodChannel _channel = MethodChannel('carino/secure');
   static int _depth = 0;
@@ -50,6 +75,12 @@ class _SecureScreenState extends State<SecureScreen> {
   void initState() {
     super.initState();
     _sync();
+    SecureScreen._listen();
+    SecureScreen._listeners.add(_onShot);
+  }
+
+  void _onShot() {
+    if (widget.enabled) widget.onScreenshot?.call();
   }
 
   @override
@@ -60,6 +91,7 @@ class _SecureScreenState extends State<SecureScreen> {
 
   @override
   void dispose() {
+    SecureScreen._listeners.remove(_onShot);
     if (_counted) {
       SecureScreen._depth--;
       SecureScreen._apply();

@@ -96,6 +96,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
         MockData.conversations()
             .where((c) => !_closed.contains(c.id))
             .where((c) => !Services.prefs.hiddenChats.contains(c.id))
+            .where((c) => !Services.prefs.blocked.contains(c.memberId))
             .toList()
           // Pinned chats first.
           ..sort((a, b) => (Services.prefs.pinnedChats.contains(b.id) ? 1 : 0)

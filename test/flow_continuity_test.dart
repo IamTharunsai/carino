@@ -133,6 +133,7 @@ void main() {
     final c = MockData.conversations().firstWhere((x) => x.id == 'conv-aria');
     await show(t, ConversationScreen(conversation: c));
     await t.enterText(find.byType(TextField), 'See you Saturday');
+    await t.pump();
     await t.tap(find.byTooltip('Send'));
     await t.pumpAndSettle();
     final again = MockData.conversations().firstWhere((x) => x.id == 'conv-aria');

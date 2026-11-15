@@ -259,6 +259,16 @@ try {
   catch (e) { assert.match(e.message, /rate limit/); }
   equal(sent, 29); assertions++;                       // 1 earlier + 29 = 30 in the window
 
+  // --- 0010 screenshot notice ---------------------------------------------------
+  await db.exec('reset role');
+  await db.exec(`update public.conversations set mode='vanish' where id='${conv3}'`);
+  await as(outsider);
+  await assert.rejects(db.exec(`select public.report_screenshot('${conv3}')`), e => /not your conversation/.test(e.message)); assertions++;
+  await as(h);
+  await db.exec(`select public.report_screenshot('${conv3}')`);
+  await db.exec(`select public.report_screenshot('${conv3}')`); // second within a minute: no duplicate
+  equal(Number((await db.query(`select count(*) n from public.messages where conversation_id='${conv3}' and is_system_notice and sender='${h}'`)).rows[0].n), 1);
+
   await db.exec('reset role; set role anon');
   await denied('select * from public.social_preferences');
   await denied('select public.is_social_group_member(null)');

@@ -84,7 +84,7 @@ class _PrivacySetupScreenState extends State<PrivacySetupScreen> {
                 _toggle(
                   title: 'Hide my contacts',
                   body:
-                      'We hash your contacts on-device and never show you to people in them. Contacts are never uploaded in plain form.',
+                      'Never show you to people in your phone contacts. This starts when contact matching launches: contacts are hashed on your phone, never uploaded in plain form. Nothing is read today.',
                   value: _prefs.excludeContacts,
                   onChanged: (v) => _prefs.excludeContacts = v,
                 ),

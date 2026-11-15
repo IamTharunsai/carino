@@ -688,10 +688,14 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                     ),
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.send, color: AppColors.emberCrimson),
-                  tooltip: 'Send',
-                  onPressed: _send,
+                ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: _composer,
+                  builder: (_, v, __) => IconButton(
+                    icon: const Icon(Icons.send),
+                    color: AppColors.emberCrimson,
+                    tooltip: 'Send',
+                    onPressed: v.text.trim().isEmpty ? null : _send,
+                  ),
                 ),
               ],
             ),

@@ -257,6 +257,13 @@ class UserPrefs {
   String notifLanguage = 'English';
   NotifTone notifTone = NotifTone.calm;
 
+  /// People I blocked (ids). Hidden both ways: Dates, Chats, Privacy Centre
+  /// lists them with Unblock. Live: also the `blocks` table.
+  final Set<String> blocked = {};
+
+  /// Chats I muted (conversation ids).
+  final Set<String> mutedChats = {};
+
   /// People I liked (ids), newest first. A match needs them to like me too.
   final List<String> liked = [];
 
@@ -325,6 +332,8 @@ class UserPrefs {
         'opensFirst': myComfort.opensFirst,
         'notes': matchNotes,
         'liked': liked,
+        'blocked': blocked.toList(),
+        'muted': mutedChats.toList(),
         'notifLanguage': notifLanguage,
         'notifTone': notifTone.name,
         'streaks': streaks,
@@ -383,6 +392,12 @@ class UserPrefs {
       if (pr['interests'] is List) interests = strs(pr['interests']);
       notifLanguage = j['notifLanguage'] as String? ?? notifLanguage;
       notifTone = NotifTone.values.asNameMap()[j['notifTone']] ?? notifTone;
+      blocked
+        ..clear()
+        ..addAll(strs(j['blocked']));
+      mutedChats
+        ..clear()
+        ..addAll(strs(j['muted']));
       if (j['liked'] is List) {
         liked
           ..clear()

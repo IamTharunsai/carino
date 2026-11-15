@@ -173,13 +173,8 @@ class ProfileDetailScreen extends StatelessWidget {
                         color: AppColors.sparkCoral),
                     title: const Text('Video intro (0:24)'),
                     subtitle: const Text('Tap to play · sound off until you tap'),
-                    onTap: () {
-                      // INTEGRATION POINT: media player over the member's
-                      // intro URL from BackendService storage.
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Video intro player (stub)')),
-                      );
-                    },
+                    // INTEGRATION POINT: media player over the intro URL.
+                    onTap: () => _introSheet(context, 'Video intro · 0:24'),
                   ),
                 if (member.hasVoiceIntro)
                   ListTile(
@@ -187,7 +182,7 @@ class ProfileDetailScreen extends StatelessWidget {
                     leading: const Icon(Icons.graphic_eq, color: AppColors.sparkCoral),
                     title: const Text('Voice intro (0:18)'),
                     subtitle: const Text('Tap to play · never autoplays'),
-                    onTap: () {},
+                    onTap: () => _introSheet(context, 'Voice intro · 0:18'),
                   ),
               ],
             ),
@@ -404,6 +399,24 @@ class ProfileDetailScreen extends StatelessWidget {
     );
   }
 }
+
+void _introSheet(BuildContext context, String title) => showGlassSheet<void>(
+      context,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(title, style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 10),
+          const Icon(Icons.play_circle_outline, size: 56, color: AppColors.sparkCoral),
+          const SizedBox(height: 10),
+          Text('This is a sample profile, so there is no recording to play. '
+              'Real members\' intros play here, sound off until you tap.',
+              style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.center),
+          TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Close')),
+        ],
+      ),
+    );
 
 /// Highlights: up to 3 Moments the member chose to keep on their profile.
 class _Highlights extends StatelessWidget {

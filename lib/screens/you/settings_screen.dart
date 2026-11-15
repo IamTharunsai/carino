@@ -138,7 +138,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: const Text('Away assistant'),
             subtitle: const Text(
                 "When you're busy, a clearly labelled 'Your assistant' message tells matches "
-                "when you'll be back. It never pretends to be you or flirts for you."),
+                "when you'll be back. It never pretends to be you or flirts for you. "
+                "Starts working when live messaging is on."),
             value: _prefs.awayAssistant,
             onChanged: (v) => setState(() => _prefs.awayAssistant = v),
           ),

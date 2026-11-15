@@ -103,7 +103,11 @@ class _TrustGraphScreenState extends State<TrustGraphScreen> {
               onPressed: !Services.trust.hasMet(_person)
                   ? null
                   : () {
-                      if (_note.text.trim().isEmpty) return;
+                      if (_note.text.trim().isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                            content: Text('Write a short note first — what makes them trustworthy?')));
+                        return;
+                      }
                       setState(() {
                         Services.prefs.givenVouches[_person] =
                             _note.text.trim();

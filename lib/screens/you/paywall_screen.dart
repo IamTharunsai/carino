@@ -89,7 +89,6 @@ class _PaywallScreenState extends State<PaywallScreen> {
                 _compareRow('Read receipts in chat', '—', 'Included'),
                 _compareRow('Spark Session invites', 'Standard queue', 'Priority windows'),
                 _compareRow('Advanced reciprocal filters', 'Basic', 'Full'),
-                _compareRow('Undo a pass', '—', 'Included'),
               ],
             ),
           ),

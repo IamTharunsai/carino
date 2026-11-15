@@ -149,9 +149,14 @@ class _SupportScreenState extends State<SupportScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  IconButton(
-                    icon: const Icon(Icons.send, color: AppColors.sparkCoral),
-                    onPressed: () => _send(_input.text),
+                  ValueListenableBuilder<TextEditingValue>(
+                    valueListenable: _input,
+                    builder: (_, v, __) => IconButton(
+                      icon: const Icon(Icons.send),
+                      color: AppColors.sparkCoral,
+                      tooltip: 'Send',
+                      onPressed: v.text.trim().isEmpty ? null : () => _send(_input.text),
+                    ),
                   ),
                 ],
               ),

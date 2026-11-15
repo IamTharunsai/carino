@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/env.dart';
 import 'auth_service.dart';
+import 'services.dart';
 
 // AuthService lives in auth_service.dart; this file is the core data gateway.
 
@@ -137,6 +139,8 @@ class BackendService {
   }
 
   Future<void> applyBlock(String blockedUserId) async {
+    Services.prefs.blocked.add(blockedUserId);
+    await Services.prefs.save();
     if (!isLive) return;
     // Server propagates immediately: hides both ways + ends contact
     // surfaces (RLS + the blocks trigger in the migration).
@@ -144,6 +148,33 @@ class BackendService {
       'blocker': currentUserId,
       'blocked': blockedUserId,
     });
+  }
+
+  /// "Download my data": the export-data Edge Function's JSON, or null in
+  /// demo mode (no server account to export).
+  Future<String?> exportMyData() async {
+    if (!isLive) return null;
+    final res = await client.functions.invoke('export-data');
+    final d = res.data;
+    return d is String ? d : const JsonEncoder.withIndent('  ').convert(d);
+  }
+
+  /// Vanish screenshot notice for both people (server-side system notice).
+  Future<void> reportScreenshot(String conversationId) async {
+    if (!isLive) return;
+    try {
+      await client.rpc('report_screenshot', params: {'p_conversation': conversationId});
+    } catch (e) {
+      debugPrint('[Backend] report_screenshot failed: $e');
+    }
+  }
+
+  Future<void> removeBlock(String blockedUserId) async {
+    Services.prefs.blocked.remove(blockedUserId);
+    await Services.prefs.save();
+    final me = currentUserId;
+    if (!isLive || me == null) return;
+    await client.from('blocks').delete().match({'blocker': me, 'blocked': blockedUserId});
   }
 
   // --- Remote config ---------------------------------------------------------
