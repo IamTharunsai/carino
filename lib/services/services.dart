@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/mock_data.dart';
 import '../models/member.dart';
+import '../models/notify.dart' show NotifTone;
 import '../models/platform.dart';
 import '../models/social.dart';
 import '../models/sync.dart';
@@ -252,6 +253,16 @@ class UserPrefs {
   Map<String, String> promptAnswers = {};
   List<String> languages = const ['English'];
 
+  /// Notifications: written in this language and tone (real events only).
+  String notifLanguage = 'English';
+  NotifTone notifTone = NotifTone.calm;
+
+  /// People I liked (ids), newest first. A match needs them to like me too.
+  final List<String> liked = [];
+
+  /// Chemistry streak per person (member id -> days). Games and chat share it.
+  final Map<String, int> streaks = {'m-sofia': 4};
+
   /// Empty until the member picks some (then the demo sample is replaced).
   List<String> interests = const [];
 
@@ -313,6 +324,10 @@ class UserPrefs {
         'daytime': myComfort.daytimeFirstMeet,
         'opensFirst': myComfort.opensFirst,
         'notes': matchNotes,
+        'liked': liked,
+        'notifLanguage': notifLanguage,
+        'notifTone': notifTone.name,
+        'streaks': streaks,
         'profile': {
           'intention': intention.name,
           'structure': structure,
@@ -366,6 +381,20 @@ class UserPrefs {
       };
       if (pr['languages'] is List) languages = strs(pr['languages']);
       if (pr['interests'] is List) interests = strs(pr['interests']);
+      notifLanguage = j['notifLanguage'] as String? ?? notifLanguage;
+      notifTone = NotifTone.values.asNameMap()[j['notifTone']] ?? notifTone;
+      if (j['liked'] is List) {
+        liked
+          ..clear()
+          ..addAll(strs(j['liked']));
+      }
+      if (j['streaks'] is Map) {
+        streaks
+          ..clear()
+          ..addAll({
+            for (final e in (j['streaks'] as Map).entries) '${e.key}': (e.value as num).toInt()
+          });
+      }
       matchNotes
         ..clear()
         ..addAll({

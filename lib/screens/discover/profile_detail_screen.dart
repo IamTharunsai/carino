@@ -10,6 +10,9 @@ import '../../models/sync.dart' show comfortSummary;
 import 'discover_screen.dart' show whySuggested;
 import '../chats/games_screen.dart';
 import '../connect/spark_session_screen.dart';
+import '../connect/plan_composer_screen.dart';
+import '../chats/conversation_screen.dart';
+import '../../data/mock_data.dart';
 
 /// S-019 Profile Detail — the full person: media, video/voice intro,
 /// prompts, interests, languages, boundaries. Report is reachable HERE
@@ -351,26 +354,51 @@ class ProfileDetailScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: SparkButton(
-                  label: 'Pass',
-                  secondary: true,
-                  icon: Icons.close,
-                  onPressed: () => Navigator.of(context).pop(),
+          if (matched)
+            Row(
+              children: [
+                Expanded(
+                  child: SparkButton(
+                    label: 'Suggest a plan',
+                    secondary: true,
+                    icon: Icons.calendar_month_outlined,
+                    onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(
+                        builder: (_) => PlanComposerScreen(member: member))),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: SparkButton(
-                  label: 'Like ${member.firstName}',
-                  icon: Icons.favorite,
-                  onPressed: () => Navigator.of(context).pop(),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: SparkButton(
+                    label: 'Message',
+                    icon: Icons.chat_bubble_outline,
+                    onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(
+                        builder: (_) => ConversationScreen(
+                            conversation: MockData.chatWith(member)))),
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            )
+          else
+            Row(
+              children: [
+                Expanded(
+                  child: SparkButton(
+                    label: 'Pass',
+                    secondary: true,
+                    icon: Icons.close,
+                    onPressed: () => Navigator.of(context).pop(false),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: SparkButton(
+                    label: 'Like ${member.firstName}',
+                    icon: Icons.favorite,
+                    onPressed: () => Navigator.of(context).pop(true),
+                  ),
+                ),
+              ],
+            ),
         ],
       ),
     );

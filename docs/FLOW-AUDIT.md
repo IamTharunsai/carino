@@ -17,6 +17,14 @@ profile → permissions → home.
 | Interests were never asked, yet "You both", games and plan ideas depend on them | "Interests · pick up to 8" in profile creation, saved and used everywhere |
 | Verification promised a match to "your profile photo" before you've added one | Copy now says the profile photo is matched when you add it |
 
+| Swipe/like: every like on the demo deck became a match | Swipe right or double-tap = like; swipe left = pass; the card flies off; a match only when they already liked you |
+| Nowhere to see who I liked | "You liked" in You → Likes & introductions (waiting / matched, undo) |
+| "It's a spark" buttons (Message / Plan / Game) all just closed | Each opens the chat, plan composer or games; the match lands in Chats |
+| Profile opened from a chat showed Pass / Like | Matched profiles show Message / Suggest a plan |
+| Chat messages vanished after leaving the chat | One session chat list; what you send stays |
+| Streak only inside Games, number not shared | Streak per person, shown in the chat with one tap to play |
+| Tapping a notification did nothing (from Dates) | Every row opens its screen |
+
 All of it is saved on the device (`Services.prefs`, key `sync`), and
 `Services.prefs.me` is the one place screens read "my profile" from.
 

@@ -42,7 +42,8 @@ class _GamesScreenState extends State<GamesScreen> {
   _Game _active = _Game.thisOrThat;
 
   /// Forgiving streak (sample: day 4, freeze unused). See ChemistryStreak.
-  ChemistryStreak _streak = const ChemistryStreak(days: 4);
+  late ChemistryStreak _streak =
+      ChemistryStreak(days: Services.prefs.streaks[widget.member.id] ?? 0);
   bool _playedToday = false;
 
   // --- This or That (with the both-answer waiting beat, S-031) ---
@@ -100,6 +101,8 @@ class _GamesScreenState extends State<GamesScreen> {
       if (!_playedToday) {
         _streak = _streak.nextDay(active: true);
         _playedToday = true;
+        Services.prefs.streaks[widget.member.id] = _streak.days;
+        Services.prefs.save();
       }
       _totMine = option;
       _totWaiting = true; // both-answer rule: no reveal until they answer

@@ -57,7 +57,7 @@ class _ConversationSettingsScreenState
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
-                builder: (_) => ProfileDetailScreen(member: member),
+                builder: (_) => ProfileDetailScreen(member: member, matched: true),
               ),
             ),
           ),

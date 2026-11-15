@@ -442,7 +442,21 @@ class MockData {
         ),
       ];
 
-  static List<Conversation> conversations() => [
+  /// The session's chats. ONE list, so what you send stays when you leave
+  /// and come back. ponytail: in-memory demo store; live = messages table.
+  static List<Conversation> conversations() => _chats;
+
+  /// The chat with [m], created on a new match.
+  static Conversation chatWith(Member m) {
+    for (final c in _chats) {
+      if (c.memberId == m.id) return c;
+    }
+    final c = Conversation(id: 'conv-${m.id}', memberId: m.id, mode: ChatMode.keep, messages: []);
+    _chats.insert(0, c);
+    return c;
+  }
+
+  static final List<Conversation> _chats = [
         Conversation(
           id: 'conv-aria',
           memberId: 'm-aria',

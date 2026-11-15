@@ -857,6 +857,22 @@ class _ConversationScreenState extends State<ConversationScreen> {
                     ),
                 ],
               ),
+            // Chemistry streak: visible where you talk, one tap to keep it going.
+            Builder(builder: (context) {
+              final days = Services.prefs.streaks[_member.id] ?? 0;
+              return Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  icon: const Icon(Icons.local_fire_department_outlined, size: 16),
+                  label: Text(days > 0
+                      ? 'Streak · Day $days — play today to keep it'
+                      : 'Start a streak: play a quick game'),
+                  onPressed: () => Navigator.of(context)
+                      .push(MaterialPageRoute<void>(builder: (_) => GamesScreen(member: _member)))
+                      .then((_) => mounted ? setState(() {}) : null),
+                ),
+              );
+            }),
             if (note != null && note.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 4, right: 8),

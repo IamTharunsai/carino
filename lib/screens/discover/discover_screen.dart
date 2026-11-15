@@ -9,6 +9,9 @@ import '../../theme/app_colors.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/match_celebration.dart';
 import '../../widgets/spark_button.dart';
+import '../chats/conversation_screen.dart';
+import '../chats/games_screen.dart';
+import '../connect/plan_composer_screen.dart';
 import '../experience/experience_screens.dart';
 import '../you/notifications_screen.dart';
 import 'filters_screen.dart';
@@ -105,27 +108,48 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     _commit(like: true, spark: choice.kind == LikeKind.spark, note: choice.note);
   }
 
-  void _commit({required bool like, bool spark = false, String? note}) {
+  bool _leaving = false;
+
+  Future<void> _commit({required bool like, bool spark = false, String? note}) async {
     final deck = _visibleDeck;
-    if (deck.isEmpty) return;
+    if (deck.isEmpty || _leaving) return;
     final member = deck.first;
     _sound.tapHaptic();
     Services.analytics.action(like ? (spark ? 'spark' : (note != null ? 'like_note' : 'like')) : 'pass');
+    // The card flies off the side it was sent to (still under reduced motion,
+    // just without the travel).
+    final calm = MediaQuery.of(context).disableAnimations;
+    setState(() {
+      _leaving = true;
+      _dragging = false;
+      _drag = Offset(like ? 520 : -520, _drag.dy);
+    });
+    if (!calm) await Future<void>.delayed(const Duration(milliseconds: 220));
+    if (!mounted) return;
     setState(() {
       _deck.remove(member);
       _drag = Offset.zero;
-      _dragging = false;
+      _leaving = false;
       _lastPassed = like ? null : member;
     });
     if (like) {
-      // Cinematic beat: hearts (or Spark flames) bloom, THEN the match.
+      Services.prefs.liked
+        ..remove(member.id)
+        ..insert(0, member.id);
+      Services.prefs.save();
       showHeartBurst(context, spark: spark);
-      // Scaffold rule: every like on the demo deck celebrates so the flow is
-      // visible. PRODUCTION: BackendService returns a match ONLY on a real
-      // mutual like — never fake a match (AI honesty rules).
-      Future<void>.delayed(const Duration(milliseconds: 750), () {
-        if (mounted) _showMatch(member);
-      });
+      // A match ONLY when they already liked you (Likes You). Live: the
+      // server decides on a real mutual like — never a fake match.
+      final mutual = MockData.likesYou.any((m) => m.id == member.id);
+      if (mutual) {
+        Future<void>.delayed(const Duration(milliseconds: 750), () {
+          if (mounted) _showMatch(member);
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('You liked ${member.firstName}. If they like you back, it\'s a match.'),
+        ));
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -144,7 +168,13 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     }
   }
 
+  /// A new match always gets a chat; then go where they tapped.
+  void _afterMatch(Widget next) {
+    Navigator.of(context).pushReplacement(MaterialPageRoute<void>(builder: (_) => next));
+  }
+
   void _showMatch(Member member) {
+    MockData.chatWith(member);
     _sound.matchChime();
     _sound.gentleHaptic();
     Navigator.of(context).push(
@@ -153,9 +183,9 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
         builder: (_) => MatchCelebrationOverlay(
           member: member,
           onClose: () => Navigator.of(context).pop(),
-          onMessage: () => Navigator.of(context).pop(),
-          onSuggestPlan: () => Navigator.of(context).pop(),
-          onPlayGame: () => Navigator.of(context).pop(),
+          onMessage: () => _afterMatch(ConversationScreen(conversation: MockData.chatWith(member))),
+          onSuggestPlan: () => _afterMatch(PlanComposerScreen(member: member)),
+          onPlayGame: () => _afterMatch(GamesScreen(member: member)),
         ),
       ),
     );
@@ -337,6 +367,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
             ),
           Positioned.fill(
             child: GestureDetector(
+              onDoubleTap: () => _commit(like: true), // double-tap = like
               onPanStart: (_) => setState(() => _dragging = true),
               onPanUpdate: (d) => setState(() => _drag += d.delta),
               onPanEnd: (_) {
@@ -364,11 +395,15 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                       member: top,
                       interactive: true,
                       onReactPrompt: () => _commit(like: true),
-                      onOpen: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => ProfileDetailScreen(member: top),
-                        ),
-                      ),
+                      onOpen: () async {
+                        // Pass / Like inside the full profile act on this card.
+                        final like = await Navigator.of(context).push<bool>(
+                          MaterialPageRoute<bool>(
+                            builder: (_) => ProfileDetailScreen(member: top),
+                          ),
+                        );
+                        if (like != null && mounted) _commit(like: like);
+                      },
                       onLike: () => _commit(like: true),
                       onLikeOptions: () => _likeOptions(top),
                       onPass: () => _commit(like: false),

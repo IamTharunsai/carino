@@ -70,6 +70,28 @@ class _LikesManagerScreenState extends State<LikesManagerScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          Text('You liked', style: text.titleMedium),
+          const SizedBox(height: 6),
+          if (_prefs.liked.isEmpty)
+            Text('Nobody yet. Swipe right or double-tap a card in Dates.',
+                style: text.bodySmall)
+          else
+            for (final id in _prefs.liked)
+              Builder(builder: (context) {
+                final m = MockData.memberById(id);
+                final matched = MockData.likesYou.any((x) => x.id == id);
+                return ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: CircleAvatar(backgroundImage: AssetImage(m.photoAsset)),
+                  title: Text(m.firstName),
+                  subtitle: Text(matched ? "It's a match — say hi" : 'Waiting for them to like you back'),
+                  trailing: TextButton(
+                    onPressed: () => setState(() => _prefs.liked.remove(id)),
+                    child: const Text('Undo like'),
+                  ),
+                );
+              }),
+          const Divider(height: 28),
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
             title: const Text('Pause discovery'),
