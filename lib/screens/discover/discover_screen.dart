@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'people_search_screen.dart';
 import '../../config/app_config.dart';
 import '../../config/env.dart';
 import '../../data/mock_data.dart';
@@ -17,6 +18,7 @@ import '../chats/games_screen.dart';
 import '../connect/plan_composer_screen.dart';
 import '../experience/experience_screens.dart';
 import '../you/notifications_screen.dart';
+import '../../state/drop_rituals.dart';
 import 'filters_screen.dart';
 import 'profile_detail_screen.dart';
 import 'worldwide_screen.dart';
@@ -75,6 +77,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
       }
       final miles =
           double.tryParse(RegExp(r'[0-9.]+').firstMatch(m.distanceBand)?.group(0) ?? '');
+      if (_filters.realCaptureOnly && !m.hasRealCaptureMedia) return false;
       final city = _filters.city?.toLowerCase();
       if (city != null) return m.city.toLowerCase().contains(city);
       if (!_filters.worldwideDistance && miles != null && miles > _filters.maxDistanceMi) return false;
@@ -279,6 +282,12 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.titleLarge),
                 ),
+                IconButton(
+                  icon: const Icon(Icons.search),
+                  tooltip: 'Search by vibe — "hike on Sundays"',
+                  onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(builder: (_) => const PeopleSearchScreen())),
+                ),
                 if (_lastPassed != null)
                   IconButton(
                     icon: const Icon(Icons.replay),
@@ -337,6 +346,21 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
             ),
           ),
           if (_showDrop) ...[
+            // Weekly ritual: today's theme leads the Drop (Market Monday…).
+            Builder(builder: (context) {
+              final r = ritualForDate(DateTime.now());
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+                child: Row(children: [
+                  Text(r.name, style: Theme.of(context).textTheme.titleSmall),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(r.tagline,
+                        style: Theme.of(context).textTheme.bodySmall, overflow: TextOverflow.ellipsis),
+                  ),
+                ]),
+              );
+            }),
             // A2 Discover backdrop band (imagery set) heads the Drop.
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
@@ -400,9 +424,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
               const Icon(Icons.hourglass_empty_outlined, size: 36),
               const SizedBox(height: 12),
               Text(
-                  _showDrop
-                      ? 'Drop complete — you\'ve seen today\'s set.'
-                      : 'You\'ve seen everyone nearby for now.',
+                  'You\'re caught up',
                   style: Theme.of(context).textTheme.titleMedium,
                   textAlign: TextAlign.center),
               const SizedBox(height: 6),

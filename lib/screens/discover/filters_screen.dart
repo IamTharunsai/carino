@@ -22,6 +22,7 @@ class FiltersConfig {
     this.verifiedOnly = true,
     this.exactIntention = false,
     this.worldwideDistance = false,
+    this.realCaptureOnly = false,
     this.city,
   });
 
@@ -40,6 +41,9 @@ class FiltersConfig {
   /// in its deck filter).
   final bool worldwideDistance;
 
+  /// Only people whose photo or video was taken in the app (unedited).
+  final bool realCaptureOnly;
+
   /// Plus travel mode: see people in another city before you land.
   final String? city;
 
@@ -52,7 +56,8 @@ class FiltersConfig {
       verifiedOnly &&
       !exactIntention &&
       !worldwideDistance &&
-      city == null;
+      city == null &&
+      !realCaptureOnly;
 }
 
 /// S-017 Filters — the full screen the lite sheet grows into:
@@ -79,6 +84,7 @@ class _FiltersScreenState extends State<FiltersScreen> {
   late bool _verifiedOnly = widget.initial.verifiedOnly;
   late bool _exactIntention = widget.initial.exactIntention;
   late bool _worldwideDistance = widget.initial.worldwideDistance;
+  late bool _realCaptureOnly = widget.initial.realCaptureOnly;
   late String _where = widget.initial.worldwideDistance
       ? 'world'
       : widget.initial.city != null
@@ -226,6 +232,13 @@ class _FiltersScreenState extends State<FiltersScreen> {
             onChanged: (v) => setState(() => _distance = v),
           ),
           ],
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Real photos only'),
+            subtitle: const Text('Photos and videos taken in the app, unedited.'),
+            value: _realCaptureOnly,
+            onChanged: (v) => setState(() => _realCaptureOnly = v),
+          ),
           Text('Language', style: text.titleMedium),
           const SizedBox(height: 8),
           Wrap(
@@ -340,6 +353,7 @@ class _FiltersScreenState extends State<FiltersScreen> {
                 exactIntention: _exactIntention,
                 worldwideDistance: _worldwideDistance,
                 city: _where == 'city' && _city.text.trim().isNotEmpty ? _city.text.trim() : null,
+                realCaptureOnly: _realCaptureOnly,
               ),
             ),
           ),

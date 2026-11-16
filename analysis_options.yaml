@@ -15,7 +15,8 @@ analyzer:
     - web/**
     - android/**
     - ios/**
-    - "carino-source*/**"   # local copies dropped in for merging
+    - "carino-source*/**"
+    - "carino-crowd-build/**"   # local copies dropped in for merging
     - docs/**              # audit scripts, not app code
 
 linter:

@@ -86,14 +86,15 @@ void main() {
     Services.prefs.liked.clear();
     await show(t, const DiscoverScreen());
     const centre = Offset(180, 380);
-    await t.dragFrom(centre, const Offset(320, 0)); // right = like
+    await t.dragFrom(centre, const Offset(-320, 0)); // left = pass (first card already likes you)
+    await settle(t);
+    expect(Services.prefs.liked, isEmpty);
+    await t.dragFrom(centre, const Offset(320, 0)); // right = like someone who hasn't liked you
     await settle(t);
     expect(Services.prefs.liked, hasLength(1));
+    expect(MockData.likesYou.any((m) => m.id == Services.prefs.liked.first), isFalse);
     expect(find.byType(SnackBar), findsNothing); // a plain like has no pop-up
     expect(find.text("It's a spark"), findsNothing); // no fake match
-    await t.dragFrom(centre, const Offset(-320, 0)); // left = pass
-    await settle(t);
-    expect(Services.prefs.liked, hasLength(1));
     final before = Services.prefs.liked.length;
     await t.tapAt(centre);
     await t.pump(const Duration(milliseconds: 60));
@@ -115,7 +116,7 @@ void main() {
   testWidgets('You liked list shows who is waiting and who matched', (t) async {
     Services.prefs.liked
       ..clear()
-      ..addAll(['m-aria', 'm-priya']);
+      ..addAll(['m-dev', 'm-priya']);
     await show(t, const LikesManagerScreen());
     expect(find.text('Waiting for them to heart you back'), findsOneWidget);
     expect(find.text("It's mutual 💞 say hi"), findsOneWidget);

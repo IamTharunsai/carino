@@ -53,6 +53,10 @@ class ChatMessage {
     this.viewOnce = false,
     this.mediaConsumed = false,
     this.isSystemNotice = false,
+    this.isVideoReply = false,
+    this.videoReplyPrompt,
+    this.videoReplySeconds = 0,
+    this.videoReplyCaptions = true,
     this.expiresInLabel,
     this.unsent = false,
     this.reaction,
@@ -80,6 +84,14 @@ class ChatMessage {
   /// System notices render centred (e.g. the S-036 screenshot-DETECTED
   /// notice — detection only, never a prevention claim).
   final bool isSystemNotice;
+
+  /// A short private video answer to one of their profile prompts.
+  final bool isVideoReply;
+  final String? videoReplyPrompt;
+  final int videoReplySeconds;
+  final bool videoReplyCaptions;
+  String get videoReplyLabel =>
+      '${videoReplySeconds ~/ 60}:${(videoReplySeconds % 60).toString().padLeft(2, '0')}';
 
   /// Vanish per-message expiry label (S-036), server-authoritative in
   /// production — the client displays the server's stated clock.

@@ -52,6 +52,9 @@ class VerificationService {
 
   bool layerPassed(VerificationLayer layer) => _completedLayers.contains(layer);
 
+  /// Sign-out hygiene: forget this session's results.
+  void reset() => _completedLayers.clear();
+
   /// The badge exists only when ALL THREE layers passed — photo-match last.
   bool get badgeEarned =>
       _status == VerificationStatus.passed &&
@@ -111,6 +114,7 @@ class VerificationService {
       await startLiveSession();
       return _status;
     }
+    _completedLayers.clear(); // a re-run starts fresh — no double-counted layers
     for (final layer in VerificationLayer.values) {
       await Future<void>.delayed(const Duration(milliseconds: 250));
       _completedLayers.add(layer);

@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 /// brand colours without updating the blueprint — these six tokens are the
 /// whole system.
 class AppColors {
+  static const Color surfaceLight = Colors.white;
+  static const Color porcelainDeep = Color(0xFFF7F0EC);
   AppColors._();
 
   /// Signature red — primary buttons (SOLID, never glass), selected states.

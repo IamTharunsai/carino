@@ -158,10 +158,10 @@ void main() {
     Services.prefs.noCounts.value = false;
     addTearDown(() => Services.prefs.noCounts.value = false);
     await open(tester, const ConnectScreen());
-    await tester.scrollUntilVisible(find.textContaining('have a crush on you'), 250);
+    await tester.scrollUntilVisible(find.textContaining('a crush on you 💗'), 250);
     Services.prefs.noCounts.value = true;
     await tester.pumpAndSettle();
     expect(find.text('People with a crush on you'), findsOneWidget);
-    expect(find.textContaining('have a crush on you'), findsNothing);
+    expect(find.textContaining('a crush on you 💗'), findsNothing);
   });
 }

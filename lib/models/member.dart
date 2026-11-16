@@ -17,6 +17,27 @@ enum Intention {
 
 /// A member of the app. In this scaffold every member is SAMPLE DATA
 /// (see data/mock_data.dart) — never a real person.
+/// Where a piece of profile media came from (Wave 1 · Real Capture,
+/// CROWD-FEATURES #2). Provenance is a STATE in the data model, set by
+/// the media pipeline — never inferred from how a photo looks:
+///
+/// - [realCapture]: shot inside the app (camera pipeline) and unedited —
+///   the only source that earns the Real Capture tag. In production the
+///   capture pipeline attaches a C2PA-style provenance credential at
+///   shutter time; edits or re-exports break the chain and lose the tag.
+/// - [uploaded]: picked from the camera roll / uploaded — a real photo,
+///   but no capture provenance, so NO tag.
+/// - [placeholder]: sample/placeholder media (all demo-build imagery
+///   starts here unless the seed data states a source) — NO tag.
+enum MediaSource {
+  realCapture('Real Capture'),
+  uploaded('Uploaded'),
+  placeholder('Placeholder');
+
+  const MediaSource(this.label);
+  final String label;
+}
+
 class Member {
   const Member({
     required this.id,
@@ -24,6 +45,7 @@ class Member {
     required this.age,
     required this.city,
     required this.distanceBand,
+    this.distanceMi = 5.0,
     required this.intention,
     required this.photoAsset,
     required this.headline,
@@ -40,6 +62,9 @@ class Member {
     this.availability = 'This week',
     this.boundaries = '',
     this.photoAssets = const [],
+    this.likesYouBack = false,
+    this.photoSource = MediaSource.placeholder,
+    this.videoIntroSource = MediaSource.placeholder,
     this.gender = const [],
     this.pronouns = '',
     this.orientation = '',
@@ -62,6 +87,9 @@ class Member {
   /// Broad band only — the app NEVER shows an exact location (blueprint S-015).
   final String distanceBand;
 
+  /// Miles, for filter maths only — the UI shows [distanceBand].
+  final double distanceMi;
+
   final Intention intention;
 
   /// In production this is a signed media URL from BackendService storage.
@@ -83,6 +111,16 @@ class Member {
   final bool verified;
   final bool hasVideoIntro;
   final bool hasVoiceIntro;
+
+  /// True when this member already liked the current user (a like back = a real match).
+  final bool likesYouBack;
+
+  /// Provenance of the main photo / video intro (Real Capture tag).
+  final MediaSource photoSource;
+  final MediaSource videoIntroSource;
+  bool get photoIsRealCapture => photoSource == MediaSource.realCapture;
+  bool get videoIntroIsRealCapture => hasVideoIntro && videoIntroSource == MediaSource.realCapture;
+  bool get hasRealCaptureMedia => photoIsRealCapture || videoIntroIsRealCapture;
   final List<String> languages;
   final bool onlineNow;
 
@@ -198,6 +236,7 @@ class Moment {
     required this.caption,
     required this.imageAsset,
     required this.expiresInLabel,
+    this.circleId,
     this.sticker,
     this.circle = Circle.everyone,
   });
@@ -214,6 +253,10 @@ class Moment {
 
   /// Which circle this Moment was shared to (private by choice, per post).
   final Circle circle;
+
+  /// Circle-only Moment: visible only to that Circle's members.
+  final String? circleId;
+  bool get isCircleScoped => circleId != null;
 }
 
 enum StickerKind { poll, askMe, thisOrThat }

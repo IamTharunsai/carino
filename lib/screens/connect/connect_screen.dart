@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../you/my_tickets_screen.dart';
+import 'circles_screen.dart';
+import 'plans_hub_screen.dart';
 import '../../config/app_config.dart';
 import '../../config/env.dart';
 import '../../data/mock_data.dart';
@@ -41,6 +44,24 @@ class ConnectScreen extends StatelessWidget {
           Text('Plans', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 12),
           const _YourPlansCard(),
+          const SizedBox(height: 12),
+          GlassContainer(
+            child: Column(children: [
+              for (final (icon, title, sub, page) in [
+                (Icons.groups_2_outlined, 'Group plans, Tables & tickets', 'Dinners with verified strangers, club nights, open plans', const PlansHubScreen() as Widget),
+                (Icons.diversity_1_outlined, 'Private circles', 'Your people, your plans, your moments', const CirclesScreen() as Widget),
+                (Icons.confirmation_number_outlined, 'My tickets', 'Seats and passes you hold', const MyTicketsScreen() as Widget),
+              ])
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(icon, color: AppColors.sparkCoral),
+                  title: Text(title),
+                  subtitle: Text(sub),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page)),
+                ),
+            ]),
+          ),
           const SizedBox(height: 12),
           // --- Spark Sessions ---
           GlassContainer(

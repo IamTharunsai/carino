@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'presence_screen.dart';
 import '../../config/app_config.dart';
 import '../../models/experience.dart';
 import '../../services/services.dart';
@@ -284,6 +285,15 @@ class _YouScreenState extends State<AccountCentreScreen> {
               MaterialPageRoute<void>(
                 builder: (_) => const PrivacyCentreScreen(),
               ),
+            ),
+          ),
+          _row(
+            context,
+            icon: Icons.self_improvement_outlined,
+            title: 'Phone-down & presence',
+            subtitle: 'How present you are on dates — only you see it',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const PresenceScreen()),
             ),
           ),
           _row(

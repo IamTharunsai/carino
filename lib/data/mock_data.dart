@@ -1,6 +1,9 @@
 import '../config/app_config.dart';
 import '../models/experience.dart';
 import '../models/member.dart';
+import '../models/ticket.dart';
+import '../models/plan.dart';
+import '../models/circle.dart';
 import '../models/message.dart';
 import '../models/platform.dart';
 import '../models/social.dart';
@@ -21,6 +24,7 @@ class MockData {
   static const List<Member> members = [
     Member(
       id: 'm-aria',
+      photoSource: MediaSource.realCapture, videoIntroSource: MediaSource.realCapture,
       name: 'Aria',
       age: 24,
       city: 'Columbus',
@@ -58,6 +62,7 @@ class MockData {
     ),
     Member(
       id: 'm-dev',
+      photoSource: MediaSource.uploaded, videoIntroSource: MediaSource.uploaded,
       name: 'Dev',
       age: 27,
       city: 'Columbus',
@@ -80,6 +85,7 @@ class MockData {
     ),
     Member(
       id: 'm-sofia',
+      photoSource: MediaSource.realCapture, videoIntroSource: MediaSource.uploaded,
       name: 'Sofia',
       age: 23,
       city: 'Dublin',
@@ -130,6 +136,7 @@ class MockData {
     ),
     Member(
       id: 'm-priya',
+      likesYouBack: true, photoSource: MediaSource.realCapture, videoIntroSource: MediaSource.realCapture,
       name: 'Priya',
       age: 26,
       city: 'Columbus',
@@ -549,9 +556,540 @@ class MockData {
 
   /// S-021 Likes You — the count is REAL (these are the people); free sees
   /// the count + blurred teaser, Plus reveals the rows.
-  static List<Member> get likesYou => [
-        memberById('m-priya'),
-        memberById('m-marcus'),
+  /// One source of truth: whoever has already hearted you.
+  static List<Member> get likesYou => [for (final m in members) if (m.likesYouBack) m];
+
+  /// Wave 1 · Post→Plan seed: open group plans hosted by sample members
+  /// (CROWD-FEATURES #9/#10). The AppStore copies this list and owns the
+  /// join state — plans minted by createPlan() join the same list.
+  static List<OpenPlan> openPlans() => [
+        OpenPlan(
+          id: 'op-sofia-arcade',
+          title: 'Arcade night + milkshakes',
+          place: 'Arcade bar · Short North',
+          timeLabel: 'Tonight · 19:30',
+          tonight: true,
+          groupSize: 6,
+          hostId: 'm-sofia',
+          attendeeIds: ['m-sofia', 'm-aria', 'm-dev'],
+          instantJoin: true,
+          sourceLabel: "From Sofia's Moment",
+          note: 'High scores, low stakes. Loser buys the first milkshake round.',
+          durationMinutes: 150,
+        ),
+        OpenPlan(
+          id: 'op-marcus-jazz',
+          title: 'Jazz set, then ramen',
+          place: 'Jazz club · Downtown',
+          timeLabel: 'Tonight · 20:30',
+          tonight: true,
+          groupSize: 4,
+          hostId: 'm-marcus',
+          attendeeIds: ['m-marcus', 'm-priya'],
+          note: 'One set only — home by eleven. Host approves joins.',
+          durationMinutes: 120,
+        ),
+        OpenPlan(
+          id: 'op-aria-market',
+          title: 'Farmers market crawl',
+          place: 'North Market',
+          timeLabel: 'Sat · 10:00',
+          tonight: false,
+          groupSize: 6,
+          hostId: 'm-aria',
+          attendeeIds: ['m-aria'],
+          instantJoin: true,
+          sourceLabel: 'From your chat with Aria',
+          note: 'We split whatever looks good and cook it Sunday.',
+          durationMinutes: 90,
+        ),
+        OpenPlan(
+          id: 'op-dev-trail',
+          title: 'Trail run, then tacos',
+          place: 'Scioto Trail · river entrance',
+          timeLabel: 'Tomorrow · 18:00',
+          tonight: false,
+          groupSize: 5,
+          hostId: 'm-dev',
+          attendeeIds: ['m-dev', 'm-marcus'],
+          note: 'Easy pace, nobody dropped. Tacos are the point.',
+          durationMinutes: 120,
+        ),
+        OpenPlan(
+          id: 'op-priya-gardens',
+          title: 'Botanical gardens + chai',
+          place: 'Franklin Park Conservatory',
+          timeLabel: 'Sun · 12:00',
+          tonight: false,
+          groupSize: 4,
+          hostId: 'm-priya',
+          attendeeIds: ['m-priya', 'm-sofia', 'm-dev', 'm-aria'],
+          instantJoin: true,
+          note: 'Slow lap of the gardens, chai after.',
+          durationMinutes: 120,
+        ),
+        // Wave 3 · Decompress shelf (CROWD-FEATURES #12): calm, bookable
+        // offline plans — the stress-relief shelf, tagged decompress so
+        // the Plans hub shelves them apart from the loud board. Same
+        // join state machine, same verified-members rule.
+        OpenPlan(
+          id: 'op-priya-parkwalk',
+          title: 'Sunset park walk',
+          place: 'Scioto Mile · river path',
+          timeLabel: 'Sat · 17:30',
+          tonight: false,
+          groupSize: 6,
+          hostId: 'm-priya',
+          attendeeIds: ['m-priya', 'm-aria'],
+          instantJoin: true,
+          note: 'Slow lap, no agenda. Breathing is the plan.',
+          decompress: true,
+          durationMinutes: 60,
+        ),
+        OpenPlan(
+          id: 'op-aria-garden',
+          title: 'Garden morning + tea',
+          place: 'Community garden · Clintonville',
+          timeLabel: 'Sun · 09:00',
+          tonight: false,
+          groupSize: 5,
+          hostId: 'm-aria',
+          attendeeIds: ['m-aria'],
+          instantJoin: true,
+          note: 'Water the beds, drink the tea, leave slower than you came.',
+          decompress: true,
+          durationMinutes: 90,
+        ),
+        OpenPlan(
+          id: 'op-dev-lakeside',
+          title: 'Lakeside sit + sketch',
+          place: 'Hoover Reservoir · north shore',
+          timeLabel: 'Tomorrow · 16:00',
+          tonight: false,
+          groupSize: 4,
+          hostId: 'm-dev',
+          attendeeIds: ['m-dev', 'm-marcus'],
+          note: 'Bring a sketchbook or don\'t. Sitting is the activity.',
+          decompress: true,
+          durationMinutes: 90,
+        ),
+        OpenPlan(
+          id: 'op-sofia-yoga',
+          title: 'Outdoor yoga in the park',
+          place: 'Goodale Park · gazebo lawn',
+          timeLabel: 'Tonight · 18:15',
+          tonight: true,
+          groupSize: 8,
+          hostId: 'm-sofia',
+          attendeeIds: ['m-sofia', 'm-priya'],
+          instantJoin: true,
+          note: 'All levels, mats provided. Phones stay in bags.',
+          decompress: true,
+          durationMinutes: 60,
+        ),
+        // Wave 4 · Outcome Graph seed (MASTER-BUILD-PLAN A3): two PAST
+        // plans the signed-in member was part of, seeded awaiting their
+        // outcome check-in — one hosted by Dev (so his host standing can
+        // gain a real "happened" count), one hosted by 'me' (so my own
+        // host line and dashboard have a real subject). They carry
+        // past: true, so the board, the Decompress shelf and People
+        // Search never offer them as joinable.
+        OpenPlan(
+          id: 'op-dev-boardgames',
+          title: 'Board-game night — the rematch',
+          place: 'Board-game café · Clintonville',
+          timeLabel: 'Last Sat · 19:00',
+          tonight: false,
+          groupSize: 6,
+          hostId: 'm-dev',
+          attendeeIds: ['m-dev', 'me', 'm-sofia'],
+          instantJoin: true,
+          note: 'Sofia defended the crown. The scorekeeping is disputed.',
+          durationMinutes: 150,
+          past: true,
+          myState: PlanJoinState.going,
+        ),
+        OpenPlan(
+          id: 'op-me-riverwalk',
+          title: 'Riverwalk + coffee crawl',
+          place: 'Scioto Mile · river path',
+          timeLabel: 'Last Sun · 10:00',
+          tonight: false,
+          groupSize: 4,
+          hostId: 'me',
+          attendeeIds: ['me', 'm-aria', 'm-priya'],
+          instantJoin: true,
+          note: 'Slow loop of the river path, coffee after.',
+          durationMinutes: 90,
+          past: true,
+          myState: PlanJoinState.going,
+        ),
+      ];
+
+  /// Wave 1 · Cariño Tables nights (CROWD-FEATURES #11). Weekly,
+  /// verified-only, tables of six. Prices sit inside the $17–35/seat
+  /// band; one night is seeded sold-out on purpose (honest scarcity —
+  /// the state must render, not just the happy path).
+  static const List<TableNight> tableNights = [
+    TableNight(
+      id: 'tn-thu-19',
+      dayLabel: 'Thursday',
+      dateLabel: 'Thu · Nov 19',
+      revealLabel: 'Thu at 17:00',
+      areaLabel: 'Short North',
+      vibeLabel: 'Foodies & first-timers',
+      seatPrice: 24,
+      capacity: 24,
+      bookedSeats: 17,
+    ),
+    TableNight(
+      id: 'tn-fri-20',
+      dayLabel: 'Friday',
+      dateLabel: 'Fri · Nov 20',
+      revealLabel: 'Fri at 17:00',
+      areaLabel: 'German Village',
+      vibeLabel: 'New in town',
+      seatPrice: 21,
+      capacity: 18,
+      bookedSeats: 18,
+    ),
+    TableNight(
+      id: 'tn-thu-26',
+      dayLabel: 'Thursday',
+      dateLabel: 'Thu · Nov 26',
+      revealLabel: 'Thu at 17:00',
+      areaLabel: 'Short North',
+      vibeLabel: 'Slow food, long talk',
+      seatPrice: 29,
+      capacity: 24,
+      bookedSeats: 9,
+    ),
+    TableNight(
+      id: 'tn-sat-28',
+      dayLabel: 'Saturday',
+      dateLabel: 'Sat · Nov 28',
+      revealLabel: 'Sat at 16:00',
+      areaLabel: 'Arena District',
+      vibeLabel: 'Game-night crowd',
+      seatPrice: 19,
+      capacity: 12,
+      bookedSeats: 3,
+    ),
+  ];
+
+  /// Wave 3.5 · Club & event nights (MASTER-BUILD-PLAN T1). Every
+  /// kind of club night, browsed by venue: one seeded SOLD OUT (the
+  /// refusal state must render), one FREE-ONLY (no premium tier), one
+  /// PREMIUM-ONLY (a supper club — nobody RSVPs to a set menu), and
+  /// two PARTNER nights (affiliate listings: "via partner", no Cariño
+  /// service fee). Our own premium nights carry a flat $2/ticket
+  /// service fee, stated in the open (the Partiful/Clyx pattern).
+  static const List<ClubNight> clubNights = [
+    ClubNight(
+      id: 'cn-guild-fri',
+      title: 'New Members Social',
+      categoryLabel: 'Social club social',
+      venueName: 'The Guild Social Club',
+      areaLabel: 'Short North',
+      dateLabel: 'Fri · Nov 20',
+      timeLabel: '19:00',
+      vibeLabel: 'First-timers & regulars, mixed kindly',
+      capacity: 60,
+      claimedSeats: 41,
+      seller: TicketSeller.carino,
+      premiumPrice: 18,
+      premiumPerks: ['Priority entry', 'Welcome drink credit'],
+      serviceFeePerTicket: 2,
+    ),
+    ClubNight(
+      id: 'cn-velvet-sat',
+      title: 'Velvet Room Saturdays',
+      categoryLabel: 'Nightlife club night',
+      venueName: 'Velvet Room',
+      areaLabel: 'Arena District',
+      dateLabel: 'Sat · Nov 21',
+      timeLabel: '21:00',
+      vibeLabel: 'House & disco edits',
+      capacity: 120,
+      claimedSeats: 86,
+      seller: TicketSeller.carino,
+      premiumPrice: 25,
+      premiumPerks: ['Priority entry', 'Coat check included'],
+      serviceFeePerTicket: 2,
+    ),
+    ClubNight(
+      id: 'cn-bluenote-thu',
+      title: 'Blue Note Thursdays — Short North Trio',
+      categoryLabel: 'Live music',
+      venueName: 'The Blue Note',
+      areaLabel: 'Short North',
+      dateLabel: 'Thu · Nov 19',
+      timeLabel: '20:00',
+      vibeLabel: 'Jazz trio, listening room',
+      capacity: 80,
+      claimedSeats: 80,
+      seller: TicketSeller.carino,
+      premiumPrice: 22,
+      premiumPerks: ['Priority entry', 'Front-section seating'],
+      serviceFeePerTicket: 2,
+    ),
+    ClubNight(
+      id: 'cn-laugh-wed',
+      title: 'Open Mic Mayhem',
+      categoryLabel: 'Comedy night',
+      venueName: 'The Laugh Cellar',
+      areaLabel: 'Brewery District',
+      dateLabel: 'Wed · Nov 18',
+      timeLabel: '19:30',
+      vibeLabel: 'New material, kind crowd',
+      capacity: 70,
+      claimedSeats: 33,
+      seller: TicketSeller.carino,
+      // Free-only night: premiumPrice stays null on purpose.
+    ),
+    ClubNight(
+      id: 'cn-hartwell-sat',
+      title: "Members' Wine Evening",
+      categoryLabel: 'Members club evening',
+      venueName: 'The Hartwell Club',
+      areaLabel: 'German Village',
+      dateLabel: 'Sat · Nov 28',
+      timeLabel: '18:30',
+      vibeLabel: 'Natural wines, low light, long talk',
+      capacity: 40,
+      claimedSeats: 22,
+      seller: TicketSeller.partner,
+      premiumPrice: 32,
+      premiumPerks: ['Hosted table', 'Two drink credits'],
+    ),
+    ClubNight(
+      id: 'cn-casa-sun',
+      title: 'Sunday Supper Club — Harvest Table',
+      categoryLabel: 'Supper club',
+      venueName: 'Casa Verde',
+      areaLabel: 'Italian Village',
+      dateLabel: 'Sun · Nov 22',
+      timeLabel: '18:00',
+      vibeLabel: 'One long table, set menu, strangers welcome',
+      capacity: 24,
+      claimedSeats: 15,
+      seller: TicketSeller.partner,
+      offersFree: false,
+      premiumPrice: 35,
+      premiumPerks: ['Hosted table', 'Welcome drink credit'],
+    ),
+  ];
+
+  /// Wave 4 · Outcome Graph seed (A3): LAST Thursday's Tables night —
+  /// deliberately NOT in [tableNights], so it can never be booked; it
+  /// exists as the subject of the store's seeded past booking (the
+  /// member went, the host checked the table in) and of the outcome
+  /// check-in that follows it.
+  static const TableNight pastTableNight = TableNight(
+    id: 'tn-thu-12',
+    dayLabel: 'Thursday',
+    dateLabel: 'Thu · Nov 12',
+    revealLabel: 'Thu at 17:00',
+    areaLabel: 'Short North',
+    vibeLabel: 'Foodies & first-timers',
+    seatPrice: 24,
+    capacity: 24,
+    bookedSeats: 21,
+  );
+
+  /// Wave 4 · Outcome Graph seed (A3): LAST Saturday's club night —
+  /// deliberately NOT in [clubNights], so it can never be ticketed; it
+  /// is the subject of the store's seeded checked-in ticket and of the
+  /// outcome check-in that follows it.
+  static const ClubNight pastClubNight = ClubNight(
+    id: 'cn-riverbend-sat',
+    title: 'Riverbend Listening Night',
+    categoryLabel: 'Live music',
+    venueName: 'The Riverbend Room',
+    areaLabel: 'Arena District',
+    dateLabel: 'Sat · Nov 14',
+    timeLabel: '20:00',
+    vibeLabel: 'Vinyl listening, low talk',
+    capacity: 60,
+    claimedSeats: 44,
+    seller: TicketSeller.carino,
+    premiumPrice: 20,
+    premiumPerks: ['Priority entry'],
+    serviceFeePerTicket: 2,
+  );
+
+  /// Wave 2 · Private Circles seed (CROWD-FEATURES #5): two small groups
+  /// that formed from Wave 1 plans and stayed. The AppStore copies this
+  /// list and owns all circle state — circles converted in-session join
+  /// the same list.
+  static List<PrivateCircle> circles() => [
+        PrivateCircle(
+          id: 'circle-arcade',
+          name: 'Arcade Crew',
+          memberIds: ['m-sofia', 'me', 'm-aria', 'm-dev'],
+          formedFromLabel: 'From the plan "Arcade night + milkshakes"',
+          upcomingPlanId: 'op-sofia-arcade',
+          sourcePlanId: 'op-sofia-arcade',
+        ),
+        PrivateCircle(
+          id: 'circle-garden',
+          name: 'Garden & Chai Club',
+          memberIds: ['m-priya', 'me', 'm-aria', 'm-sofia'],
+          formedFromLabel: 'From the plan "Botanical gardens + chai"',
+          upcomingPlanId: 'op-priya-gardens',
+          sourcePlanId: 'op-priya-gardens',
+        ),
+      ];
+
+  /// Wave 2 · Circle-only Moments (CROWD-FEATURES #6): scoped Moments —
+  /// these NEVER appear in the connections feed, only inside their
+  /// Circle. The AppStore owns the list (posting/pinning is state).
+  static List<Moment> circleMoments() => [
+        Moment(
+          id: 'cmom-arcade-1',
+          member: memberById('m-sofia'),
+          caption: 'Rematch Friday. The crown stays heavy 👑',
+          imageAsset: AppConfig.assetBackdropMatch,
+          expiresInLabel: '9h left',
+          circleId: 'circle-arcade',
+        ),
+        Moment(
+          id: 'cmom-arcade-2',
+          member: memberById('m-aria'),
+          caption: 'New high score. Dev disputes it. There is a spreadsheet.',
+          imageAsset: AppConfig.assetBackdropDiscover,
+          expiresInLabel: '14h left',
+          circleId: 'circle-arcade',
+        ),
+        Moment(
+          id: 'cmom-garden-1',
+          member: memberById('m-priya'),
+          caption: 'Chilli update: thriving. Unlike my sleep schedule.',
+          imageAsset: AppConfig.assetBackdropDiscover,
+          expiresInLabel: '5h left',
+          circleId: 'circle-garden',
+        ),
+        Moment(
+          id: 'cmom-garden-2',
+          member: memberById('m-aria'),
+          caption: 'Golden hour at the conservatory hits different.',
+          imageAsset: AppConfig.assetHeroWelcome,
+          expiresInLabel: '19h left',
+          circleId: 'circle-garden',
+        ),
+      ];
+
+  /// Circle Moments pinned as Highlights at seed time (one per circle —
+  /// the pin cap is 3, see AppStore.maxHighlightsPerCircle).
+  static const Set<String> highlightedMomentIds = {
+    'cmom-arcade-1',
+    'cmom-garden-1',
+  };
+
+  /// Wave 2 · Circle chat seeds (CROWD-FEATURES #7/#8): real message
+  /// objects with real poll votes — the counts the UI shows are these
+  /// lists, never typed-in numbers.
+  static List<CircleMessage> circleMessages() => [
+        CircleMessage(
+          id: 'cmsg-arcade-0',
+          circleId: 'circle-arcade',
+          authorId: 'm-sofia',
+          kind: CircleMsgKind.system,
+          text: 'Circle formed from "Arcade night + milkshakes" — '
+              'only members can see this chat.',
+          timeLabel: 'Fri',
+        ),
+        CircleMessage(
+          id: 'cmsg-arcade-1',
+          circleId: 'circle-arcade',
+          authorId: 'm-sofia',
+          kind: CircleMsgKind.text,
+          text: 'Friday rematch is ON. Biscuit the llama has been notified.',
+          timeLabel: '18:02',
+        ),
+        CircleMessage(
+          id: 'cmsg-arcade-2',
+          circleId: 'circle-arcade',
+          authorId: 'm-aria',
+          kind: CircleMsgKind.poll,
+          text: 'Next arcade night — which day?',
+          timeLabel: '18:05',
+          pollOptions: [
+            CirclePollOption('Thursday', ['m-sofia']),
+            CirclePollOption('Friday', ['m-aria', 'm-dev']),
+            CirclePollOption('Saturday'),
+          ],
+        ),
+        CircleMessage(
+          id: 'cmsg-arcade-3',
+          circleId: 'circle-arcade',
+          authorId: 'm-dev',
+          kind: CircleMsgKind.askMe,
+          askMeTopic: 'Ask me about trail running — routes, shoes, '
+              'and how not to get lost',
+          timeLabel: '18:11',
+          questionsAsked: 1,
+        ),
+        CircleMessage(
+          id: 'cmsg-arcade-4',
+          circleId: 'circle-arcade',
+          authorId: 'm-sofia',
+          kind: CircleMsgKind.intro,
+          introId: 'intro-sofia-1',
+          timeLabel: '18:14',
+        ),
+        CircleMessage(
+          id: 'cmsg-arcade-5',
+          circleId: 'circle-arcade',
+          authorId: 'm-aria',
+          kind: CircleMsgKind.text,
+          text: 'I brought the milkshake rankings. Controversial as ever.',
+          timeLabel: '18:20',
+        ),
+        CircleMessage(
+          id: 'cmsg-garden-1',
+          circleId: 'circle-garden',
+          authorId: 'm-priya',
+          kind: CircleMsgKind.text,
+          text: 'The chillies survived the week. Sunday gardens are a go 🌶',
+          timeLabel: '09:12',
+        ),
+        CircleMessage(
+          id: 'cmsg-garden-2',
+          circleId: 'circle-garden',
+          authorId: 'm-priya',
+          kind: CircleMsgKind.poll,
+          text: 'After the gardens?',
+          timeLabel: '09:15',
+          pollOptions: [
+            CirclePollOption('Chai', ['m-priya', 'm-sofia']),
+            CirclePollOption('Coffee', ['m-aria']),
+          ],
+        ),
+        CircleMessage(
+          id: 'cmsg-garden-3',
+          circleId: 'circle-garden',
+          authorId: 'm-aria',
+          kind: CircleMsgKind.text,
+          text: 'Bringing the camera. Golden hour owes me one.',
+          timeLabel: '09:21',
+        ),
+      ];
+
+  /// Wave 2 · Wingperson seed (CROWD-FEATURES #8): Sofia introduces the
+  /// signed-in member to Dev inside the Arcade Crew. Dev has accepted;
+  /// the intro waits on 'me' — so the accept flow is real, not staged.
+  static List<WingIntro> wingIntros() => [
+        WingIntro(
+          id: 'intro-sofia-1',
+          circleId: 'circle-arcade',
+          byId: 'm-sofia',
+          aId: 'me',
+          bId: 'm-dev',
+          note: 'You two keep circling the same trails-and-tacos plans — '
+              'say hi properly.',
+          acceptedIds: {'m-dev'},
+        ),
       ];
 
   /// S-041 Plans — upcoming + past, with honest states.

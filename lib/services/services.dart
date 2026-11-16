@@ -8,6 +8,7 @@ import '../models/notify.dart' show NotifTone;
 import '../models/plans.dart';
 import '../models/posts.dart';
 import '../models/flame.dart';
+import '../state/app_store.dart';
 import '../models/safety.dart';
 import '../models/platform.dart';
 import '../models/social.dart';
@@ -31,6 +32,8 @@ import 'video_service.dart';
 /// `VerificationService()` always reads "not started"). Everything goes
 /// through [Services].
 class Services {
+  /// Crowd build state: plans, Tables, tickets, Circles, concierge, presence.
+  static final AppStore store = AppStore();
   Services._();
 
   static final AuthService auth = AuthService();
@@ -322,6 +325,10 @@ class UserPrefs {
   /// Gift credits, creators I subscribe to, posts I liked.
   int credits = 0;
 
+  /// Taste Quiz tune for the Daily Drop (boost / drop terms).
+  List<String> tasteBoostTerms = const [];
+  List<String> tasteDropTerms = const [];
+
   /// Chat translation: their messages shown in my language.
   String myLanguage = 'English';
   bool autoTranslate = true;
@@ -446,6 +453,8 @@ class UserPrefs {
         'posts': [for (final p in posts) p.toJson()],
         'following': following.toList(),
         'credits': credits,
+        'tasteBoostTerms': tasteBoostTerms,
+        'tasteDropTerms': tasteDropTerms,
         'myLanguage': myLanguage,
         'flames': {for (final e in flames.entries) e.key: e.value.toJson()},
         'alertMessage': alertMessage,
@@ -508,6 +517,8 @@ class UserPrefs {
         ..clear()
         ..addAll(strs(j['following']));
       credits = (j['credits'] as num?)?.toInt() ?? 0;
+      tasteBoostTerms = strs(j['tasteBoostTerms']);
+      tasteDropTerms = strs(j['tasteDropTerms']);
       myLanguage = j['myLanguage'] as String? ?? myLanguage;
       flames
         ..clear()
