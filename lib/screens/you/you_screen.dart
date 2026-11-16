@@ -346,7 +346,7 @@ class _YouScreenState extends State<YouScreen> {
             title: AppConfig.plusName,
             subtitle: Services.payments.isPlus
                 ? 'Active — manage subscription'
-                : 'See who likes you, read receipts, spark sooner',
+                : 'See who liked you, unlimited likes, rewind, travel',
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
                 builder: (_) => Services.payments.isPlus

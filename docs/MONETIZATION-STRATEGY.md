@@ -42,7 +42,33 @@ Late-Night question deck, Plus filters. Price isn't set (store decides).
 "priority windows" are weak reasons to pay; "count only" likes is the exact
 pattern reviewers hate.
 
-## 4. Recommended plans
+## 4a. What's built (Nov 15, 2026) — the launch split
+Source of truth in code: `lib/models/plans.dart` (the paywall table renders from it).
+
+| | Free | Plus ($12.99/mo · $89.99/yr) |
+|---|---|---|
+| Verified discovery, Daily Drop, video profiles, matching, messaging, games, Vanish, plans, Decompress | ✓ | ✓ |
+| Likes a day | 10 (resets at midnight) | Unlimited |
+| See who liked you | Count | Everyone |
+| Super Likes a day | 1 | 5 |
+| Rewind a pass | — | ✓ |
+| Read receipts ("Seen" once they've replied; live: `read_at`) | — | ✓ |
+| Advanced filters | Basic | Full |
+| Travel mode (Worldwide) | — | ✓ |
+| Spark Night seats | Standard | Priority |
+
+À la carte: Super Like pack, 5 for $4.99, never expires (store consumable).
+Paid bookings already exist: Decompress experiences and Spark Nights via Stripe Connect.
+
+**Kept free on purpose:** incognito (a privacy/safety tool for women first), verification, report, block, check-ins.
+**Not built:**
+- "Who viewed your profile": a stalking vector, and it conflicts with incognito.
+- Paid Boosts: pay-to-be-seen.
+
+Either is a server ranking/logging change if you decide otherwise.
+**Later:** Elite (~$29.99) once a city is liquid: always-on priority, Circle admin, hosting perks.
+
+## 4. Recommended plans (original proposal)
 **Free — generous, because trust is the product**
 Verification, Daily Drop, unlimited messaging, plans + check-in safety, comfort
 rules, Decompress booking, core games, Stage, circles, 1 Super Like a day,

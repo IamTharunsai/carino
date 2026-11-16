@@ -65,7 +65,8 @@ update public.verification_records
   Apple / Google billing (store rules) — the app already refuses otherwise.
 - Add to `backend/supabase/.env`, then `npx supabase secrets set --env-file supabase/.env`:
   - `STRIPE_SECRET_KEY=sk_test_...`
-  - `STRIPE_PRICE_PLUS_MONTHLY=price_...` (create a Product "Cariño Plus", monthly)
+  - `STRIPE_PRICE_PLUS_MONTHLY=price_...` and `STRIPE_PRICE_PLUS_ANNUAL=price_...`
+    (one Product "Cariño Plus" with two prices: $12.99/month, $89.99/year)
   - `STRIPE_WEBHOOK_SECRET=whsec_...` from a webhook endpoint pointing at
     `https://<your-ref>.supabase.co/functions/v1/stripe-webhook`
     with events `checkout.session.completed` and `customer.subscription.deleted`.

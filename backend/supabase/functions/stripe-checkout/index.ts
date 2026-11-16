@@ -49,7 +49,7 @@ Deno.serve(async (req: Request) => {
     form.set("metadata[kind]", "booking");
     form.set("metadata[booking_id]", b.id);
   } else if (body.kind === "plus_web") {
-    const price = Deno.env.get("STRIPE_PRICE_PLUS_MONTHLY");
+    const price = Deno.env.get(body.plan === "annual" ? "STRIPE_PRICE_PLUS_ANNUAL" : "STRIPE_PRICE_PLUS_MONTHLY");
     if (!price) return json({ error: "plus_price_not_configured" }, 503);
     form.set("mode", "subscription");
     form.set("line_items[0][price]", price);

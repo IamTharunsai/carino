@@ -3,6 +3,7 @@ import '../../config/env.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import '../../config/app_config.dart';
+import '../../models/plans.dart';
 import '../../services/services.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/glass_card.dart';
@@ -101,11 +102,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
               children: [
                 _compareRow('', 'Free', 'Plus'),
                 const Divider(),
-                _compareRow('Daily Drop + nearby discovery', 'Included', 'Included'),
-                _compareRow('See who liked you', 'Count only', 'Full list'),
-                _compareRow('Read receipts in chat', '—', 'Included'),
-                _compareRow('Spark Session invites', 'Standard queue', 'Priority windows'),
-                _compareRow('Advanced reciprocal filters', 'Basic', 'Full'),
+                for (final r in planRows) _compareRow(r.label, r.free, r.plus),
               ],
             ),
           ),
@@ -120,11 +117,11 @@ class _PaywallScreenState extends State<PaywallScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text('Founding-member intro price',
+                Text('Launch price',
                     style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 6),
                 Text(
-                  'The price and renewal price are shown by the App Store / Google Play before you confirm — the same number, no surprises at renewal. Cancel anytime in store settings; access runs to the end of the paid period.',
+                  '$plusMonthlyPrice a month or $plusAnnualPrice a year (US). The App Store / Google Play shows your price and the renewal price before you confirm — same number at renewal, no surprises. Cancel anytime in store settings; access runs to the end of the paid period. Need more Super Likes only? A pack of $superLikePackSize is $superLikePackPrice and never expires.',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ],
@@ -141,7 +138,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                     children: [
                       Text('Monthly',
                           style: Theme.of(context).textTheme.titleMedium),
-                      Text('Price shown at checkout',
+                      Text('$plusMonthlyPrice / month',
                           style: Theme.of(context).textTheme.bodySmall,
                           textAlign: TextAlign.center),
                     ],
@@ -157,7 +154,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                     children: [
                       Text('Annual',
                           style: Theme.of(context).textTheme.titleMedium),
-                      Text('Best value · price shown at checkout',
+                      Text('$plusAnnualPrice / year · best value',
                           style: Theme.of(context).textTheme.bodySmall,
                           textAlign: TextAlign.center),
                     ],

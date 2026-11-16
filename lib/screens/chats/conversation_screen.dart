@@ -929,6 +929,13 @@ class _ConversationScreenState extends State<ConversationScreen> {
     );
   }
 
+  bool _seen(ChatMessage msg) {
+    final all = widget.conversation.messages;
+    return all
+        .skip(all.indexOf(msg) + 1)
+        .any((m) => !m.fromMe && !m.isSystemNotice);
+  }
+
   Widget _bubble(BuildContext context, ChatMessage msg) {
     if (msg.isGameCard) {
       return Padding(
@@ -1058,11 +1065,12 @@ class _ConversationScreenState extends State<ConversationScreen> {
                   const SizedBox(width: 6),
                 ],
                 Flexible(child: Text(
-                  // "Seen" renders only per read-receipt prefs/entitlement;
-                  // scaffold shows time (+ vanish expiry where it applies).
-                  _vanish && msg.expiresInLabel != null
-                      ? '${msg.timeLabel} · ${msg.expiresInLabel}'
-                      : msg.timeLabel,
+                  // Read receipts are Plus. "Seen" = they wrote after it
+                  // (live: the server's read_at), never guessed.
+                  (_vanish && msg.expiresInLabel != null
+                          ? '${msg.timeLabel} · ${msg.expiresInLabel}'
+                          : msg.timeLabel) +
+                      (mine && Services.payments.isPlus && _seen(msg) ? ' · Seen' : ''),
                   style: TextStyle(
                     fontSize: 10,
                     color: (mine ? AppColors.warmIvory : AppColors.softRose)

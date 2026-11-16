@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../data/mock_data.dart';
 import '../models/member.dart';
 import '../models/notify.dart' show NotifTone;
+import '../models/plans.dart';
 import '../models/platform.dart';
 import '../models/social.dart';
 import '../models/sync.dart';
@@ -69,6 +70,9 @@ class UserPrefs {
     ageBlockedUntil = blocked == null ? null : DateTime.tryParse(blocked);
     _sparkDay = sp.getString('sparkDay');
     _sparksUsed = sp.getInt('sparksUsed') ?? 0;
+    _likeDay = sp.getString('likeDay');
+    _likesUsed = sp.getInt('likesUsed') ?? 0;
+    bonusSparks = sp.getInt('bonusSparks') ?? 0;
     _loadSync(sp.getString('sync'));
   }
 
@@ -86,6 +90,9 @@ class UserPrefs {
     }
     if (_sparkDay != null) await sp.setString('sparkDay', _sparkDay!);
     await sp.setInt('sparksUsed', _sparksUsed);
+    if (_likeDay != null) await sp.setString('likeDay', _likeDay!);
+    await sp.setInt('likesUsed', _likesUsed);
+    await sp.setInt('bonusSparks', bonusSparks);
     await sp.setString('sync', jsonEncode(_syncJson()));
   }
 
@@ -211,28 +218,67 @@ class UserPrefs {
   final Set<String> hiddenChats = {};
   final Map<String, int> chatThemes = {};
 
-  /// Super Like ("Spark"): 1 a day free, Plus gets 5 — honest count.
+  /// Daily allowances (models/plans.dart): likes are capped on Free,
+  /// Super Likes are 1 free / 5 Plus, plus any bought packs (never expire).
   String? _sparkDay;
   int _sparksUsed = 0;
+  String? _likeDay;
+  int _likesUsed = 0;
+  int bonusSparks = 0;
 
   static String _dayKey(DateTime d) => '${d.year}-${d.month}-${d.day}';
 
-  int sparksLeft(DateTime now, {required bool isPlus}) {
-    final allowance = isPlus ? 5 : 1;
+  /// null = unlimited (Plus).
+  int? likesLeft(DateTime now, {required bool isPlus}) {
+    if (isPlus) return null;
+    if (_likeDay != _dayKey(now)) return freeLikesPerDay;
+    return math.max(0, freeLikesPerDay - _likesUsed);
+  }
+
+  /// Spends one like; false when Free has none left today.
+  bool useLike(DateTime now, {required bool isPlus}) {
+    if (isPlus) return true;
+    if (likesLeft(now, isPlus: false)! <= 0) return false;
+    if (_likeDay != _dayKey(now)) {
+      _likeDay = _dayKey(now);
+      _likesUsed = 0;
+    }
+    _likesUsed++;
+    save();
+    return true;
+  }
+
+  int _dailySparksLeft(DateTime now, bool isPlus) {
+    final allowance = isPlus ? plusSparksPerDay : freeSparksPerDay;
     if (_sparkDay != _dayKey(now)) return allowance;
     return math.max(0, allowance - _sparksUsed);
   }
 
-  /// Spends one Spark; false when none are left today.
+  int sparksLeft(DateTime now, {required bool isPlus}) =>
+      _dailySparksLeft(now, isPlus) + bonusSparks;
+
+  /// Spends one Spark (today's allowance first, then bought ones);
+  /// false when none are left.
   bool useSpark(DateTime now, {required bool isPlus}) {
-    if (sparksLeft(now, isPlus: isPlus) <= 0) return false;
-    if (_sparkDay != _dayKey(now)) {
-      _sparkDay = _dayKey(now);
-      _sparksUsed = 0;
+    if (_dailySparksLeft(now, isPlus) > 0) {
+      if (_sparkDay != _dayKey(now)) {
+        _sparkDay = _dayKey(now);
+        _sparksUsed = 0;
+      }
+      _sparksUsed++;
+    } else if (bonusSparks > 0) {
+      bonusSparks--;
+    } else {
+      return false;
     }
-    _sparksUsed++;
     save();
     return true;
+  }
+
+  /// A bought Super Like pack (store consumable; demo grants it free).
+  void addSparkPack() {
+    bonusSparks += superLikePackSize;
+    save();
   }
 
   /// AI Away Assistant — replies ONLY with a visible "assistant" label,

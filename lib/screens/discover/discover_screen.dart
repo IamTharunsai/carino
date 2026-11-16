@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import '../../config/app_config.dart';
+import '../../config/env.dart';
 import '../../data/mock_data.dart';
 import '../../models/experience.dart';
 import '../../models/member.dart';
+import '../../models/plans.dart';
 import '../../services/services.dart';
 import '../../services/sound_service.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/match_celebration.dart';
+import '../../widgets/plus_nudge.dart';
 import '../../widgets/spark_button.dart';
 import '../chats/conversation_screen.dart';
 import '../chats/games_screen.dart';
@@ -123,6 +126,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   Future<void> _commit({required bool like, bool spark = false, String? note}) async {
     final deck = _visibleDeck;
     if (deck.isEmpty || _leaving) return;
+    if (like && !_allowed(spark)) return;
     final member = deck.first;
     _sound.tapHaptic();
     Services.analytics.action(like ? (spark ? 'spark' : (note != null ? 'like_note' : 'like')) : 'pass');
@@ -166,8 +170,14 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
         SnackBar(
           content: const Text('Passed'),
           action: SnackBarAction(
-            label: 'Undo',
+            label: Services.payments.isPlus ? 'Undo' : 'Undo · Plus',
             onPressed: () {
+              if (!Services.payments.isPlus) {
+                showPlusNudge(context,
+                    title: 'Rewind with Plus',
+                    body: 'Passed too fast? Plus brings them back to the top of your deck.');
+                return;
+              }
               setState(() {
                 if (_lastPassed != null) {
                   _deck.insert(0, _lastPassed!);
@@ -183,18 +193,49 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   }
 
   /// Swipe up = Super Like (a "Spark"): 1 a day free, 5 with Plus.
-  void _superLike(Member m) {
-    final ok = Services.prefs.useSpark(DateTime.now(), isPlus: Services.payments.isPlus);
-    if (!ok) {
-      setState(() {
-        _drag = Offset.zero;
-        _dragging = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('No Super Likes left today — you get a new one at midnight.')));
-      return;
+  void _superLike(Member m) => _commit(like: true, spark: true);
+
+  /// Free/Plus allowances (models/plans.dart), checked where every like
+  /// goes through. Out of likes = the honest moment to mention Plus.
+  bool _allowed(bool spark) {
+    final now = DateTime.now();
+    final plus = Services.payments.isPlus;
+    final ok = spark
+        ? Services.prefs.useSpark(now, isPlus: plus)
+        : Services.prefs.useLike(now, isPlus: plus);
+    if (ok) return true;
+    setState(() {
+      _drag = Offset.zero;
+      _dragging = false;
+    });
+    if (spark) {
+      showPlusNudge(context,
+          title: 'No Super Likes left today',
+          body: 'You get a new one at midnight. Plus gives you $plusSparksPerDay a day, '
+              'or get a pack of $superLikePackSize that never expires.',
+          extra: SparkButton(
+            label: 'Get $superLikePackSize Super Likes · $superLikePackPrice',
+            secondary: true,
+            onPressed: _buySparkPack,
+          ));
+    } else {
+      showPlusNudge(context,
+          title: "That's your $freeLikesPerDay likes for today",
+          body: 'New likes at midnight — give the ones you sent a chance. '
+              'Or go unlimited with Plus.');
     }
-    _commit(like: true, spark: true);
+    return false;
+  }
+
+  void _buySparkPack() {
+    Navigator.of(context).pop(); // the sheet
+    final demo = Env.useMockBackend;
+    if (demo) Services.prefs.addSparkPack();
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(demo
+            ? '$superLikePackSize Super Likes added (demo — no charge).'
+            : 'Super Like packs are bought through the App Store or Google Play. '
+                "They aren't on sale in this build yet — nothing was charged.")));
   }
 
   /// Full profile; its Pass / Like act on this card.
@@ -247,10 +288,13 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                 IconButton(
                   icon: const Icon(Icons.public),
                   tooltip: 'Worldwide',
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                        builder: (_) => const WorldwideScreen()),
-                  ),
+                  onPressed: () => Services.payments.isPlus
+                      ? Navigator.of(context).push(MaterialPageRoute<void>(
+                          builder: (_) => const WorldwideScreen()))
+                      : showPlusNudge(context,
+                          title: 'Travel mode',
+                          body: 'Meet verified people in a city before you land. '
+                              'Part of Plus.'),
                 ),
                 IconButton(
                   icon: const Icon(Icons.notifications_outlined),
