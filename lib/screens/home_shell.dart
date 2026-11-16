@@ -67,12 +67,16 @@ class _HomeShellState extends State<HomeShell> {
       extendBody: true,
       body: IndexedStack(
         index: _index,
-        children: const [
-          StageScreen(),
-          DiscoverScreen(),
-          ChatListScreen(),
-          ConnectScreen(),
-          YouScreen(),
+        children: [
+          // Only the visible tab animates; hidden tabs pause their tickers.
+          for (final (i, tab) in const <Widget>[
+            StageScreen(),
+            DiscoverScreen(),
+            ChatListScreen(),
+            ConnectScreen(),
+            YouScreen(),
+          ].indexed)
+            TickerMode(enabled: i == _index, child: tab),
         ],
       ),
       bottomNavigationBar: Padding(

@@ -8,6 +8,7 @@ import 'services/links.dart';
 import 'services/services.dart';
 import 'theme/app_theme.dart';
 import 'widgets/app_lock_gate.dart';
+import 'widgets/motion.dart' show stillBackgrounds;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,6 +27,8 @@ Future<void> main() async {
     await Services.remoteConfig.fetch().timeout(const Duration(seconds: 10));
     // Persisted gates (app lock, hidden chats, under-21 block) before UI.
     await Services.prefs.load();
+    // Web: still backgrounds (continuous full-screen animation hurts taps/INP).
+    if (kIsWeb) stillBackgrounds = true;
     // A shared profile link that opened the app (web URL or app link).
     pendingProfile.value = profileIdFromLink(Uri.base);
     if (!kIsWeb) {

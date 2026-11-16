@@ -51,7 +51,8 @@ void main() {
 
   testWidgets('verification is two steps: ID, then one selfie clip', (t) async {
     var done = false;
-    await show(t, VerificationProviderScreen(onComplete: () => done = true, onCancel: () {}));
+    await show(t, VerificationProviderScreen(
+        onComplete: () => done = true, onCancel: () {}, captureSelfie: (_) async => 'video:clip'));
     expect(find.text('Step 1 of 2 · ID'), findsOneWidget);
     await t.tap(find.text('Take photo')); // front
     await t.pump();
@@ -60,7 +61,7 @@ void main() {
     expect(find.text('Step 2 of 2 · Selfie'), findsOneWidget);
     expect(find.text('Upload a photo instead'), findsNothing); // a live selfie can't be uploaded
     expect(done, isFalse);
-    await t.tap(find.text('Record selfie'));
+    await t.tap(find.text('Start selfie'));
     await t.pump(const Duration(seconds: 3));
     expect(done, isTrue);
   });

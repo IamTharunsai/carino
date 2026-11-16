@@ -7,6 +7,7 @@ import '../../theme/app_colors.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/spark_button.dart';
 import '../you/support_screen.dart';
+import 'selfie_capture_screen.dart';
 
 /// S-005 ID Capture + S-006 Liveness / Photo Match — the PROVIDER flow.
 ///
@@ -22,10 +23,17 @@ class VerificationProviderScreen extends StatefulWidget {
     super.key,
     required this.onComplete,
     required this.onCancel,
+    this.captureSelfie = _guidedSelfie,
   });
 
   final VoidCallback onComplete;
   final VoidCallback onCancel;
+
+  /// Opens the guided camera; returns the clip (`video:<path>`) or null.
+  final Future<String?> Function(BuildContext) captureSelfie;
+
+  static Future<String?> _guidedSelfie(BuildContext context) => Navigator.of(context)
+      .push<String>(MaterialPageRoute(builder: (_) => const SelfieCaptureScreen()));
 
   @override
   State<VerificationProviderScreen> createState() =>
@@ -61,14 +69,21 @@ class _VerificationProviderScreenState
       case _Phase.idBack:
         _wait(_Phase.reading, () async => setState(() => _phase = _Phase.selfie));
       case _Phase.selfie:
-        _wait(_Phase.checking, () async {
-          await Services.verification.runDemoFlow();
-          if (mounted) widget.onComplete();
-        });
+        _recordSelfie();
       case _Phase.reading:
       case _Phase.checking:
         break;
     }
+  }
+
+  Future<void> _recordSelfie() async {
+    final clip = await widget.captureSelfie(context);
+    if (clip == null || !mounted) return; // cancelled: stay on this step
+    // Production: the clip goes to the verification provider with the ID.
+    _wait(_Phase.checking, () async {
+          await Services.verification.runDemoFlow();
+          if (mounted) widget.onComplete();
+        });
   }
 
   String get _title => switch (_phase) {
@@ -83,7 +98,7 @@ class _VerificationProviderScreenState
         _Phase.idFront => 'Fit it inside the frame, all four corners showing.',
         _Phase.idBack => 'Now the back.',
         _Phase.reading => 'Confirming your date of birth.',
-        _Phase.selfie => 'Look at the camera and slowly turn your head. About 3 seconds.',
+        _Phase.selfie => 'We’ll guide you: fit your face in the oval, then slowly turn your head each way. About 10 seconds.',
         _Phase.checking => 'Matching your selfie to your ID photo.',
       };
 
@@ -157,7 +172,7 @@ class _VerificationProviderScreenState
             const SizedBox(height: 16),
             if (!busy) ...[
               SparkButton(
-                label: _phase == _Phase.selfie ? 'Record selfie' : 'Take photo',
+                label: _phase == _Phase.selfie ? 'Start selfie' : 'Take photo',
                 icon: Icons.camera_alt_outlined,
                 onPressed: _advance,
               ),

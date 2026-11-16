@@ -29,9 +29,9 @@ class AppColors {
 
   // --- Glass tints (DESIGN SYSTEM: cards 55–65% tint, sheets 80%) ---
   static Color glassFillDark(double opacity) =>
-      plumCharcoal.withValues(alpha: opacity);
+      plumCharcoal.withValues(alpha: opacity.clamp(0.0, 1.0));
   static Color glassFillLight(double opacity) =>
-      Colors.white.withValues(alpha: opacity);
+      Colors.white.withValues(alpha: opacity.clamp(0.0, 1.0));
 
   /// Hairline borders: Warm Ivory 28% on dark, Midnight 10% on light.
   static Color glassBorder(Brightness brightness) => brightness == Brightness.dark

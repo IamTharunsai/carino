@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
@@ -33,18 +34,15 @@ class GlassContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final brightness = Theme.of(context).brightness;
+    // ponytail: live blur is the most expensive effect on the web (it
+    // re-blurs everything behind every card each frame), so the web gets a
+    // denser tint instead — near-identical over the scrim, far smoother.
+    final boost = kIsWeb ? 0.18 : 0.0;
     final fill = brightness == Brightness.dark
-        ? AppColors.glassFillDark(opacity ?? AppColors.glassCardOpacity)
-        : AppColors.glassFillLight((opacity ?? AppColors.glassCardOpacity) + 0.15);
+        ? AppColors.glassFillDark((opacity ?? AppColors.glassCardOpacity) + boost)
+        : AppColors.glassFillLight((opacity ?? AppColors.glassCardOpacity) + 0.15 + boost);
     final corners = borderRadius ?? BorderRadius.circular(radius);
-    final content = ClipRRect(
-      borderRadius: corners,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(
-          sigmaX: AppColors.glassBlurSigma,
-          sigmaY: AppColors.glassBlurSigma,
-        ),
-        child: Container(
+    final card = Container(
           padding: padding,
           decoration: BoxDecoration(
             color: fill,
@@ -52,8 +50,15 @@ class GlassContainer extends StatelessWidget {
             border: Border.all(color: AppColors.glassBorder(brightness), width: 1),
           ),
           child: Material(type: MaterialType.transparency, child: child),
-        ),
-      ),
+        );
+    final content = ClipRRect(
+      borderRadius: corners,
+      child: kIsWeb
+          ? card
+          : BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: AppColors.glassBlurSigma, sigmaY: AppColors.glassBlurSigma),
+              child: card,
+            ),
     );
     final shadowed = DecoratedBox(
       decoration: BoxDecoration(
@@ -126,10 +131,12 @@ class GlassScaffold extends StatelessWidget {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          if (backgroundAsset != null)
-            KenBurnsImage(asset: backgroundAsset!)
-          else
-            const AuroraBackground(),
+          // Own layer: the drifting background never forces the page to repaint.
+          RepaintBoundary(
+            child: backgroundAsset != null
+                ? KenBurnsImage(asset: backgroundAsset!)
+                : const AuroraBackground(),
+          ),
           // Scrim for legibility (never invert/desaturate the imagery).
           DecoratedBox(
             decoration: BoxDecoration(
