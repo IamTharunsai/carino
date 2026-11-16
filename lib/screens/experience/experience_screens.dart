@@ -407,7 +407,7 @@ class _CoupleScreenState extends State<CoupleScreen> {
                 const SizedBox(height: 4),
                 Text(
                   'Honest Status: if you\'re taken, Dates pauses so nobody '
-                  'is misled. Friends, Stage and Plans stay on.',
+                  'is misled. Friends, Feed and Plans stay on.',
                   style: text.bodySmall,
                 ),
                 const SizedBox(height: 10),

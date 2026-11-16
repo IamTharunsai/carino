@@ -45,18 +45,84 @@ class AIService {
   Future<List<String>> suggestOpeners({
     required String memberName,
     List<String> shared = const [],
+    String tone = 'normal', // normal | romantic | funny | flirty
+    String language = 'English',
+    bool mix = false,
+    String? lastMessage,
   }) async {
-    final live = await _proxy('AI-01', {'member_name': memberName, 'shared': shared});
+    final live = await _proxy('AI-01', {
+      'member_name': memberName,
+      'shared': shared,
+      'tone': tone,
+      'language': language,
+      'mix': mix,
+      if (lastMessage != null) 'last_message': lastMessage,
+    });
     if (live is Map && live['drafts'] is List) {
       return List<String>.from(live['drafts'] as List);
     }
     await Future<void>.delayed(const Duration(milliseconds: 450));
     // Stubbed drafts — in production these come from the model, and are
     // STILL only shown as drafts above the composer.
+    return switch (tone) {
+      'romantic' => [
+          'Not gonna lie, $memberName — talking to you is the best part of my day.',
+          'I keep thinking about our chat. Coffee soon, just us?',
+          'You have a way of making ordinary sound really good.',
+        ],
+      'funny' => [
+          'Okay $memberName, defend your most controversial food opinion. I\'m ready.',
+          'Rate my texting game 1–10. Be gentle, I bruise easily.',
+          'I\'d say hi but I\'ve rehearsed this too many times.',
+        ],
+      'flirty' => [
+          'Careful $memberName, keep smiling like that in your photos and I\'ll have to ask you out.',
+          'So… is it the coffee or me that you\'re excited about? 😏',
+          'I have a theory you\'re trouble. Want to help me test it?',
+        ],
+      _ => [
+          'Your playlist-rating system needs a public defender. I volunteer.',
+          'Okay, $memberName — defend your most controversial food opinion.',
+          'Skip the small talk: what\'s the best plan in this city right now?',
+        ],
+    };
+  }
+
+  /// AI profile coach: turns the member's chat answers into a draft
+  /// (bio, interests, first-plan prompt). Null = use the offline draft.
+  Future<({String? bio, List<String> interests, String? firstPlan})?> coachDraft(
+      List<({String q, String a})> answers) async {
+    final live = await _proxy('coach', {
+      'answers': [for (final x in answers) {'q': x.q, 'a': x.a}],
+    });
+    if (live is! Map) return null;
+    return (
+      bio: live['bio'] as String?,
+      interests: List<String>.from((live['interests'] as List?) ?? const []),
+      firstPlan: live['first_plan'] as String?,
+    );
+  }
+
+  /// Plan ideas for two people from both profiles (drafts to pick from).
+  Future<List<({String title, String what, String search})>> planIdeas({
+    required List<String> mine,
+    required List<String> theirs,
+    String city = '',
+    String budget = 'moderate',
+  }) async {
+    final live = await _proxy('plan_ideas', {'mine': mine, 'theirs': theirs, 'city': city, 'budget': budget});
+    if (live is Map && live['ideas'] is List && (live['ideas'] as List).isNotEmpty) {
+      return [
+        for (final i in live['ideas'] as List)
+          (title: '${i['title']}', what: '${i['what']}', search: '${i['search']}')
+      ];
+    }
+    final both = mine.where(theirs.contains).toList();
+    final pick = both.isNotEmpty ? both.first : (theirs.isNotEmpty ? theirs.first : 'Coffee');
     return [
-      'Your playlist-rating system needs a public defender. I volunteer.',
-      'Okay, $memberName — defend your most controversial food opinion.',
-      'Skip the small talk: what\'s the best plan in this city right now?',
+      (title: '$pick, together', what: 'You both picked $pick — start there, keep it easy.', search: pick),
+      (title: 'Coffee + a walk', what: 'Low pressure, easy to stretch into dinner if it\'s going well.', search: 'coffee shop'),
+      (title: 'Market wander', what: 'Browse, snack, people-watch. Lots to talk about.', search: 'farmers market'),
     ];
   }
 

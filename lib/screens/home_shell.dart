@@ -9,8 +9,7 @@ import 'discover/discover_screen.dart';
 import 'stage/stage_screen.dart';
 import 'you/you_screen.dart';
 
-/// The five-tab shell (blueprint NAV & IA): Discover · Moments · Connect ·
-/// Chats · You. Floating GLASS bottom bar over content; each tab keeps its
+/// The five-tab shell: Feed · Dates · Chats · Plans · You. Floating GLASS bottom bar over content; each tab keeps its
 /// own navigation stack/state (IndexedStack). Badge counts are REAL
 /// unread/invite counts only — never inflated engagement bait.
 class HomeShell extends StatefulWidget {
@@ -29,12 +28,12 @@ class _HomeShellState extends State<HomeShell> {
   @override
   Widget build(BuildContext context) {
     final tabs = <_TabSpec>[
-      _TabSpec(Icons.chat_bubble_outline, Icons.chat_bubble, 'Chats',
-          badge: _unreadChats),
-      const _TabSpec(Icons.play_circle_outline, Icons.play_circle, 'Stage'),
-      // Dates: the 21+ verified dating deck, one tab of the social app.
+      // Faces first: the social Feed, then the verified 21+ Dates deck.
+      const _TabSpec(Icons.play_circle_outline, Icons.play_circle, 'Feed'),
       const _TabSpec(Icons.local_fire_department_outlined,
           Icons.local_fire_department, 'Dates'),
+      _TabSpec(Icons.chat_bubble_outline, Icons.chat_bubble, 'Chats',
+          badge: _unreadChats),
       const _TabSpec(Icons.event_outlined, Icons.event, 'Plans'),
       const _TabSpec(Icons.person_outline, Icons.person, 'You'),
     ];
@@ -44,9 +43,9 @@ class _HomeShellState extends State<HomeShell> {
       body: IndexedStack(
         index: _index,
         children: const [
-          ChatListScreen(),
           StageScreen(),
           DiscoverScreen(),
+          ChatListScreen(),
           ConnectScreen(),
           YouScreen(),
         ],

@@ -303,6 +303,12 @@ class UserPrefs {
   String boundaries = '';
   Map<String, String> promptAnswers = {};
   List<String> languages = const ['English'];
+  List<String> lifestyle = const [];
+
+  /// Profile media: photos/videos (videos prefixed `video:`), intros.
+  List<String> photos = const [];
+  String? videoIntro;
+  String? voiceIntro;
 
   /// Notifications: written in this language and tone (real events only).
   String notifLanguage = 'English';
@@ -403,6 +409,10 @@ class UserPrefs {
           'prompts': promptAnswers,
           'languages': languages,
           'interests': interests,
+          'lifestyle': lifestyle,
+          'photos': photos,
+          'videoIntro': videoIntro,
+          'voiceIntro': voiceIntro,
         },
         'reflections': [
           for (final r in reflections)
@@ -447,6 +457,10 @@ class UserPrefs {
       };
       if (pr['languages'] is List) languages = strs(pr['languages']);
       if (pr['interests'] is List) interests = strs(pr['interests']);
+      if (pr['lifestyle'] is List) lifestyle = strs(pr['lifestyle']);
+      if (pr['photos'] is List) photos = strs(pr['photos']);
+      videoIntro = pr['videoIntro'] as String?;
+      voiceIntro = pr['voiceIntro'] as String?;
       notifLanguage = j['notifLanguage'] as String? ?? notifLanguage;
       themeMode.value = ThemeMode.values.asNameMap()[j['theme']] ?? themeMode.value;
       notifTone = NotifTone.values.asNameMap()[j['notifTone']] ?? notifTone;

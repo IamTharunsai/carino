@@ -2,6 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>To add photos and videos from your gallery to your profile.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>To record your voice intro, videos and voice notes.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>To take photos and videos for your profile, and for ID verification.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Use Face ID to unlock Cariño and keep your chats private.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>

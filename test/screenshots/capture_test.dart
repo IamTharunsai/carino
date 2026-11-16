@@ -161,7 +161,7 @@ void main() {
     Shot('19_waitlist', () => WaitlistScreen(onAdmitted: () {})),
     // ---- Home tabs ---------------------------------------------------------
     Shot('20_tab_chats', () => const HomeShell()),
-    Shot('21_tab_stage', () => const HomeShell(), (t) => _tapTab(t, 'Stage')),
+    Shot('21_tab_stage', () => const HomeShell(), (t) => _tapTab(t, 'Feed')),
     Shot('22_tab_dates', () => const HomeShell(), (t) => _tapTab(t, 'Dates')),
     Shot('23_tab_plans', () => const HomeShell(), (t) => _tapTab(t, 'Plans')),
     Shot('24_tab_you', () => const HomeShell(), (t) => _tapTab(t, 'You')),

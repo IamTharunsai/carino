@@ -157,7 +157,7 @@ class _FeedViewState extends State<_FeedView> {
             ),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Public on Stage'),
+              title: const Text('Public on Feed'),
               subtitle:
                   Text(public ? 'Anyone can see it' : 'Your circles only'),
               value: public,
