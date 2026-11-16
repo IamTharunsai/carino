@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../widgets/media.dart';
 import '../../widgets/secure_screen.dart';
 import '../../models/message.dart';
 import '../../theme/app_colors.dart';
@@ -60,7 +61,7 @@ class MediaViewerScreen extends StatelessWidget {
                   ],
                 ),
               )
-            : Image.asset(message.mediaAsset!, fit: BoxFit.contain),
+            : (isVideo(message.mediaAsset!) ? VideoClip(message.mediaAsset!) : MediaImage(message.mediaAsset!, fit: BoxFit.contain)),
       ),
       bottomNavigationBar: message.viewOnce
           ? const Padding(

@@ -147,8 +147,8 @@ class _GamesScreenState extends State<GamesScreen> {
                     children: [
                       Text(
                         _streak.completedByDate
-                            ? 'Streak complete — you made a date!'
-                            : 'Chemistry streak · Day ${_streak.days}',
+                            ? 'Your Flame made a date happen 🔥'
+                            : '🔥 Flame · Day ${_streak.days}',
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       Text(

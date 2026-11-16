@@ -358,14 +358,16 @@ class _ConversationScreenState extends State<ConversationScreen> {
         [...groundedOpeners(chips, _member.firstName), ...drafts].take(4).toList());
   }
 
-  void _sendMedia() {
+  Future<void> _sendMedia() async {
+    final media = await chooseMedia(context);
+    if (media == null || !mounted) return;
     setState(() {
       widget.conversation.messages.add(ChatMessage(
         id: 'local-media-${DateTime.now().millisecondsSinceEpoch}',
-        text: _viewOnceNext ? 'View-once photo' : 'Photo',
+        text: _viewOnceNext ? 'View-once' : (isVideo(media) ? 'Video' : 'Photo'),
         fromMe: true,
         timeLabel: 'now',
-        mediaAsset: 'assets/images/backdrop_match.jpg',
+        mediaAsset: media,
         viewOnce: _viewOnceNext,
       ));
       _viewOnceNext = false;
@@ -571,6 +573,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
         timeLabel: 'now',
         toneTag: _tone,
       ));
+      Services.prefs.feedFlameFor(_member.id);
       _composer.clear();
       _aiDrafts = const [];
       _tone = null;
@@ -1090,8 +1093,8 @@ class _ConversationScreenState extends State<ConversationScreen> {
                 child: TextButton.icon(
                   icon: const Icon(Icons.local_fire_department_outlined, size: 16),
                   label: Text(days > 0
-                      ? 'Streak · Day $days — play today to keep it'
-                      : 'Start a streak: play a quick game'),
+                      ? '🔥 Flame · Day $days — a game or Heartbeat keeps it lit'
+                      : 'Light a Flame 🔥 — play a quick game'),
                   onPressed: () => Navigator.of(context)
                       .push(MaterialPageRoute<void>(builder: (_) => GamesScreen(member: _member)))
                       .then((_) => mounted ? setState(() {}) : null),
@@ -1208,8 +1211,10 @@ class _ConversationScreenState extends State<ConversationScreen> {
                         child: ImageFiltered(
                           enabled: !msg.fromMe && Services.prefs.sensitiveMediaBlur,
                           imageFilter: ui.ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-                          child: Image.asset(msg.mediaAsset!,
-                              width: 200, height: 140, fit: BoxFit.cover),
+                          child: SizedBox(
+                              width: 200,
+                              height: isVideo(msg.mediaAsset!) ? 280 : 140,
+                              child: isVideo(msg.mediaAsset!) ? VideoClip(msg.mediaAsset!) : MediaImage(msg.mediaAsset!)),
                         ),
                       ),
               )

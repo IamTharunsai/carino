@@ -75,8 +75,11 @@ class GroupMessage {
     required this.timeLabel,
     this.isSystem = false,
     this.expiresAt,
+    this.media,
   });
 
+  /// A photo or video (videos prefixed `video:`), seen by everyone in the group.
+  final String? media;
   final String senderId;
   final String text;
   final String timeLabel;

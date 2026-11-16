@@ -7,6 +7,7 @@ import '../models/member.dart';
 import '../models/notify.dart' show NotifTone;
 import '../models/plans.dart';
 import '../models/posts.dart';
+import '../models/flame.dart';
 import '../models/safety.dart';
 import '../models/platform.dart';
 import '../models/social.dart';
@@ -346,6 +347,17 @@ class UserPrefs {
 
   /// Chemistry streak per person (member id -> days). Games and chat share it.
   final Map<String, int> streaks = {'m-sofia': 4};
+  final Map<String, Flame> flames = {};
+
+  /// Any message, game or Heartbeat keeps your Flame with them alive.
+  void feedFlameFor(String memberId) {
+    final f = feedFlame(flames[memberId] ??
+        (streaks[memberId] == null ? null : Flame(streaks[memberId]!, DateTime.now().subtract(const Duration(days: 1)))),
+        DateTime.now());
+    flames[memberId] = f;
+    streaks[memberId] = f.days;
+    save();
+  }
 
   /// Empty until the member picks some (then the demo sample is replaced).
   List<String> interests = const [];
@@ -435,6 +447,7 @@ class UserPrefs {
         'following': following.toList(),
         'credits': credits,
         'myLanguage': myLanguage,
+        'flames': {for (final e in flames.entries) e.key: e.value.toJson()},
         'alertMessage': alertMessage,
         'trusted': [for (final c in trustedContacts) {'n': c.name, 'p': c.phone}],
         'chatWallpapers': chatWallpapers,
@@ -496,6 +509,13 @@ class UserPrefs {
         ..addAll(strs(j['following']));
       credits = (j['credits'] as num?)?.toInt() ?? 0;
       myLanguage = j['myLanguage'] as String? ?? myLanguage;
+      flames
+        ..clear()
+        ..addAll({
+          for (final e in (j['flames'] as Map? ?? const {}).entries)
+            '${e.key}': Flame.fromJson(Map<String, Object?>.from(e.value as Map))
+        });
+      flames.forEach((k, v) => streaks[k] = v.days);
       alertMessage = j['alertMessage'] as String? ?? alertMessage;
       trustedContacts
         ..clear()

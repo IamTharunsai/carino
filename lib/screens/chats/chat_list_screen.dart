@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../models/flame.dart';
 import '../../data/mock_data.dart';
 import '../../models/experience.dart';
 import '../../models/message.dart';
@@ -222,6 +223,38 @@ class _ChatListScreenState extends State<ChatListScreen> {
             const SizedBox(height: 10),
           ],
           const SizedBox(height: 6),
+          if (conversations.isNotEmpty) ...[
+            Text('Heartbeats', style: Theme.of(context).textTheme.titleMedium),
+            Text('One tap keeps your 🔥 Flame alive.', style: Theme.of(context).textTheme.bodySmall),
+            const SizedBox(height: 8),
+            SizedBox(
+              height: 92,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  for (final c in conversations)
+                    Builder(builder: (context) {
+                      final m = MockData.memberById(c.memberId);
+                      final flame = Services.prefs.streaks[m.id] ?? 0;
+                      return InkWell(
+                        borderRadius: BorderRadius.circular(16),
+                        onTap: () => _heartbeat(c, m.firstName, m.id),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                          child: Column(children: [
+                            CircleAvatar(radius: 28, backgroundImage: AssetImage(m.photoAsset)),
+                            const SizedBox(height: 4),
+                            Text(flame > 0 ? '${m.firstName} 🔥$flame' : m.firstName,
+                                style: Theme.of(context).textTheme.bodySmall),
+                          ]),
+                        ),
+                      );
+                    }),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
           Text('Dates', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
           if (_query.trim().isNotEmpty && conversations.isEmpty)
@@ -373,6 +406,38 @@ class _ChatListScreenState extends State<ChatListScreen> {
         ],
       ),
     );
+  }
+
+  /// A Heartbeat: a one-tap emoji that lands in the chat and feeds the Flame.
+  Future<void> _heartbeat(Conversation conv, String name, String memberId) async {
+    final e = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      builder: (s) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Text('Send $name a Heartbeat', style: Theme.of(s).textTheme.titleMedium),
+            const SizedBox(height: 12),
+            Wrap(spacing: 14, runSpacing: 10, children: [
+              for (final h in heartbeatEmojis)
+                InkWell(
+                  onTap: () => Navigator.pop(s, h),
+                  child: Text(h, style: const TextStyle(fontSize: 36)),
+                ),
+            ]),
+          ]),
+        ),
+      ),
+    );
+    if (e == null || !mounted) return;
+    setState(() {
+      conv.messages.add(ChatMessage(
+          id: 'hb-${DateTime.now().millisecondsSinceEpoch}', text: e, fromMe: true, timeLabel: 'now'));
+      Services.prefs.feedFlameFor(memberId);
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$e sent · 🔥 ${Services.prefs.streaks[memberId]}-day Flame with $name')));
   }
 
   Widget _swipeBg(IconData icon, String label, Alignment align) => Container(

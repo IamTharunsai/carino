@@ -97,7 +97,7 @@ const Map<NotifKind, (String, String)> _playful = {
   NotifKind.likeReceived: ('Someone likes you', 'A verified person liked your profile. Curious?'),
   NotifKind.planReminder: ('Tomorrow: {detail} 🎉', '{detail} with {who} is tomorrow — check-in is ready.'),
   NotifKind.safetyCheckIn: ('Are you okay?', 'Your check-in for {detail} with {who} is due. Tap to confirm.'),
-  NotifKind.streakAtRisk: ('Keep it going 🔥', 'Day {detail} with {who} — one game or voice note keeps it alive.'),
+  NotifKind.streakAtRisk: ('Don’t let it go out 🔥', 'Day {detail} with {who} — one Heartbeat keeps your Flame lit.'),
   NotifKind.momentReply: ('{who} replied', '{who} answered your Moment 👀'),
   NotifKind.dailyDrop: ('Your Daily Drop is here', 'A few new verified people, picked for your tastes.'),
 };
@@ -109,7 +109,7 @@ const Map<String, Map<NotifKind, (String, String)>> _copy = {
     NotifKind.likeReceived: ('New like', 'A verified person liked your profile.'),
     NotifKind.planReminder: ('Plan tomorrow', '{detail} with {who} is tomorrow.'),
     NotifKind.safetyCheckIn: ('Check-in due', 'Confirm you\'re okay after {detail} with {who}.'),
-    NotifKind.streakAtRisk: ('Streak reminder', 'Day {detail} with {who}. One small thing keeps it going.'),
+    NotifKind.streakAtRisk: ('Your Flame 🔥', 'Day {detail} with {who}. One Heartbeat keeps it lit.'),
     NotifKind.momentReply: ('Moment reply', '{who} replied to your Moment.'),
     NotifKind.dailyDrop: ('Daily Drop', 'New verified people picked for your tastes.'),
   },

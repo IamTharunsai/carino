@@ -9,6 +9,7 @@ import '../../models/platform.dart';
 import '../../services/services.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/glass_card.dart';
+import '../../widgets/media.dart';
 import '../../widgets/safety_actions.dart';
 import '../../widgets/copy_text.dart';
 import '../../widgets/spark_button.dart';
@@ -303,6 +304,17 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               : null));
       _composer.clear();
     });
+  }
+
+  Future<void> _sendMedia() async {
+    final media = await chooseMedia(context);
+    if (media == null || !mounted) return;
+    setState(() => _g.messages.add(GroupMessage(
+        senderId: 'me',
+        text: isVideo(media) ? 'Video' : 'Photo',
+        timeLabel: 'now',
+        media: media,
+        expiresAt: _g.vanishEnabled ? DateTime.now().add(const Duration(hours: 24)) : null)));
   }
 
   Future<void> _startPlan() async {
@@ -669,6 +681,11 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
             child: Row(
               children: [
                 IconButton(
+                  icon: const Icon(Icons.add_photo_alternate_outlined),
+                  tooltip: 'Send a photo or video',
+                  onPressed: _sendMedia,
+                ),
+                IconButton(
                   icon: const Icon(Icons.event_available_outlined),
                   tooltip: 'Make it a plan',
                   onPressed: _startPlan,
@@ -740,6 +757,16 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                       color: AppColors.sparkCoral,
                       fontSize: 12,
                       fontWeight: FontWeight.w600)),
+            if (m.media != null)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: SizedBox(
+                  width: 220,
+                  height: isVideo(m.media!) ? 300 : 160,
+                  child: isVideo(m.media!) ? VideoClip(m.media!) : MediaImage(m.media!),
+                ),
+              )
+            else
             Text(m.text,
                 style: TextStyle(
                     color: mine
