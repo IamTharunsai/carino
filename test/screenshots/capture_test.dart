@@ -81,7 +81,7 @@ Future<void> _snap(WidgetTester tester, Shot shot) async {
     child: MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
-      darkTheme: AppTheme.dark(),
+      darkTheme: AppTheme.light(),
       themeMode: ThemeMode.dark,
       home: shot.build(),
     ),

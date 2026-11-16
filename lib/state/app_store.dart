@@ -391,7 +391,7 @@ class AppStore extends ChangeNotifier {
     return null;
   }
 
-  /// "Keep this group as a PrivateCircle" is offered only for plans the member
+  /// "Keep this group as a circle" is offered only for plans the member
   /// is actually part of (hosting or going) that haven't converted yet.
   bool canConvertPlanToCircle(OpenPlan plan) =>
       circleForPlan(plan.id) == null &&
@@ -399,7 +399,7 @@ class AppStore extends ChangeNotifier {
 
   int _circleSeq = 0;
 
-  /// Converts a plan into a persistent PrivateCircle: the attendee list becomes
+  /// Converts a plan into a persistent circle: the attendee list becomes
   /// the membership, the plan stays linked as the circle's upcoming
   /// plan. Returns null when the conversion isn't available (unknown
   /// plan, not a member of it, or already converted) — a refusal is a
@@ -421,7 +421,7 @@ class AppStore extends ChangeNotifier {
       circleId: circle.id,
       authorId: 'me',
       kind: CircleMsgKind.system,
-      text: 'PrivateCircle formed from "${plan.title}" — '
+      text: 'Circle formed from "${plan.title}" — '
           'only members can see this chat.',
       timeLabel: 'now',
     ));
@@ -429,9 +429,9 @@ class AppStore extends ChangeNotifier {
     return circle;
   }
 
-  // --- Wave 2 · PrivateCircle-only Moments + Highlights (CROWD-FEATURES #6) ----
+  // --- Wave 2 · circle-only Moments + Highlights (CROWD-FEATURES #6) ----
 
-  /// Scoped Moments: visible only inside their PrivateCircle, never in the
+  /// Scoped Moments: visible only inside their circle, never in the
   /// connections feed (the feed reads MockData.moments, a separate list).
   final List<Moment> _circleMoments = MockData.circleMoments();
 
@@ -454,7 +454,7 @@ class AppStore extends ChangeNotifier {
       .where((m) => _highlightedMomentIds.contains(m.id))
       .toList();
 
-  /// Pins/unpins a PrivateCircle Moment as a Highlight. Unpinning always works;
+  /// Pins/unpins a circle Moment as a Highlight. Unpinning always works;
   /// pinning refuses (false) at the per-circle cap or for an unknown /
   /// non-circle Moment, so the UI explains instead of pretending.
   bool toggleMomentHighlight(String momentId) {
@@ -498,7 +498,7 @@ class AppStore extends ChangeNotifier {
     return moment;
   }
 
-  // --- Wave 2 · PrivateCircle chat + Smart Chat (CROWD-FEATURES #7) ------------
+  // --- Wave 2 · circle chat + Smart Chat (CROWD-FEATURES #7) ------------
 
   final List<CircleMessage> _circleMessages = MockData.circleMessages();
 

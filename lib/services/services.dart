@@ -187,7 +187,7 @@ class UserPrefs {
 
   // --- Experience upgrade (Nov 14) ------------------------------------------
   /// App theme: Midnight (dark, brand default), Porcelain (light), System.
-  final ValueNotifier<ThemeMode> themeMode = ValueNotifier(ThemeMode.dark);
+  final ValueNotifier<ThemeMode> themeMode = ValueNotifier(ThemeMode.light);
 
   /// Relationship status + who may see it. In a relationship, Dates pauses
   /// itself (Honest Status): you can't be discoverable and "taken" at once.

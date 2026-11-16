@@ -31,11 +31,18 @@ Future<void> main() async {
     if (kIsWeb) stillBackgrounds = true;
     // A shared profile link that opened the app (web URL or app link).
     pendingProfile.value = profileIdFromLink(Uri.base);
+    pendingCircle.value = circleIdFromLink(Uri.base);
     if (!kIsWeb) {
       final links = AppLinks();
       final first = await links.getInitialLink().timeout(const Duration(seconds: 2), onTimeout: () => null);
-      if (first != null) pendingProfile.value = profileIdFromLink(first) ?? pendingProfile.value;
-      links.uriLinkStream.listen((u) => pendingProfile.value = profileIdFromLink(u) ?? pendingProfile.value);
+      if (first != null) {
+        pendingProfile.value = profileIdFromLink(first) ?? pendingProfile.value;
+        pendingCircle.value = circleIdFromLink(first) ?? pendingCircle.value;
+      }
+      links.uriLinkStream.listen((u) {
+        pendingProfile.value = profileIdFromLink(u) ?? pendingProfile.value;
+        pendingCircle.value = circleIdFromLink(u) ?? pendingCircle.value;
+      });
     }
   } catch (e) {
     debugPrint('[startup] failed: $e');

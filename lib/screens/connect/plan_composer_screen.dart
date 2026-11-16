@@ -111,7 +111,7 @@ class _PlanComposerScreenState extends State<PlanComposerScreen> {
                 ChoiceChip(
                   label: Text(t),
                   selected: _timeChip == t,
-                  selectedColor: AppColors.emberCrimson,
+                  selectedColor: AppColors.blush,
                   // Comfort rule: daytime first meet (either person's) greys
                   // out evening times until you've met.
                   onSelected: _allowed(t) ? (_) => setState(() => _timeChip = t) : null,

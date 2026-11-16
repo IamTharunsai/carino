@@ -172,14 +172,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     }
   }
 
-  /// Rewind the last pass (Plus) — a button in the top bar, not a pop-up.
+  /// Rewind the last pass — free for everyone (a basic courtesy, not a perk).
   void _rewind() {
-    if (!Services.payments.isPlus) {
-      showPlusNudge(context,
-          title: 'Rewind with Plus',
-          body: 'Passed too fast? Plus brings them back to the top of your deck.');
-      return;
-    }
     setState(() {
       if (_lastPassed != null) {
         _deck.insert(0, _lastPassed!);
@@ -332,14 +326,14 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                   avatar: const Icon(Icons.explore_outlined, size: 16),
                   label: const Text('Nearby'),
                   selected: !_showDrop,
-                  selectedColor: AppColors.emberCrimson,
+                  selectedColor: AppColors.blush,
                   onSelected: (_) => setState(() => _showDrop = false),
                 ),
                 ChoiceChip(
                   avatar: const Icon(Icons.local_fire_department_outlined, size: 16),
                   label: Text('Daily Drop · ${MockData.dailyDrop.where((m) => fitsMe(m) && !_swiped.contains(m.id)).length}'),
                   selected: _showDrop,
-                  selectedColor: AppColors.emberCrimson,
+                  selectedColor: AppColors.blush,
                   onSelected: (_) => setState(() => _showDrop = true),
                 ),
               ],
@@ -436,6 +430,13 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 14),
+              SparkButton(
+                label: 'Invite friends — fill your city faster',
+                icon: Icons.favorite_border_rounded,
+                onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(builder: (_) => const ReferralScreen())),
+              ),
+              const SizedBox(height: 8),
               SparkButton(
                 label: 'Reset demo deck',
                 secondary: true,
@@ -682,10 +683,10 @@ class _MemberCard extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.play_circle_fill, size: 16, color: AppColors.warmIvory),
+                    Icon(Icons.play_circle_fill, size: 16, color: AppColors.midnight),
                     SizedBox(width: 4),
                     Text('Video intro · 0:24',
-                        style: TextStyle(color: AppColors.warmIvory, fontSize: 12)),
+                        style: TextStyle(color: AppColors.midnight, fontSize: 12)),
                   ],
                 ),
               ),
@@ -716,7 +717,7 @@ class _MemberCard extends StatelessWidget {
                             ],
                           ),
                           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                color: AppColors.warmIvory,
+                                color: AppColors.midnight,
                               ),
                         ),
                       ),
@@ -781,7 +782,7 @@ class _MemberCard extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                              color: AppColors.warmIvory,
+                              color: AppColors.midnight,
                               fontStyle: FontStyle.italic),
                         ),
                       ),

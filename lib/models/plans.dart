@@ -9,8 +9,8 @@ const superLikePackSize = 5;
 
 /// Display prices for the US launch. The store sheet shows the final,
 /// localised price before anyone confirms.
-const plusMonthlyPrice = r'$12.99';
-const plusAnnualPrice = r'$89.99';
+const plusMonthlyPrice = r'$7.99';
+const plusAnnualPrice = r'$59.99';
 const superLikePackPrice = r'$4.99';
 
 typedef PlanRow = ({String label, String free, String plus});
@@ -23,7 +23,7 @@ const List<PlanRow> planRows = [
   (label: 'Hearts a day', free: '$freeLikesPerDay', plus: 'Unlimited'),
   (label: 'See who has a crush on you', free: 'Count', plus: 'Everyone'),
   (label: 'Crushes a day 💘', free: '$freeSparksPerDay', plus: '$plusSparksPerDay'),
-  (label: 'Rewind a pass', free: '—', plus: 'Included'),
+  (label: 'Rewind a pass', free: 'Included', plus: 'Included'),
   (label: 'Read receipts', free: '—', plus: 'Included'),
   (label: 'Advanced filters', free: 'Basic', plus: 'Full'),
   (label: 'Travel mode (Worldwide)', free: '—', plus: 'Included'),

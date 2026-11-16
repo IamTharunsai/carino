@@ -35,7 +35,8 @@ class SparkButton extends StatelessWidget {
         style: OutlinedButton.styleFrom(
           minimumSize: const Size.fromHeight(50),
           side: BorderSide(color: AppColors.glassBorder(Theme.of(context).brightness)),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          foregroundColor: Theme.of(context).brightness == Brightness.dark ? AppColors.warmIvory : AppColors.midnight,
+          shape: const StadiumBorder(),
         ),
       );
     }
@@ -72,10 +73,10 @@ class IntentionChip extends StatelessWidget {
       backgroundColor: brightness == Brightness.dark
           ? AppColors.glassFillDark(0.6)
           : AppColors.glassFillLight(0.75),
-      selectedColor: AppColors.emberCrimson,
+      selectedColor: AppColors.blush,
       labelStyle: TextStyle(
         color: selected
-            ? AppColors.warmIvory
+            ? AppColors.emberCrimson
             : Theme.of(context).textTheme.bodyLarge?.color,
         fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
       ),
@@ -96,8 +97,8 @@ class VerifiedBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Tooltip(
-      message: 'Verified 21+ · ID + photo matched',
-      child: Icon(Icons.verified, size: size, color: AppColors.sparkCoral),
+      message: 'Verified · ID and selfie checked',
+      child: Icon(Icons.verified, size: size, color: AppColors.verifiedGold),
     );
   }
 }
@@ -129,16 +130,19 @@ class GlassIconButton extends StatelessWidget {
       child: Material(
         color: filled
             ? AppColors.emberCrimson
-            : Theme.of(context).colorScheme.surface.withValues(alpha: 0.55),
+            : Theme.of(context).brightness == Brightness.dark
+                ? AppColors.plumCharcoal
+                : AppColors.blush,
         shape: const CircleBorder(),
         child: InkWell(
           customBorder: const CircleBorder(),
           onTap: onPressed,
           onLongPress: onLongPress,
           child: SizedBox(
-            width: 52,
-            height: 52,
-            child: Icon(icon, color: AppColors.warmIvory, size: 24),
+            width: 48,
+            height: 48,
+            child: Icon(icon,
+                color: filled ? AppColors.warmIvory : Theme.of(context).colorScheme.onSurface, size: 22),
           ),
         ),
       ),

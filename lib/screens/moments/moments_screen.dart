@@ -84,7 +84,7 @@ class _MomentsScreenState extends State<MomentsScreen> {
                 ChoiceChip(
                   label: Text(f),
                   selected: _filter == f,
-                  selectedColor: AppColors.emberCrimson,
+                  selectedColor: AppColors.blush,
                   onSelected: (_) => setState(() => _filter = f),
                 ),
             ],
@@ -291,7 +291,7 @@ class _MomentsScreenState extends State<MomentsScreen> {
                   ChoiceChip(
                     label: Text(k),
                     selected: kind == k,
-                    selectedColor: AppColors.emberCrimson,
+                    selectedColor: AppColors.blush,
                     onSelected: (_) => setSheet(() => kind = k),
                   ),
               ],
@@ -316,7 +316,7 @@ class _MomentsScreenState extends State<MomentsScreen> {
                 ChoiceChip(
                   label: const Text('None'),
                   selected: sticker == null,
-                  selectedColor: AppColors.emberCrimson,
+                  selectedColor: AppColors.blush,
                   onSelected: (_) => setSheet(() => sticker = null),
                 ),
                 for (final (k, label) in [
@@ -327,7 +327,7 @@ class _MomentsScreenState extends State<MomentsScreen> {
                   ChoiceChip(
                     label: Text(label),
                     selected: sticker == k,
-                    selectedColor: AppColors.emberCrimson,
+                    selectedColor: AppColors.blush,
                     onSelected: (_) => setSheet(() => sticker = k),
                   ),
               ],

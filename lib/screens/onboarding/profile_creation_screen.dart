@@ -168,7 +168,7 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen> {
             FilterChip(
               label: Text(o),
               selected: selected.contains(o),
-              selectedColor: AppColors.emberCrimson,
+              selectedColor: AppColors.blush,
               onSelected: (on) => setState(() => on ? selected.add(o) : selected.remove(o)),
             ),
         ],
@@ -280,7 +280,7 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen> {
               FilterChip(
                 label: Text(p),
                 selected: _answers.containsKey(p),
-                selectedColor: AppColors.emberCrimson,
+                selectedColor: AppColors.blush,
                 onSelected: (on) => setState(() {
                   if (on && _answers.length < 3) {
                     _answers[p] = TextEditingController();

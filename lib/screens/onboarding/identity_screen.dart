@@ -105,7 +105,7 @@ class _IdentityScreenState extends State<IdentityScreen> {
           FilterChip(
             label: Text(o),
             selected: selected(o),
-            selectedColor: AppColors.emberCrimson,
+            selectedColor: AppColors.blush,
             showCheckmark: false,
             onSelected: (_) => setState(() => toggle(o)),
           ),

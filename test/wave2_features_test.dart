@@ -1,5 +1,5 @@
 // Wave 2 crowd features (CROWD-FEATURES #5, #6, #7, #8, #16, #21, #22):
-// Private Circles + plan conversion, PrivateCircle-only Moments + Highlights,
+// Private Circles + plan conversion, circle-only Moments + Highlights,
 // Smart Chat polls / Ask-me, Wingperson accept/decline, People Search
 // matching, the video-reply message state, and the Finite Drop end card.
 //
@@ -88,7 +88,7 @@ void main() {
     });
   });
 
-  group('PrivateCircle-only Moments + Highlights (Wave 2 #6)', () {
+  group('Circle-only Moments + Highlights (Wave 2 #6)', () {
     test('circle Moments are scoped — the connections feed has none', () {
       final store = AppStore();
       final arcade = store.circleMomentsFor('circle-arcade');
@@ -127,7 +127,7 @@ void main() {
       expect(store.circleHighlightsFor('circle-garden').length, 1);
     });
 
-    test('posting a PrivateCircle Moment scopes it to that circle only', () {
+    test('posting a circle Moment scopes it to that circle only', () {
       final store = AppStore();
       final moment = store.postCircleMoment(
         circleId: 'circle-garden',

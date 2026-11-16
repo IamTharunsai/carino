@@ -286,6 +286,7 @@ class _TablesScreenState extends State<TablesScreen> {
               ),
               const SizedBox(height: 10),
               _row(context, 'Night', '${night.dayLabel} · ${night.dateLabel}'),
+              _row(context, 'Dress vibe', 'Smart casual — plan your outfit now'),
               _row(context, 'Area', '${night.areaLabel} (venue reveals '
                   '${night.revealLabel})'),
               _row(context, 'Table', 'Table of ${TableNight.tableSize} · '

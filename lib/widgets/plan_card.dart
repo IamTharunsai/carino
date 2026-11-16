@@ -33,9 +33,9 @@ class PlanCard extends StatelessWidget {
   /// the store call + feedback; the card is a pure render of [plan].
   final VoidCallback onJoinToggle;
 
-  /// Wave 2 · "Keep this group as a PrivateCircle" (CROWD-FEATURES #5): parents
+  /// Wave 2 · "Keep this group as a circle" (CROWD-FEATURES #5): parents
   /// pass this only when the store says the plan can convert (member is
-  /// hosting/going, not yet a PrivateCircle) — null hides the action entirely.
+  /// hosting/going, not yet a circle) — null hides the action entirely.
   final VoidCallback? onKeepAsCircle;
 
   /// Wave 3 · Check-In Safety (CROWD-FEATURES #15): parents pass this
@@ -259,7 +259,7 @@ class PlanCard extends StatelessWidget {
               child: TextButton.icon(
                 icon: const Icon(Icons.groups_outlined,
                     size: 16, color: AppColors.emberCrimson),
-                label: const Text('Keep this group as a PrivateCircle',
+                label: const Text('Keep this group as a circle',
                     style: TextStyle(
                         color: AppColors.emberCrimson, fontSize: 12.5)),
                 style: TextButton.styleFrom(

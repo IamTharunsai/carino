@@ -170,14 +170,14 @@ class _FiltersScreenState extends State<FiltersScreen> {
               ChoiceChip(
                 label: const Text('Everyone'),
                 selected: _intention == null,
-                selectedColor: AppColors.emberCrimson,
+                selectedColor: AppColors.blush,
                 onSelected: (_) => setState(() => _intention = null),
               ),
               for (final i in Intention.values)
                 ChoiceChip(
                   label: Text(i.label),
                   selected: _intention == i,
-                  selectedColor: AppColors.emberCrimson,
+                  selectedColor: AppColors.blush,
                   onSelected: (_) => setState(() => _intention = i),
                 ),
             ],
@@ -249,7 +249,7 @@ class _FiltersScreenState extends State<FiltersScreen> {
                 ChoiceChip(
                   label: Text(l),
                   selected: (_language ?? 'Any') == l,
-                  selectedColor: AppColors.emberCrimson,
+                  selectedColor: AppColors.blush,
                   onSelected: (_) =>
                       setState(() => _language = l == 'Any' ? null : l),
                 ),

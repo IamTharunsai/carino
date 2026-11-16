@@ -360,7 +360,7 @@ class _MatchTile extends StatelessWidget {
                       const SizedBox(width: 6),
                       if (member.verified)
                         const Icon(Icons.verified,
-                            size: 15, color: AppColors.sparkCoral),
+                            size: 15, color: AppColors.verifiedGold),
                     ],
                   ),
                   Text(

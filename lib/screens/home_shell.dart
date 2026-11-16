@@ -7,6 +7,7 @@ import 'chats/chat_list_screen.dart';
 import 'connect/connect_screen.dart';
 import 'discover/discover_screen.dart';
 import 'stage/creator_profile_screen.dart';
+import 'connect/circle_detail_screen.dart';
 import 'stage/stage_screen.dart';
 import '../services/links.dart';
 import 'you/my_profile_screen.dart';
@@ -28,12 +29,17 @@ class _HomeShellState extends State<HomeShell> {
   void initState() {
     super.initState();
     pendingProfile.addListener(_openShared);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _openShared());
+    pendingCircle.addListener(_openCircle);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _openShared();
+      _openCircle();
+    });
   }
 
   @override
   void dispose() {
     pendingProfile.removeListener(_openShared);
+    pendingCircle.removeListener(_openCircle);
     super.dispose();
   }
 
@@ -45,6 +51,13 @@ class _HomeShellState extends State<HomeShell> {
     final name = MockData.feed.where((f) => f.creatorId == id).map((f) => f.creatorName).firstOrNull ?? 'Profile';
     Navigator.of(context).push(MaterialPageRoute<void>(
         builder: (_) => CreatorProfileScreen(creatorId: id, name: name)));
+  }
+
+  void _openCircle() {
+    final id = pendingCircle.value;
+    if (id == null || !mounted) return;
+    pendingCircle.value = null;
+    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => CircleDetailScreen(circleId: id)));
   }
 
   int get _unreadChats =>

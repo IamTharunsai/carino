@@ -1,33 +1,42 @@
 import 'package:flutter/material.dart';
 
-/// Locked brand palette (blueprint DESIGN SYSTEM sheet). Do not add new
-/// brand colours without updating the blueprint — these six tokens are the
-/// whole system.
+/// Cariño palette — clean white, near-black ink, romantic plum (not red),
+/// a soft mauve for small highlights and gold for the verified tick.
+/// Token NAMES are kept from the first palette so every screen updates.
 class AppColors {
   static const Color surfaceLight = Colors.white;
-  static const Color porcelainDeep = Color(0xFFF7F0EC);
+  static const Color porcelainDeep = Color(0xFFF7F3F5);
   AppColors._();
 
-  /// Signature red — primary buttons (SOLID, never glass), selected states.
-  static const Color emberCrimson = Color(0xFFB81735);
+  /// Plum — primary buttons, selected states. 9:1 on white.
+  static const Color emberCrimson = Color(0xFF6B2D5C);
 
-  /// Celebrations, match glow, decorative highlights. Never body text on dark.
-  static const Color sparkCoral = Color(0xFFFF6B6B);
+  /// Mauve — small highlights, icons, celebrations. 5:1 on white.
+  static const Color sparkCoral = Color(0xFFB0507A);
 
-  /// Dark theme background (brand default theme).
-  static const Color midnight = Color(0xFF151014);
+  /// Ink — text on light, and the dark-mode / reel background.
+  static const Color midnight = Color(0xFF1C1A1F);
 
   /// Elevated surfaces on dark: cards, sheets, navigation.
-  static const Color plumCharcoal = Color(0xFF261C24);
+  static const Color plumCharcoal = Color(0xFF2A2730);
 
   /// Primary text on dark.
-  static const Color warmIvory = Color(0xFFFFF8F3);
+  static const Color warmIvory = Color(0xFFFFFFFF);
 
   /// Secondary text / quiet labels on dark.
-  static const Color softRose = Color(0xFFD2BDC5);
+  static const Color softRose = Color(0xFF9A919B);
 
-  /// Light theme background (fully supported, never an inversion of dark).
-  static const Color porcelain = Color(0xFFFFF8F5);
+  /// Light theme background — clean white (the default theme).
+  static const Color porcelain = Color(0xFFFFFFFF);
+
+  /// Soft plum tint for selected chips and quiet fills.
+  static const Color blush = Color(0xFFF5EAF0);
+
+  /// Hairlines and card borders on white.
+  static const Color line = Color(0xFFECE6EA);
+
+  /// The verified tick.
+  static const Color verifiedGold = Color(0xFFC9A13B);
 
   // --- Glass tints (DESIGN SYSTEM: cards 55–65% tint, sheets 80%) ---
   static Color glassFillDark(double opacity) =>
@@ -38,7 +47,7 @@ class AppColors {
   /// Hairline borders: Warm Ivory 28% on dark, Midnight 10% on light.
   static Color glassBorder(Brightness brightness) => brightness == Brightness.dark
       ? warmIvory.withValues(alpha: 0.28)
-      : midnight.withValues(alpha: 0.10);
+      : line;
 
   /// Card tint opacity per blueprint (55–65%).
   static const double glassCardOpacity = 0.60;
@@ -52,9 +61,9 @@ class AppColors {
   /// Shadow under glass cards: Midnight 25%, y=8, blur 24.
   static const List<BoxShadow> glassShadow = [
     BoxShadow(
-      color: Color(0x40151014),
-      offset: Offset(0, 8),
-      blurRadius: 24,
+      color: Color(0x0F1C1A1F),
+      offset: Offset(0, 4),
+      blurRadius: 16,
     ),
   ];
 

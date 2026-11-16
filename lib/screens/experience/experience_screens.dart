@@ -328,7 +328,7 @@ class _CoupleScreenState extends State<CoupleScreen> {
                   ChoiceChip(
                     label: Text(t),
                     selected: when == t,
-                    selectedColor: AppColors.emberCrimson,
+                    selectedColor: AppColors.blush,
                     onSelected: (_) => setSheet(() => when = t),
                   ),
               ],
@@ -419,7 +419,7 @@ class _CoupleScreenState extends State<CoupleScreen> {
                       ChoiceChip(
                         label: Text(s),
                         selected: _prefs.relationshipStatus == s,
-                        selectedColor: AppColors.emberCrimson,
+                        selectedColor: AppColors.blush,
                         onSelected: (_) => _setStatus(s),
                       ),
                   ],

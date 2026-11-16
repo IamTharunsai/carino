@@ -1,5 +1,4 @@
 import 'dart:ui';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
@@ -34,13 +33,8 @@ class GlassContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final brightness = Theme.of(context).brightness;
-    // ponytail: live blur is the most expensive effect on the web (it
-    // re-blurs everything behind every card each frame), so the web gets a
-    // denser tint instead — near-identical over the scrim, far smoother.
-    final boost = kIsWeb ? 0.18 : 0.0;
-    final fill = brightness == Brightness.dark
-        ? AppColors.glassFillDark((opacity ?? AppColors.glassCardOpacity) + boost)
-        : AppColors.glassFillLight((opacity ?? AppColors.glassCardOpacity) + 0.15 + boost);
+    // Solid cards on a clean background (no blur: crisper and much faster).
+    final fill = brightness == Brightness.dark ? AppColors.plumCharcoal : Colors.white;
     final corners = borderRadius ?? BorderRadius.circular(radius);
     final card = Container(
           padding: padding,
@@ -51,15 +45,7 @@ class GlassContainer extends StatelessWidget {
           ),
           child: Material(type: MaterialType.transparency, child: child),
         );
-    final content = ClipRRect(
-      borderRadius: corners,
-      child: kIsWeb
-          ? card
-          : BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: AppColors.glassBlurSigma, sigmaY: AppColors.glassBlurSigma),
-              child: card,
-            ),
-    );
+    final content = ClipRRect(borderRadius: corners, child: card);
     final shadowed = DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: corners,
@@ -110,7 +96,6 @@ class GlassScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     // Every page gets a back button: onboarding steps via OnboardingBack,
     // pushed pages via the Navigator. Tab roots (nothing to go back to)
     // stay clean.
@@ -128,33 +113,8 @@ class GlassScaffold extends StatelessWidget {
       appBar: bar,
       extendBody: true,
       extendBodyBehindAppBar: true,
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          // Own layer: the drifting background never forces the page to repaint.
-          RepaintBoundary(
-            child: backgroundAsset != null
-                ? KenBurnsImage(asset: backgroundAsset!)
-                : const AuroraBackground(),
-          ),
-          // Scrim for legibility (never invert/desaturate the imagery).
-          DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  (isDark ? AppColors.midnight : AppColors.porcelain)
-                      .withValues(alpha: scrimOpacity + 0.25),
-                  (isDark ? AppColors.midnight : AppColors.porcelain)
-                      .withValues(alpha: scrimOpacity),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-          ),
-          SafeArea(child: body),
-        ],
-      ),
+      // Clean white (or ink in dark mode): no background photos or motion.
+      body: SafeArea(child: body),
       bottomNavigationBar: bottomBar,
     );
   }

@@ -8,6 +8,7 @@ import '../../widgets/glass_card.dart';
 import '../../widgets/spark_button.dart';
 import '../you/support_screen.dart';
 import 'selfie_capture_screen.dart';
+import 'verification_intro_screen.dart';
 
 /// S-005 ID Capture + S-006 Liveness / Photo Match — the PROVIDER flow.
 ///
@@ -384,4 +385,30 @@ class VerificationResultScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+
+/// Optional verification, started from your profile. Passing earns the
+/// gold tick on your profile; nothing else in the app is locked behind it.
+Future<void> startVerification(BuildContext context) async {
+  final nav = Navigator.of(context);
+  await nav.push(MaterialPageRoute<void>(
+    builder: (introCtx) => VerificationIntroScreen(
+      onExit: () => Navigator.of(introCtx).pop(),
+      onStart: () => Navigator.of(introCtx).pushReplacement(MaterialPageRoute<void>(
+        builder: (flowCtx) => VerificationProviderScreen(
+          onCancel: () => Navigator.of(flowCtx).pop(),
+          onComplete: () => Navigator.of(flowCtx).pushReplacement(MaterialPageRoute<void>(
+            builder: (resCtx) => VerificationResultScreen(
+              onPassed: () async {
+                await Services.prefs.setMockVerified(true);
+                if (resCtx.mounted) Navigator.of(resCtx).pop();
+              },
+              onRetry: () => Navigator.of(resCtx).pop(),
+            ),
+          )),
+        ),
+      )),
+    ),
+  ));
 }

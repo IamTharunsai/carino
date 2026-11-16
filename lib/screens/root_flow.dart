@@ -73,13 +73,14 @@ class _RootFlowState extends State<RootFlow> {
   /// anything else must pass the age gate + ID verification first. Every
   /// sign-in path (password, code, Google/Apple, passkey) calls this.
   Future<void> _afterSignIn() async {
-    final verified = await Services.verification.isVerified();
+    // Verification is optional (gold tick on your profile), so a signed-in
+    // member goes straight in — or to their profile if it's still empty.
     if (!mounted) return;
-    if (verified) {
+    if (Services.prefs.photos.isEmpty && !_returning) {
+      _go(_Stage.profile);
+    } else {
       _completedOnboarding = true;
       _go(_Stage.home);
-    } else {
-      _go(_Stage.ageGate);
     }
   }
 
@@ -164,14 +165,14 @@ class _RootFlowState extends State<RootFlow> {
           _returning = false;
           // Already signed in (returning but unverified)? Straight to
           // verification — don't ask for a code twice.
-          _go(Services.auth.isSignedIn ? _Stage.verificationIntro : _Stage.auth);
+          _go(Services.auth.isSignedIn ? _Stage.profile : _Stage.auth);
         });
       case _Stage.auth:
         return AuthScreen(onAuthenticated: () {
           if (_returning) {
             _afterSignIn();
           } else {
-            _go(_Stage.verificationIntro);
+            _go(_Stage.profile);
           }
         });
       case _Stage.verificationIntro:

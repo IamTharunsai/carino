@@ -1,7 +1,7 @@
-// Wave 2 crowd models (CROWD-FEATURES #5 Private Circles, #6 PrivateCircle-only
+// Wave 2 crowd models (CROWD-FEATURES #5 Private Circles, #6 circle-only
 // Moments, #7 Smart Chat, #8 Wingperson).
 //
-// A PrivateCircle is a small PERSISTENT group — the thing a one-off plan becomes
+// A circle is a small PERSISTENT group — the thing a one-off plan becomes
 // when the people in it decide to stay. Circles are private: only members
 // see the circle, its Moments and its chat. Kept separate from the 1:1
 // models (member.dart / message.dart): a circle is a group object with
@@ -9,7 +9,7 @@
 
 /// A private, persistent small group (CROWD-FEATURES #5).
 ///
-/// Born from a plan ("Keep this group as a PrivateCircle") and owned by the
+/// Born from a plan ("Keep this group as a circle") and owned by the
 /// AppStore like plans and conversations — a circle created from the
 /// Plans hub must still exist when the member opens Connect.
 class PrivateCircle {
@@ -37,7 +37,7 @@ class PrivateCircle {
   final String? upcomingPlanId;
 
   /// The OpenPlan this circle was converted from, when it was born via
-  /// "Keep this group as a PrivateCircle" — the store uses it to refuse a
+  /// "Keep this group as a circle" — the store uses it to refuse a
   /// second conversion of the same plan.
   final String? sourcePlanId;
 
@@ -45,7 +45,7 @@ class PrivateCircle {
   bool get includesMe => memberIds.contains('me');
 }
 
-/// The kinds of message a PrivateCircle chat carries (Smart Chat, #7).
+/// The kinds of message a circle chat carries (Smart Chat, #7).
 enum CircleMsgKind {
   /// A plain group text message.
   text,
@@ -63,7 +63,7 @@ enum CircleMsgKind {
   system,
 }
 
-/// One option in a PrivateCircle poll, with the member ids who picked it.
+/// One option in a circle poll, with the member ids who picked it.
 /// Votes are state, not decoration: one vote per member, movable.
 class CirclePollOption {
   CirclePollOption(this.label, [List<String>? voterIds])
@@ -75,7 +75,7 @@ class CirclePollOption {
   int get votes => voterIds.length;
 }
 
-/// One message in a PrivateCircle chat. Poll votes and Ask-me question counts
+/// One message in a circle chat. Poll votes and Ask-me question counts
 /// are mutable session state on the message itself, like ChatMessage's
 /// reaction/unsent flags.
 class CircleMessage {

@@ -8,9 +8,9 @@ import '../../widgets/glass_card.dart';
 import '../../widgets/intro_card.dart';
 import '../../widgets/spark_button.dart';
 
-/// Wave 2 · PrivateCircle chat + Smart Chat (CROWD-FEATURES #7).
+/// Wave 2 · circle chat + Smart Chat (CROWD-FEATURES #7).
 ///
-/// The group thread inside a PrivateCircle: plain texts, poll stickers (real
+/// The group thread inside a circle: plain texts, poll stickers (real
 /// votes, one per member, movable), "Ask me" opener stickers (post a
 /// topic; questions land as texts and the sticker counts them), and
 /// Wingperson intro cards. No public counts anywhere — votes are shown
@@ -67,7 +67,7 @@ class _CircleChatScreenState extends State<CircleChatScreen> {
               style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 6),
           Text(
-            'Openers that start real conversations inside the PrivateCircle — '
+            'Openers that start real conversations inside the circle — '
             'not engagement bait. No counts ever leave this group.',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
@@ -77,7 +77,7 @@ class _CircleChatScreenState extends State<CircleChatScreen> {
             leading: const Icon(Icons.poll_outlined,
                 color: AppColors.sparkCoral),
             title: const Text('Poll'),
-            subtitle: const Text('Ask the PrivateCircle, tap to vote.'),
+            subtitle: const Text('Ask the circle, tap to vote.'),
             onTap: () {
               Navigator.of(context).pop();
               _pollSheet();
@@ -89,7 +89,7 @@ class _CircleChatScreenState extends State<CircleChatScreen> {
                 color: AppColors.sparkCoral),
             title: const Text('Ask me'),
             subtitle:
-                const Text('Offer a topic — the PrivateCircle asks, you answer.'),
+                const Text('Offer a topic — the circle asks, you answer.'),
             onTap: () {
               Navigator.of(context).pop();
               _askMeSheet();
@@ -251,7 +251,7 @@ class _CircleChatScreenState extends State<CircleChatScreen> {
             ),
             const SizedBox(height: 14),
             SparkButton(
-              label: 'Ask in the PrivateCircle',
+              label: 'Ask in the circle',
               icon: Icons.send_outlined,
               onPressed: question.text.trim().isEmpty
                   ? null
@@ -278,8 +278,8 @@ class _CircleChatScreenState extends State<CircleChatScreen> {
         final circle = store.circleById(widget.circleId);
         if (circle == null) {
           return GlassScaffold(
-            appBar: AppBar(title: const Text('PrivateCircle chat')),
-            body: const Center(child: Text('This PrivateCircle no longer exists.')),
+            appBar: AppBar(title: const Text('Circle chat')),
+            body: const Center(child: Text('This circle no longer exists.')),
           );
         }
         final messages = store.circleMessagesFor(circle.id);

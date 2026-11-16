@@ -174,7 +174,7 @@ class _DecompressScreenState extends State<DecompressScreen> {
                 ChoiceChip(
                   label: Text(m.label),
                   selected: _mode == m,
-                  selectedColor: AppColors.emberCrimson,
+                  selectedColor: AppColors.blush,
                   onSelected: (_) => setState(() => _mode = m),
                 ),
             ],
@@ -333,7 +333,7 @@ class _BookingSheetState extends State<_BookingSheet> {
               ChoiceChip(
                 label: Text(m.label),
                 selected: _mode == m,
-                selectedColor: AppColors.emberCrimson,
+                selectedColor: AppColors.blush,
                 onSelected: (m == BookMode.group && e.groupGoing == 0) || (m != BookMode.solo && m != BookMode.group && e.maxPeople < 2)
                     ? null
                     : (_) => setState(() {

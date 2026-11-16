@@ -70,7 +70,7 @@ class _IntentionsScreenState extends State<IntentionsScreen> {
               ChoiceChip(
                 label: Text(o),
                 selected: value == o,
-                selectedColor: AppColors.emberCrimson,
+                selectedColor: AppColors.blush,
                 onSelected: (_) => setState(() => onPick(o)),
               ),
           ],

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../widgets/copy_text.dart';
+import '../../models/host_tools.dart';
 
 import '../../data/mock_data.dart';
 import '../../models/circle.dart';
@@ -13,12 +15,12 @@ import '../../widgets/spark_button.dart';
 import '../moments/moment_viewer_screen.dart';
 import 'circle_chat_screen.dart';
 
-/// Wave 2 · PrivateCircle detail (CROWD-FEATURES #5/#6/#8).
+/// Wave 2 · circle detail (CROWD-FEATURES #5/#6/#8).
 ///
-/// One PrivateCircle, whole: its members, its next plan, its Highlights (the
+/// One circle, whole: its members, its next plan, its Highlights (the
 /// pinned standout Moments, max 3), its circle-only Moments (visible to
 /// members only — they never enter the connections feed), its
-/// Wingperson introductions, and the door into the PrivateCircle chat.
+/// Wingperson introductions, and the door into the circle chat.
 class CircleDetailScreen extends StatelessWidget {
   const CircleDetailScreen({super.key, required this.circleId});
 
@@ -72,7 +74,7 @@ class CircleDetailScreen extends StatelessWidget {
                 style: Theme.of(ctx).textTheme.titleLarge),
             const SizedBox(height: 8),
             Text(
-              'Visible ONLY to this PrivateCircle\'s ${circle.memberCount} '
+              'Visible ONLY to this circle\'s ${circle.memberCount} '
               'members, for 24 hours. It never appears in the '
               'connections feed. Demo build: posts with a sample image.',
               style: Theme.of(ctx).textTheme.bodyMedium,
@@ -84,7 +86,7 @@ class CircleDetailScreen extends StatelessWidget {
               maxLength: 140,
               decoration: const InputDecoration(
                 labelText: 'Caption',
-                hintText: 'What\'s happening with the PrivateCircle?',
+                hintText: 'What\'s happening with the circle?',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(16)),
                 ),
@@ -92,7 +94,7 @@ class CircleDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 14),
             SparkButton(
-              label: 'Post to the PrivateCircle',
+              label: 'Post to the circle',
               icon: Icons.send_outlined,
               onPressed: () {
                 Services.store.postCircleMoment(
@@ -103,7 +105,7 @@ class CircleDetailScreen extends StatelessWidget {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                       content:
-                          Text('Moment posted — PrivateCircle members only.')),
+                          Text('Moment posted — circle members only.')),
                 );
               },
             ),
@@ -154,7 +156,7 @@ class CircleDetailScreen extends StatelessWidget {
               Text(
                 'You\'re the wingperson: pick two members of '
                 '${circle.name} and say why they should meet. The intro '
-                'lands in the PrivateCircle chat — it only opens a 1:1 chat '
+                'lands in the circle chat — it only opens a 1:1 chat '
                 'when BOTH of them accept.',
                 style: Theme.of(ctx).textTheme.bodyMedium,
               ),
@@ -208,7 +210,7 @@ class CircleDetailScreen extends StatelessWidget {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text(
-                                'Intro posted in the PrivateCircle chat — it opens only if both accept.'),
+                                'Intro posted in the circle chat — it opens only if both accept.'),
                           ),
                         );
                       }
@@ -231,8 +233,8 @@ class CircleDetailScreen extends StatelessWidget {
         final circle = store.circleById(circleId);
         if (circle == null) {
           return GlassScaffold(
-            appBar: AppBar(title: const Text('PrivateCircle')),
-            body: const Center(child: Text('This PrivateCircle no longer exists.')),
+            appBar: AppBar(title: const Text('Circle')),
+            body: const Center(child: Text('This circle no longer exists.')),
           );
         }
         final upcoming = circle.upcomingPlanId == null
@@ -242,7 +244,19 @@ class CircleDetailScreen extends StatelessWidget {
         final highlights = store.circleHighlightsFor(circle.id);
         final intros = store.introsForCircle(circle.id);
         return GlassScaffold(
-          appBar: AppBar(title: Text(circle.name)),
+          appBar: AppBar(title: Text(circle.name), actions: [
+            IconButton(
+              icon: const Icon(Icons.group_add_outlined),
+              tooltip: 'Invite your group',
+              onPressed: () async {
+                final ok = await copyText(context, groupInviteLink(circle.id));
+                if (ok && context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text('Invite link copied — paste it in your group chat and everyone joins in one tap.')));
+                }
+              },
+            ),
+          ]),
           body: ListView(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 110),
             children: [
@@ -274,14 +288,14 @@ class CircleDetailScreen extends StatelessWidget {
                           if (id != 'me' &&
                               MockData.memberById(id).verified)
                             const Icon(Icons.verified,
-                                size: 15, color: AppColors.sparkCoral),
+                                size: 15, color: AppColors.verifiedGold),
                         ],
                       ),
                       const SizedBox(height: 8),
                     ],
                     Text(
                       'Private to these ${circle.memberCount} members — '
-                      'chat, Moments and plans stay inside the PrivateCircle.',
+                      'chat, Moments and plans stay inside the circle.',
                       style: theme.textTheme.bodySmall,
                     ),
                   ],
@@ -289,7 +303,7 @@ class CircleDetailScreen extends StatelessWidget {
               ),
               const SizedBox(height: 14),
               SparkButton(
-                label: 'Open PrivateCircle chat',
+                label: 'Open circle chat',
                 icon: Icons.chat_bubble_outline,
                 onPressed: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
@@ -313,7 +327,7 @@ class CircleDetailScreen extends StatelessWidget {
                 Text('Highlights', style: theme.textTheme.titleLarge),
                 const SizedBox(height: 4),
                 Text(
-                  'The standout Moments the PrivateCircle pinned — up to 3.',
+                  'The standout Moments the circle pinned — up to 3.',
                   style: theme.textTheme.bodySmall,
                 ),
                 const SizedBox(height: 10),
@@ -330,12 +344,12 @@ class CircleDetailScreen extends StatelessWidget {
                   ),
                 ),
               ],
-              // --- PrivateCircle Moments ---
+              // --- circle Moments ---
               const SizedBox(height: 18),
               Row(
                 children: [
                   Expanded(
-                    child: Text('PrivateCircle Moments',
+                    child: Text('Circle Moments',
                         style: theme.textTheme.titleLarge),
                   ),
                   TextButton.icon(
@@ -356,7 +370,7 @@ class CircleDetailScreen extends StatelessWidget {
               if (moments.isEmpty)
                 GlassContainer(
                   child: Text(
-                    'No Moments in this PrivateCircle yet — share the first one.',
+                    'No Moments in this circle yet — share the first one.',
                     style: theme.textTheme.bodyMedium,
                   ),
                 ),
@@ -377,7 +391,7 @@ class CircleDetailScreen extends StatelessWidget {
               if (intros.isEmpty)
                 GlassContainer(
                   child: Text(
-                    'No introductions yet in this PrivateCircle.',
+                    'No introductions yet in this circle.',
                     style: theme.textTheme.bodyMedium,
                   ),
                 ),

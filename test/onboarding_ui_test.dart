@@ -78,7 +78,7 @@ void main() {
     await _pump(tester, WelcomeScreen(onContinue: () {}, onSignIn: () {}));
     expect(find.textContaining('21+'), findsNothing);
     final createRect = tester.getRect(find.text('Create account'));
-    final arrowRect = tester.getRect(find.byIcon(Icons.arrow_forward).first);
+    final arrowRect = tester.getRect(find.byIcon(Icons.arrow_forward_rounded).first);
     expect(arrowRect.left, greaterThan(createRect.right));
     expect(tester.takeException(), isNull);
   });

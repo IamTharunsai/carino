@@ -290,7 +290,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                   ChoiceChip(
                     label: Text(t),
                     selected: _checkInAt == t,
-                    selectedColor: AppColors.emberCrimson,
+                    selectedColor: AppColors.blush,
                     onSelected: (_) => setState(() => _checkInAt = t),
                   ),
               ],

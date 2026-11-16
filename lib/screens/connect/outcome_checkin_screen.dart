@@ -175,7 +175,7 @@ class _OutcomeCheckInScreenState extends State<OutcomeCheckInScreen> {
                 ChoiceChip(
                   label: Text(rating.label),
                   selected: pick == rating,
-                  selectedColor: AppColors.emberCrimson,
+                  selectedColor: AppColors.blush,
                   onSelected: (_) =>
                       setState(() => _picks[prompt.subjectId] = rating),
                 ),

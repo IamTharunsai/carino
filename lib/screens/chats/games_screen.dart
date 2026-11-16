@@ -221,7 +221,7 @@ class _GamesScreenState extends State<GamesScreen> {
                 ChoiceChip(
                   label: Text(_gameName(g)),
                   selected: _active == g,
-                  selectedColor: AppColors.emberCrimson,
+                  selectedColor: AppColors.blush,
                   onSelected: (_) => setState(() => _active = g),
                 ),
             ],
@@ -472,7 +472,7 @@ class _GamesScreenState extends State<GamesScreen> {
                 ChoiceChip(
                   label: Text(v),
                   selected: _vibe == v,
-                  selectedColor: AppColors.emberCrimson,
+                  selectedColor: AppColors.blush,
                   onSelected: _vibeRevealed
                       ? null
                       : (_) => setState(() {

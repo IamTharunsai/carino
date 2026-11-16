@@ -332,7 +332,7 @@ class _FeedViewState extends State<_FeedView> {
               ),
               if (item.verifiedHuman) ...[
                 const SizedBox(width: 4),
-                const Icon(Icons.verified, size: 18, color: Color(0xFFE8B84A)), // gold = ID-verified
+                const Icon(Icons.verified, size: 18, color: AppColors.verifiedGold), // gold = ID-verified
               ],
               if (item.creatorId != 'me') ...[
                 const SizedBox(width: 8),

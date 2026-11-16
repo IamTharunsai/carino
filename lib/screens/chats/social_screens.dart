@@ -214,7 +214,7 @@ Future<GroupChat?> showNewGroupSheet(BuildContext context) {
                           AssetImage(MockData.personById(id).photoAsset)),
                   label: Text(MockData.personById(id).firstName),
                   selected: picked.contains(id),
-                  selectedColor: AppColors.emberCrimson,
+                  selectedColor: AppColors.blush,
                   showCheckmark: false,
                   onSelected: (_) => setSheet(() =>
                       picked.contains(id) ? picked.remove(id) : picked.add(id)),
@@ -348,7 +348,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                   FilterChip(
                     label: Text(s),
                     selected: picked.contains(s),
-                    selectedColor: AppColors.emberCrimson,
+                    selectedColor: AppColors.blush,
                     showCheckmark: false,
                     onSelected: (_) => setSheet(() =>
                         picked.contains(s) ? picked.remove(s) : picked.add(s)),

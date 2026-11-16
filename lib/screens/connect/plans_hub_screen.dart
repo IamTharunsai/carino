@@ -181,14 +181,14 @@ class _PlansHubScreenState extends State<PlansHubScreen> {
                   ChoiceChip(
                     label: const Text('I\'m here'),
                     selected: selected == PlanCheckInState.checkedIn,
-                    selectedColor: AppColors.emberCrimson,
+                    selectedColor: AppColors.blush,
                     onSelected: (_) => setSheetState(
                         () => selected = PlanCheckInState.checkedIn),
                   ),
                   ChoiceChip(
                     label: const Text('Running late'),
                     selected: selected == PlanCheckInState.runningLate,
-                    selectedColor: AppColors.emberCrimson,
+                    selectedColor: AppColors.blush,
                     onSelected: (_) => setSheetState(
                         () => selected = PlanCheckInState.runningLate),
                   ),
@@ -494,7 +494,7 @@ class _PlansHubScreenState extends State<PlansHubScreen> {
                   ChoiceChip(
                     label: const Text('All plans'),
                     selected: _filter == _HubFilter.all,
-                    selectedColor: AppColors.emberCrimson,
+                    selectedColor: AppColors.blush,
                     onSelected: (_) =>
                         setState(() => _filter = _HubFilter.all),
                   ),
@@ -502,14 +502,14 @@ class _PlansHubScreenState extends State<PlansHubScreen> {
                     label: Text(
                         'Tonight · ${store.tonightPlans.length}'),
                     selected: _filter == _HubFilter.tonight,
-                    selectedColor: AppColors.emberCrimson,
+                    selectedColor: AppColors.blush,
                     onSelected: (_) =>
                         setState(() => _filter = _HubFilter.tonight),
                   ),
                   ChoiceChip(
                     label: const Text('Mine'),
                     selected: _filter == _HubFilter.mine,
-                    selectedColor: AppColors.emberCrimson,
+                    selectedColor: AppColors.blush,
                     onSelected: (_) =>
                         setState(() => _filter = _HubFilter.mine),
                   ),
@@ -554,7 +554,7 @@ class _PlansHubScreenState extends State<PlansHubScreen> {
                       ? () => _openPhoneDown(plans[i])
                       : null,
                   phoneDownLabel: _phoneDownLabel(plans[i]),
-                  // Wave 2 · a plan I'm part of can become a PrivateCircle.
+                  // Wave 2 · a plan I'm part of can become a circle.
                   onKeepAsCircle: store.canConvertPlanToCircle(plans[i])
                       ? () {
                           final circle =
@@ -563,8 +563,8 @@ class _PlansHubScreenState extends State<PlansHubScreen> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(circle == null
-                                  ? 'That plan already became a PrivateCircle.'
-                                  : 'PrivateCircle created: "${circle.name}" — '
+                                  ? 'That plan already became a circle.'
+                                  : 'Circle created: "${circle.name}" — '
                                       'find it under Your Circles in Connect.'),
                             ),
                           );

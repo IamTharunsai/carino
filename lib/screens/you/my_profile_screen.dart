@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../onboarding/verification_flow_screen.dart';
 import 'package:flutter/services.dart';
 import '../../data/mock_data.dart';
 import '../../models/posts.dart';
@@ -113,7 +114,8 @@ class _YouScreenState extends State<YouScreen> {
               child: Row(children: [
                 Flexible(child: Text(me.name, style: t.titleLarge, overflow: TextOverflow.ellipsis)),
                 const SizedBox(width: 6),
-                const Icon(Icons.verified, size: 18, color: AppColors.sparkCoral),
+                if (_prefs.mockVerified)
+                  const Icon(Icons.verified, size: 18, color: AppColors.verifiedGold),
               ]),
             ),
             IconButton(icon: const Icon(Icons.add_box_outlined), tooltip: 'New post', onPressed: _newPost),
@@ -149,6 +151,21 @@ class _YouScreenState extends State<YouScreen> {
               padding: const EdgeInsets.only(top: 4),
               child: Text(me.interests.take(5).join(' · '), style: t.bodySmall),
             ),
+          if (!_prefs.mockVerified) ...[
+            const SizedBox(height: 10),
+            GlassContainer(
+              onTap: () => startVerification(context).then((_) => setState(() {})),
+              child: Row(children: [
+                const Icon(Icons.verified_outlined, color: AppColors.verifiedGold),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text('Get your gold tick — 2 minutes, and people know you’re really you.',
+                      style: t.bodyMedium),
+                ),
+                const Icon(Icons.chevron_right_rounded),
+              ]),
+            ),
+          ],
           const SizedBox(height: 12),
           Row(children: [
             Expanded(

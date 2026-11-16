@@ -13,4 +13,9 @@ void main() {
     expect(profileIdFromLink(Uri.parse('https://carino-liard.vercel.app/')), isNull);
     expect(profileIdFromLink(Uri.parse('https://carino-liard.vercel.app/#/u/../x')), isNull);
   });
+
+  test('group invite links carry the circle id', () {
+    expect(circleIdFromLink(Uri.parse('https://carino-liard.vercel.app/#/c/circle-garden')), 'circle-garden');
+    expect(circleIdFromLink(Uri.parse('https://carino-liard.vercel.app/#/u/f-sam')), isNull);
+  });
 }

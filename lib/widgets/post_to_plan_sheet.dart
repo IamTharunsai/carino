@@ -38,7 +38,7 @@ Future<void> showPostToPlanSheet(BuildContext context, {String idea = ''}) {
                 ChoiceChip(
                   label: Text(t),
                   selected: when == t,
-                  selectedColor: AppColors.emberCrimson,
+                  selectedColor: AppColors.blush,
                   onSelected: (_) => setSheet(() => when = t),
                 ),
             ],
@@ -54,7 +54,7 @@ Future<void> showPostToPlanSheet(BuildContext context, {String idea = ''}) {
                 ChoiceChip(
                   label: Text(c.label),
                   selected: who == c,
-                  selectedColor: AppColors.emberCrimson,
+                  selectedColor: AppColors.blush,
                   onSelected: (_) => setSheet(() => who = c),
                 ),
             ],

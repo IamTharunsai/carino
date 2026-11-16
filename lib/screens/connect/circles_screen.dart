@@ -12,8 +12,8 @@ import 'circle_detail_screen.dart';
 ///
 /// The list of the member's private Circles — the small groups that
 /// formed from plans and stayed — plus the conversion shelf: plans the
-/// member is part of that haven't become a PrivateCircle yet, each with its
-/// "Keep this group as a PrivateCircle" action. Everything reads the shared
+/// member is part of that haven't become a circle yet, each with its
+/// "Keep this group as a circle" action. Everything reads the shared
 /// store, so a conversion made here (or in the Plans hub) shows up in
 /// both places at once.
 class CirclesScreen extends StatelessWidget {
@@ -25,8 +25,8 @@ class CirclesScreen extends StatelessWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(circle == null
-            ? 'That plan already became a PrivateCircle.'
-            : 'PrivateCircle created: "${circle.name}" — the group chat is open '
+            ? 'That plan already became a circle.'
+            : 'Circle created: "${circle.name}" — the group chat is open '
                 'and the plan stays pinned inside.'),
       ),
     );
@@ -47,7 +47,7 @@ class CirclesScreen extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 110),
             children: [
               Text(
-                'Small groups that stuck. A PrivateCircle is private — only its '
+                'Small groups that stuck. A circle is private — only its '
                 'members see the chat, the Moments and the plans.',
                 style: theme.textTheme.bodyMedium,
               ),
@@ -57,7 +57,7 @@ class CirclesScreen extends StatelessWidget {
                   icon: Icons.groups_outlined,
                   title: 'No Circles yet',
                   body: 'Join a plan, meet the group — then keep it as a '
-                      'PrivateCircle and it stays yours.',
+                      'Circle and it stays yours.',
                 ),
               for (final circle in store.circles) ...[
                 GlassContainer(
@@ -147,7 +147,7 @@ class CirclesScreen extends StatelessWidget {
               ],
               if (convertible.isNotEmpty) ...[
                 const SizedBox(height: 6),
-                Text('Keep a group as a PrivateCircle',
+                Text('Keep a group as a circle',
                     style: theme.textTheme.titleLarge),
                 const SizedBox(height: 6),
                 Text(
@@ -180,7 +180,7 @@ class CirclesScreen extends StatelessWidget {
                         TextButton.icon(
                           icon: const Icon(Icons.groups_outlined,
                               size: 17, color: AppColors.sparkCoral),
-                          label: const Text('Keep as PrivateCircle',
+                          label: const Text('Keep as circle',
                               style: TextStyle(
                                   color: AppColors.sparkCoral,
                                   fontSize: 13)),

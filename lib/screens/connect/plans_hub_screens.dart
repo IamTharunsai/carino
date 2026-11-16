@@ -228,7 +228,7 @@ class _HostPlanScreenState extends State<HostPlanScreen> {
                 ChoiceChip(
                   label: Text(t),
                   selected: _when == t,
-                  selectedColor: AppColors.emberCrimson,
+                  selectedColor: AppColors.blush,
                   onSelected: (_) => setState(() => _when = t),
                 ),
             ],

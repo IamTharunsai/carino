@@ -94,14 +94,14 @@ class _EventsScreenState extends State<EventsScreen> {
               ChoiceChip(
                 label: const Text('All'),
                 selected: _category == null,
-                selectedColor: AppColors.emberCrimson,
+                selectedColor: AppColors.blush,
                 onSelected: (_) => setState(() => _category = null),
               ),
               for (final c in categories)
                 ChoiceChip(
                   label: Text(c),
                   selected: _category == c,
-                  selectedColor: AppColors.emberCrimson,
+                  selectedColor: AppColors.blush,
                   onSelected: (_) => setState(() => _category = c),
                 ),
             ],
@@ -420,7 +420,7 @@ class _GroupHangoutScreenState extends State<GroupHangoutScreen> {
                       ChoiceChip(
                         label: Text(i),
                         selected: _plan == i,
-                        selectedColor: AppColors.emberCrimson,
+                        selectedColor: AppColors.blush,
                         onSelected: (_) => setState(() => _plan = i),
                       ),
                   ],

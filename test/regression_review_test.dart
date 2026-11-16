@@ -69,7 +69,7 @@ void main() {
 
   // 3 + 4. Any sign-in path must route an UNVERIFIED account into the age
   // gate — never straight to Home.
-  testWidgets('returning sign-in of an unverified account goes to the age gate', (tester) async {
+  testWidgets('returning sign-in goes straight in — verification is optional (gold tick)', (tester) async {
     await _phone(tester);
     await Services.prefs.setMockVerified(false);
     await tester.pumpWidget(MaterialApp(theme: AppTheme.dark(), home: const RootFlow()));
@@ -82,8 +82,8 @@ void main() {
     await tester.tap(find.text('Sign in'));
     await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(milliseconds: 300));
-    expect(find.byType(HomeShell), findsNothing);
-    expect(find.byType(AgeGateScreen), findsOneWidget);
+    expect(find.byType(HomeShell), findsOneWidget);
+    expect(find.byType(AgeGateScreen), findsNothing);
   });
 
   testWidgets('returning sign-in of a verified account goes Home', (tester) async {

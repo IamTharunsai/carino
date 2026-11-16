@@ -8,7 +8,7 @@ import 'app_colors.dart';
 class AppTheme {
   AppTheme._();
 
-  static const double radiusCard = 24; // cards 20–24 per blueprint
+  static const double radiusCard = 20;
   static const double radiusButton = 16;
   static const double minTouchTarget = 44;
   static const double screenPadding = 16;
@@ -81,20 +81,45 @@ class AppTheme {
       brightness: Brightness.light,
       colorScheme: scheme,
       scaffoldBackgroundColor: AppColors.porcelain,
-      textTheme: _textTheme(AppColors.midnight, AppColors.midnight.withValues(alpha: 0.6)),
+      textTheme: _textTheme(AppColors.midnight, const Color(0xFF6E6670)),
+      iconTheme: const IconThemeData(size: 22, color: AppColors.midnight),
+      dividerColor: AppColors.line,
       appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
         foregroundColor: AppColors.midnight,
+        iconTheme: IconThemeData(size: 22),
       ),
+      chipTheme: ChipThemeData(
+        backgroundColor: Colors.white,
+        selectedColor: AppColors.blush,
+        side: const BorderSide(color: AppColors.line),
+        labelStyle: const TextStyle(fontFamily: bodyFont, fontSize: 13, color: AppColors.midnight),
+        shape: const StadiumBorder(),
+        showCheckmark: false,
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: AppColors.porcelainDeep,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+        focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: AppColors.emberCrimson)),
+      ),
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? Colors.white : null),
+        trackColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? AppColors.emberCrimson : null),
+      ),
+      bottomSheetTheme: const BottomSheetThemeData(backgroundColor: Colors.white, surfaceTintColor: Colors.transparent),
+      snackBarTheme: const SnackBarThemeData(
+          backgroundColor: AppColors.midnight, behavior: SnackBarBehavior.floating),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.emberCrimson,
           foregroundColor: Colors.white,
+          elevation: 0,
           minimumSize: const Size.fromHeight(50),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(radiusButton),
-          ),
+          shape: const StadiumBorder(),
           textStyle: const TextStyle(fontFamily: bodyFont, fontSize: 16, fontWeight: FontWeight.w600),
         ),
       ),

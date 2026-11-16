@@ -113,7 +113,7 @@ class _TasteQuizScreenState extends State<TasteQuizScreen> {
                   ChoiceChip(
                     label: Text(tasteQuizQuestions[q].options[o].label),
                     selected: _answers[q] == o,
-                    selectedColor: AppColors.emberCrimson,
+                    selectedColor: AppColors.blush,
                     onSelected: (_) => setState(() => _answers[q] = o),
                   ),
               ],

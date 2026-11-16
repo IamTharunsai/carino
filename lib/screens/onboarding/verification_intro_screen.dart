@@ -81,7 +81,12 @@ class _VerificationIntroScreenState extends State<VerificationIntroScreen> {
                 _step(Icons.face_retouching_natural, '2 · A quick selfie',
                     'Shows it’s really you, live.'),
                 _step(Icons.lock_outline, 'What we keep',
-                    'Only the result. Not your ID photos.'),
+                    'Only the result (verified or not) and the date. Never your ID photos.'),
+                _step(Icons.shield_outlined, 'Who checks it',
+                    'A certified identity partner (SOC 2 Type II and ISO 27001). We’ll name them here before launch. '
+                    'They delete your ID images within 30 days, and nothing is ever sold or used to train AI.'),
+                _step(Icons.toggle_on_outlined, 'Optional',
+                    'You can use Cariño without it — verified people just get the gold tick.'),
               ],
             ),
           ),

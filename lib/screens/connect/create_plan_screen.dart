@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../models/host_tools.dart';
 
 import '../../models/member.dart';
 import '../../services/services.dart';
@@ -55,6 +56,7 @@ class _CreatePlanScreenState extends State<CreatePlanScreen> {
   final TextEditingController _title = TextEditingController();
   final TextEditingController _placeDetail = TextEditingController();
   final TextEditingController _note = TextEditingController();
+  final TextEditingController _code = TextEditingController();
   String? _placeType;
   String? _timeLabel;
   int _groupSize = 4;
@@ -91,6 +93,7 @@ class _CreatePlanScreenState extends State<CreatePlanScreen> {
     _title.dispose();
     _placeDetail.dispose();
     _note.dispose();
+    _code.dispose();
     super.dispose();
   }
 
@@ -116,7 +119,10 @@ class _CreatePlanScreenState extends State<CreatePlanScreen> {
       groupSize: _groupSize,
       instantJoin: _instantJoin,
       sourceLabel: _sourceLabel,
-      note: _note.text,
+      note: [
+        _note.text.trim(),
+        if (cleanCheckInCode(_code.text) case final c?) 'Check-in code: $c',
+      ].where((s) => s.isNotEmpty).join(' · '),
     );
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -189,10 +195,10 @@ class _CreatePlanScreenState extends State<CreatePlanScreen> {
                 ChoiceChip(
                   label: Text(p),
                   selected: _placeType == p,
-                  selectedColor: AppColors.emberCrimson,
+                  selectedColor: AppColors.blush,
                   labelStyle: TextStyle(
                     color: _placeType == p
-                        ? AppColors.warmIvory
+                        ? AppColors.emberCrimson
                         : theme.textTheme.bodyLarge?.color,
                   ),
                   onSelected: (_) => setState(() => _placeType = p),
@@ -222,10 +228,10 @@ class _CreatePlanScreenState extends State<CreatePlanScreen> {
                 ChoiceChip(
                   label: Text(t),
                   selected: _timeLabel == t,
-                  selectedColor: AppColors.emberCrimson,
+                  selectedColor: AppColors.blush,
                   labelStyle: TextStyle(
                     color: _timeLabel == t
-                        ? AppColors.warmIvory
+                        ? AppColors.emberCrimson
                         : theme.textTheme.bodyLarge?.color,
                   ),
                   onSelected: (_) => setState(() => _timeLabel = t),
@@ -265,6 +271,15 @@ class _CreatePlanScreenState extends State<CreatePlanScreen> {
                 'Off = people request, and you approve each join.'),
             value: _instantJoin,
             onChanged: (v) => setState(() => _instantJoin = v),
+          ),
+          TextField(
+            controller: _code,
+            maxLength: 8,
+            textCapitalization: TextCapitalization.characters,
+            decoration: const InputDecoration(
+              labelText: 'Check-in code (optional)',
+              hintText: 'e.g. SUNRUN — guests say it when they arrive',
+            ),
           ),
           TextField(
             controller: _note,

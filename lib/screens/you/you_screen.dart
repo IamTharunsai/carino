@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../onboarding/verification_flow_screen.dart';
 import 'presence_screen.dart';
 import '../../config/app_config.dart';
 import '../../models/experience.dart';
@@ -273,8 +274,12 @@ class _YouScreenState extends State<AccountCentreScreen> {
             context,
             icon: Icons.verified_user_outlined,
             title: 'Verification Centre',
-            subtitle: 'ID + selfie verified · badge active',
-            onTap: () => _verificationCentre(context),
+            subtitle: Services.prefs.mockVerified
+                ? 'ID + selfie verified · gold tick on'
+                : 'Optional · get your gold tick in 2 minutes',
+            onTap: () => Services.prefs.mockVerified
+                ? _verificationCentre(context)
+                : startVerification(context).then((_) => setState(() {})),
           ),
           _row(
             context,
