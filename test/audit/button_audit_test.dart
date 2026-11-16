@@ -35,8 +35,6 @@ import 'package:carino/screens/onboarding/age_gate_screen.dart';
 import 'package:carino/screens/onboarding/auth_screen.dart';
 import 'package:carino/screens/onboarding/identity_screen.dart';
 import 'package:carino/screens/onboarding/intentions_screen.dart';
-import 'package:carino/screens/onboarding/permission_primers_screen.dart';
-import 'package:carino/screens/onboarding/privacy_setup_screen.dart';
 import 'package:carino/screens/onboarding/profile_creation_screen.dart';
 import 'package:carino/screens/onboarding/sign_in_screen.dart';
 import 'package:carino/screens/onboarding/taste_quiz_screen.dart';
@@ -94,9 +92,7 @@ Map<String, Widget Function()> _screens() {
     'Intentions': () => IntentionsScreen(onDone: _cb),
     'About you': () => IdentityScreen(onDone: _cb),
     'Taste quiz': () => TasteQuizScreen(onDone: _cb),
-    'Privacy setup': () => PrivacySetupScreen(onDone: _cb),
     'Profile creation': () => ProfileCreationScreen(onPublished: _cb),
-    'Permissions': () => PermissionPrimersScreen(onDone: _cb),
     'Chats tab': () => const ChatListScreen(),
     'Chat (Aria)': () => ConversationScreen(conversation: conv('conv-aria')),
     'Chat (Sofia, Vanish)': () => ConversationScreen(conversation: conv('conv-sofia')),

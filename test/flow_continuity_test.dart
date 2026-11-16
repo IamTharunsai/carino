@@ -49,21 +49,18 @@ void main() {
     expect(Services.prefs.me.availability, 'Weekends');
   });
 
-  testWidgets('verification marks one layer per step, not all three at once', (t) async {
+  testWidgets('verification is two steps: ID, then one selfie clip', (t) async {
     var done = false;
     await show(t, VerificationProviderScreen(onComplete: () => done = true, onCancel: () {}));
-    expect(find.text('Step 1 of 3 · ID document'), findsOneWidget);
-    await t.tap(find.text('Capture')); // front
+    expect(find.text('Step 1 of 2 · ID'), findsOneWidget);
+    await t.tap(find.text('Take photo')); // front
     await t.pump();
-    await t.tap(find.text('Capture')); // back -> reading
+    await t.tap(find.text('Take photo')); // back -> reading
     await t.pump(const Duration(seconds: 3));
-    expect(find.text('Step 2 of 3 · Liveness'), findsOneWidget);
-    expect(find.text('Upload instead'), findsNothing); // a live selfie can't be uploaded
-    await t.tap(find.text('Take live selfie'));
-    await t.pump(const Duration(seconds: 3));
-    expect(find.text('Step 3 of 3 · Photo match'), findsOneWidget);
+    expect(find.text('Step 2 of 2 · Selfie'), findsOneWidget);
+    expect(find.text('Upload a photo instead'), findsNothing); // a live selfie can't be uploaded
     expect(done, isFalse);
-    await t.tap(find.text('Run photo match'));
+    await t.tap(find.text('Record selfie'));
     await t.pump(const Duration(seconds: 3));
     expect(done, isTrue);
   });

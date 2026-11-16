@@ -37,8 +37,6 @@ import 'package:carino/screens/onboarding/age_gate_screen.dart';
 import 'package:carino/screens/onboarding/auth_screen.dart';
 import 'package:carino/screens/onboarding/identity_screen.dart';
 import 'package:carino/screens/onboarding/intentions_screen.dart';
-import 'package:carino/screens/onboarding/permission_primers_screen.dart';
-import 'package:carino/screens/onboarding/privacy_setup_screen.dart';
 import 'package:carino/screens/onboarding/profile_creation_screen.dart';
 import 'package:carino/screens/onboarding/sign_in_screen.dart';
 import 'package:carino/screens/onboarding/taste_quiz_screen.dart';
@@ -159,9 +157,7 @@ void main() {
     Shot('13_intentions', () => IntentionsScreen(onDone: (_) {})),
     Shot('14_identity', () => IdentityScreen(onDone: () {})),
     Shot('15_taste_quiz', () => TasteQuizScreen(onDone: () {})),
-    Shot('16_privacy_setup', () => PrivacySetupScreen(onDone: () {})),
     Shot('17_profile_creation', () => ProfileCreationScreen(onPublished: () {})),
-    Shot('18_permission_primers', () => PermissionPrimersScreen(onDone: () {})),
     Shot('19_waitlist', () => WaitlistScreen(onAdmitted: () {})),
     // ---- Home tabs ---------------------------------------------------------
     Shot('20_tab_chats', () => const HomeShell()),

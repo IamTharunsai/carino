@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
+import '../config/env.dart';
 import '../services/auth_service.dart';
 import '../widgets/glass_card.dart';
 import '../services/services.dart';
 import 'home_shell.dart';
 import 'onboarding/age_gate_screen.dart';
 import 'onboarding/auth_screen.dart';
-import 'onboarding/identity_screen.dart';
-import 'onboarding/intentions_screen.dart';
-import 'onboarding/permission_primers_screen.dart';
-import 'onboarding/privacy_setup_screen.dart';
 import 'onboarding/profile_creation_screen.dart';
 import 'onboarding/sign_in_screen.dart';
-import 'onboarding/taste_quiz_screen.dart';
 import 'onboarding/verification_flow_screen.dart';
 import 'onboarding/verification_intro_screen.dart';
 import 'onboarding/waitlist_screen.dart';
@@ -29,13 +25,8 @@ enum _Stage {
   verificationIntro,
   verificationProvider,
   verificationResult,
-  intentions,
-  identity,
-  tasteQuiz,
-  privacySetup,
   waitlist,
   profile,
-  primers,
   home,
 }
 
@@ -61,6 +52,15 @@ class _RootFlowState extends State<RootFlow> {
   void initState() {
     super.initState();
     AuthService.sessionChanges.addListener(_onSessionChange);
+    // A saved session opens straight into the app; Face ID / fingerprint
+    // (Settings → App lock) guards it instead of a sign-in screen.
+    if (Services.auth.isSignedIn || (Env.useMockBackend && Services.prefs.mockSignedIn)) {
+      _returning = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!Services.auth.isSignedIn) await Services.auth.signInDemo();
+        if (mounted) _afterSignIn();
+      });
+    }
   }
 
   @override
@@ -84,6 +84,10 @@ class _RootFlowState extends State<RootFlow> {
   }
 
   void _onSessionChange() {
+    if (Env.useMockBackend) {
+      Services.prefs.mockSignedIn = AuthService.sessionChanges.value;
+      Services.prefs.save();
+    }
     // OAuth (Google/Apple) completes in the browser and returns via deep
     // link; the session arriving is the signal to route.
     if (AuthService.sessionChanges.value &&
@@ -185,24 +189,16 @@ class _RootFlowState extends State<RootFlow> {
           onPassed: () => _go(
             Services.remoteConfig.cityBatchFull
                 ? _Stage.waitlist
-                : _Stage.intentions,
+                : _Stage.profile,
           ),
           onRetry: () => _go(_Stage.verificationProvider),
         );
-      case _Stage.intentions:
-        return IntentionsScreen(onDone: (_) => _go(_Stage.identity));
-      case _Stage.identity:
-        return IdentityScreen(onDone: () => _go(_Stage.tasteQuiz));
-      case _Stage.tasteQuiz:
-        return TasteQuizScreen(onDone: () => _go(_Stage.privacySetup));
-      case _Stage.privacySetup:
-        return PrivacySetupScreen(onDone: () => _go(_Stage.profile));
       case _Stage.waitlist:
-        return WaitlistScreen(onAdmitted: () => _go(_Stage.intentions));
+        return WaitlistScreen(onAdmitted: () => _go(_Stage.profile));
       case _Stage.profile:
-        return ProfileCreationScreen(onPublished: () => _go(_Stage.primers));
-      case _Stage.primers:
-        return PermissionPrimersScreen(onDone: () {
+        // Publishing ends onboarding: history is cleared, so Back can't
+        // reopen the empty form.
+        return ProfileCreationScreen(onPublished: () {
           _completedOnboarding = true;
           _go(_Stage.home);
         });

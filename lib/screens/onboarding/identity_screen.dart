@@ -56,16 +56,23 @@ class _IdentityScreenState extends State<IdentityScreen> {
   Widget _visibility(String field) {
     return Padding(
       padding: const EdgeInsets.only(top: 8),
-      child: SegmentedButton<String>(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Who can see this', style: Theme.of(context).textTheme.bodySmall),
+          const SizedBox(height: 4),
+          SegmentedButton<String>(
         showSelectedIcon: false,
         style: const ButtonStyle(visualDensity: VisualDensity.compact),
         segments: const [
           ButtonSegment(value: 'everyone', label: Text('Everyone')),
           ButtonSegment(value: 'matches', label: Text('Matches')),
-          ButtonSegment(value: 'hidden', label: Text('Just me')),
+          ButtonSegment(value: 'hidden', label: Text('Only me')),
         ],
         selected: {_vis[field] ?? 'everyone'},
         onSelectionChanged: (v) => setState(() => _vis[field] = v.first),
+      ),
+        ],
       ),
     );
   }

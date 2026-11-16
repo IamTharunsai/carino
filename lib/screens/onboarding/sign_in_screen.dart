@@ -92,25 +92,6 @@ class _SignInScreenState extends State<SignInScreen> {
     }
   }
 
-  Future<void> _passkey() async {
-    // Passkeys are unlocked by the phone's biometrics; the OS handles it.
-    final ok = await Services.biometric.unlock('Sign in to Cariño with your passkey');
-    if (!mounted) return;
-    if (!ok) {
-      setState(() => _error = "Passkey sign-in was cancelled or isn't set up on this phone.");
-      return;
-    }
-    final signedIn = await Services.auth.signInDemo();
-    if (!mounted) return;
-    if (!signedIn || !Services.auth.isSignedIn) {
-      // A local fingerprint is NOT a credential. Until platform passkeys are
-      // wired to the server, live mode refuses rather than faking a session.
-      setState(() => _error = "Passkeys aren't available yet. Use your password or a one-time code.");
-      return;
-    }
-    widget.onSignedIn();
-  }
-
   Widget _requiredLabel(String text) => Text.rich(
         TextSpan(
           text: text,
@@ -218,13 +199,6 @@ class _SignInScreenState extends State<SignInScreen> {
             icon: Icons.apple,
             secondary: true,
             onPressed: _busy ? null : () => _provider(OAuthProvider.apple),
-          ),
-          const SizedBox(height: 8),
-          SparkButton(
-            label: 'Use a passkey (Face / fingerprint)',
-            icon: Icons.fingerprint,
-            secondary: true,
-            onPressed: _busy ? null : _passkey,
           ),
           const SizedBox(height: 8),
           TextButton.icon(

@@ -70,6 +70,29 @@ class AuthService {
     }
   }
 
+  /// New account: contact + password. Supabase sends a code to confirm the
+  /// phone/email; [verifyOtp] finishes it. Returns an error or null.
+  Future<String?> signUp(String contact, String password) async {
+    final c = contact.trim();
+    _pendingContact = c;
+    if (password.length < 8) return 'Use at least 8 characters for your password.';
+    if (Env.useMockBackend) {
+      await Future<void>.delayed(const Duration(milliseconds: 400));
+      return null;
+    }
+    try {
+      if (c.contains('@')) {
+        await _client.auth.signUp(email: c, password: password);
+      } else {
+        await _client.auth.signUp(phone: c, password: password);
+      }
+      return null;
+    } on AuthException catch (e) {
+      debugPrint('[AuthService] signUp failed: ${e.message}');
+      return "We couldn't create that account. If you already have one, sign in instead.";
+    }
+  }
+
   /// Verifies a code. Returns an error string on failure (attempts/lockout
   /// are enforced server-side by Supabase Auth rate limits in live mode).
   Future<String?> verifyOtp(String code) async {
