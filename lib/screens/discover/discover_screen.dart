@@ -119,8 +119,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
       if (gift == null || !mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(Env.useMockBackend
-              ? '$gift sent with your like 🎁 (demo — no charge)'
-              : 'Your like was sent. Gifts open when store products are live — nothing was charged.')));
+              ? '$gift sent with your heart 🎁 (demo — no charge)'
+              : 'Your heart was sent. Gifts open when store products are live — nothing was charged.')));
     }
     _commit(like: true, spark: choice.kind == LikeKind.spark, note: choice.note);
   }
@@ -204,18 +204,18 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     });
     if (spark) {
       showPlusNudge(context,
-          title: 'No Super Likes left today',
+          title: 'No crushes left today 💘',
           body: 'You get a new one at midnight. Plus gives you $plusSparksPerDay a day, '
               'or get a pack of $superLikePackSize that never expires.',
           extra: SparkButton(
-            label: 'Get $superLikePackSize Super Likes · $superLikePackPrice',
+            label: 'Get $superLikePackSize crushes · $superLikePackPrice',
             secondary: true,
             onPressed: _buySparkPack,
           ));
     } else {
       showPlusNudge(context,
-          title: "That's your $freeLikesPerDay likes for today",
-          body: 'New likes at midnight — give the ones you sent a chance. '
+          title: "That's your $freeLikesPerDay hearts for today 💗",
+          body: 'New hearts at midnight — give the ones you sent a chance to land. '
               'Or go unlimited with Plus.');
     }
     return false;
@@ -227,8 +227,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     if (demo) Services.prefs.addSparkPack();
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(demo
-            ? '$superLikePackSize Super Likes added (demo — no charge).'
-            : 'Super Like packs are bought through the App Store or Google Play. '
+            ? '$superLikePackSize crushes added 💘 (demo — no charge)'
+            : 'Crush packs are bought through the App Store or Google Play. '
                 "They aren't on sale in this build yet — nothing was charged.")));
   }
 
@@ -516,7 +516,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                               angle: -0.25,
                               child: Transform.scale(
                                 scale: 0.8 + 0.2 * likeGlow,
-                                child: const _Stamp(label: 'LIKE', color: AppColors.sparkCoral),
+                                child: const _Stamp(label: 'HEART 💗', color: AppColors.sparkCoral),
                               ),
                             ),
                           ),
@@ -533,7 +533,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                               angle: 0.25,
                               child: Transform.scale(
                                 scale: 0.8 + 0.2 * passFade,
-                                child: const _Stamp(label: 'PASS', color: AppColors.warmIvory),
+                                child: const _Stamp(label: 'NOT NOW', color: AppColors.warmIvory),
                               ),
                             ),
                           ),
@@ -780,7 +780,7 @@ class _MemberCard extends StatelessWidget {
                       children: [
                         GlassIconButton(
                           icon: Icons.close,
-                          semanticLabel: 'Pass',
+                          semanticLabel: 'Not now',
                           onPressed: onPass ?? () {},
                         ),
                         GlassIconButton(
@@ -790,7 +790,7 @@ class _MemberCard extends StatelessWidget {
                         ),
                         GlassIconButton(
                           icon: Icons.favorite,
-                          semanticLabel: 'Like. Long-press for note, gift or Spark',
+                          semanticLabel: 'Send a heart. Long-press for a note, gift or crush',
                           filled: true,
                           onPressed: onLike ?? () {},
                           onLongPress: onLikeOptions,
@@ -864,7 +864,7 @@ class _SuperStamp extends StatelessWidget {
           Icon(Icons.star, size: 18, color: AppColors.warmIvory),
           SizedBox(width: 6),
           Text(
-            'SUPER LIKE',
+            'CRUSH 💘',
             style: TextStyle(
               color: AppColors.warmIvory,
               fontSize: 16,

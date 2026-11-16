@@ -92,9 +92,9 @@ const _generic = {
 // when there are more than a handful of languages. Native-speaker review
 // required before launch for every non-English row.
 const Map<NotifKind, (String, String)> _playful = {
-  NotifKind.match: ("It's a spark ✨", '{who} liked you back. Say something they\'ll remember.'),
+  NotifKind.match: ("It's mutual 💞", '{who} hearted you back. Say something they\'ll remember.'),
   NotifKind.message: ('New message', '{who} just wrote to you 💬'),
-  NotifKind.likeReceived: ('Someone likes you', 'A verified person liked your profile. Curious?'),
+  NotifKind.likeReceived: ('Someone has a crush on you 💗', 'A verified person sent you a heart. Curious?'),
   NotifKind.planReminder: ('Tomorrow: {detail} 🎉', '{detail} with {who} is tomorrow — check-in is ready.'),
   NotifKind.safetyCheckIn: ('Are you okay?', 'Your check-in for {detail} with {who} is due. Tap to confirm.'),
   NotifKind.streakAtRisk: ('Don’t let it go out 🔥', 'Day {detail} with {who} — one Heartbeat keeps your Flame lit.'),
@@ -104,9 +104,9 @@ const Map<NotifKind, (String, String)> _playful = {
 
 const Map<String, Map<NotifKind, (String, String)>> _copy = {
   'English': {
-    NotifKind.match: ("It's a match", '{who} liked you back.'),
+    NotifKind.match: ("It's mutual 💞", '{who} hearted you back.'),
     NotifKind.message: ('New message', '{who} sent you a message.'),
-    NotifKind.likeReceived: ('New like', 'A verified person liked your profile.'),
+    NotifKind.likeReceived: ('New heart 💗', 'A verified person sent you a heart.'),
     NotifKind.planReminder: ('Plan tomorrow', '{detail} with {who} is tomorrow.'),
     NotifKind.safetyCheckIn: ('Check-in due', 'Confirm you\'re okay after {detail} with {who}.'),
     NotifKind.streakAtRisk: ('Your Flame 🔥', 'Day {detail} with {who}. One Heartbeat keeps it lit.'),

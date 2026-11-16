@@ -580,7 +580,7 @@ class MockData {
     MockNotification(
       id: 'n1',
       category: 'Matches',
-      text: 'You and Sofia liked each other',
+      text: 'You and Sofia hearted each other 💞',
       timeLabel: 'Yesterday',
       target: 'connect',
     ),

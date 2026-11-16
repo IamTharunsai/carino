@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../widgets/glass_card.dart';
-import '../../widgets/safety_actions.dart';
 import '../../widgets/spark_button.dart';
 
 /// S-051 Report Confirmation — a real screen, never just a snackbar:

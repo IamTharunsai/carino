@@ -272,7 +272,7 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen> {
             ),
           ),
           Text('Prompts', style: t.titleMedium),
-          Text('Pick a question and answer it. People can like or reply to your answer — the easiest way to start a chat.',
+          Text('Pick a question and answer it. People can heart or reply to your answer — the easiest way to start a chat.',
               style: t.bodySmall),
           const SizedBox(height: 6),
           Wrap(spacing: 8, runSpacing: 4, children: [

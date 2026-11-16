@@ -116,15 +116,15 @@ void main() {
       ..clear()
       ..addAll(['m-aria', 'm-priya']);
     await show(t, const LikesManagerScreen());
-    expect(find.text('Waiting for them to like you back'), findsOneWidget);
-    expect(find.text("It's a match — say hi"), findsOneWidget);
+    expect(find.text('Waiting for them to heart you back'), findsOneWidget);
+    expect(find.text("It's mutual 💞 say hi"), findsOneWidget);
   });
 
   testWidgets('a matched profile offers Message and Suggest a plan, not Pass/Like', (t) async {
     await show(t, ProfileDetailScreen(member: MockData.memberById('m-aria'), matched: true));
     await t.scrollUntilVisible(find.text('Message'), 300, scrollable: find.byType(Scrollable).first);
     expect(find.text('Message'), findsOneWidget);
-    expect(find.text('Pass'), findsNothing);
+    expect(find.text('Not now'), findsNothing);
   });
 
   testWidgets('a message I send is still there when I come back to the chat', (t) async {
@@ -165,11 +165,11 @@ void main() {
       }
     }
     await move(const Offset(100, 0));
-    expect(find.text('LIKE'), findsOneWidget);
+    expect(find.text('HEART 💗'), findsOneWidget);
     await move(const Offset(-200, 0));
-    expect(find.text('PASS'), findsOneWidget);
+    expect(find.text('NOT NOW'), findsOneWidget);
     await move(const Offset(100, -200));
-    expect(find.text('SUPER LIKE'), findsOneWidget);
+    expect(find.text('CRUSH 💘'), findsOneWidget);
     await g.up();
     await settle(t);
     expect(Services.prefs.liked, hasLength(1)); // super like counts as a like

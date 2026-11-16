@@ -40,6 +40,6 @@ void main() {
       expect(row.label.toLowerCase(), isNot(contains('report')));
       expect(row.label.toLowerCase(), isNot(contains('block')));
     }
-    expect(planRows.any((r) => r.label.contains('liked you')), isTrue);
+    expect(planRows.any((r) => r.label.contains('crush on you')), isTrue);
   });
 }

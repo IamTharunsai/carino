@@ -121,7 +121,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                     style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 6),
                 Text(
-                  '$plusMonthlyPrice a month or $plusAnnualPrice a year (US). The App Store / Google Play shows your price and the renewal price before you confirm — same number at renewal, no surprises. Cancel anytime in store settings; access runs to the end of the paid period. Need more Super Likes only? A pack of $superLikePackSize is $superLikePackPrice and never expires.',
+                  '$plusMonthlyPrice a month or $plusAnnualPrice a year (US). The App Store / Google Play shows your price and the renewal price before you confirm — same number at renewal, no surprises. Cancel anytime in store settings; access runs to the end of the paid period. Just want more crushes? A pack of $superLikePackSize is $superLikePackPrice and never expires.',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ],

@@ -16,13 +16,13 @@ const superLikePackPrice = r'$4.99';
 typedef PlanRow = ({String label, String free, String plus});
 
 const List<PlanRow> planRows = [
-  (label: 'Unlimited Feed, likes on posts, follows', free: 'Included', plus: 'Included'),
+  (label: 'Unlimited Feed, hearts on posts, follows', free: 'Included', plus: 'Included'),
   (label: 'Verified discovery, Daily Drop, video profiles', free: 'Included', plus: 'Included'),
   (label: 'Matching, messaging, games, Vanish chat', free: 'Included', plus: 'Included'),
   (label: 'Join plans and Decompress experiences', free: 'Included', plus: 'Included'),
-  (label: 'Likes a day', free: '$freeLikesPerDay', plus: 'Unlimited'),
-  (label: 'See who liked you', free: 'Count', plus: 'Everyone'),
-  (label: 'Super Likes a day', free: '$freeSparksPerDay', plus: '$plusSparksPerDay'),
+  (label: 'Hearts a day', free: '$freeLikesPerDay', plus: 'Unlimited'),
+  (label: 'See who has a crush on you', free: 'Count', plus: 'Everyone'),
+  (label: 'Crushes a day 💘', free: '$freeSparksPerDay', plus: '$plusSparksPerDay'),
   (label: 'Rewind a pass', free: '—', plus: 'Included'),
   (label: 'Read receipts', free: '—', plus: 'Included'),
   (label: 'Advanced filters', free: 'Basic', plus: 'Full'),

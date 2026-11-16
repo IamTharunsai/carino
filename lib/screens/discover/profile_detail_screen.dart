@@ -5,12 +5,10 @@ import '../../theme/app_colors.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/safety_actions.dart';
 import '../../widgets/spark_button.dart';
-import '../../widgets/video_reply_sheet.dart';
 import '../../widgets/sync_widgets.dart';
 import '../../models/sync.dart' show comfortSummary;
 import 'discover_screen.dart' show whySuggested;
 import '../chats/games_screen.dart';
-import '../connect/spark_session_screen.dart';
 import '../connect/plan_composer_screen.dart';
 import '../chats/conversation_screen.dart';
 import '../../data/mock_data.dart';
@@ -342,7 +340,7 @@ class ProfileDetailScreen extends StatelessWidget {
               children: [
                 Expanded(
                   child: SparkButton(
-                    label: 'Pass',
+                    label: 'Not now',
                     secondary: true,
                     icon: Icons.close,
                     onPressed: () => Navigator.of(context).pop(false),
@@ -351,7 +349,7 @@ class ProfileDetailScreen extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: SparkButton(
-                    label: 'Like ${member.firstName}',
+                    label: 'Send ${member.firstName} a heart',
                     icon: Icons.favorite,
                     onPressed: () => Navigator.of(context).pop(true),
                   ),

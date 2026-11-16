@@ -156,9 +156,9 @@ Future<LikeChoice?> showLikeOptions(BuildContext context, Member m) {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('Like ${m.firstName}', style: Theme.of(context).textTheme.headlineSmall),
+        Text('Heart ${m.firstName} 💗', style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 4),
-        Text('Likes with a note get far more replies than a plain like.',
+        Text('A heart with a sweet note gets far more replies.',
             style: Theme.of(context).textTheme.bodySmall),
         const SizedBox(height: 12),
         TextField(
@@ -173,7 +173,7 @@ Future<LikeChoice?> showLikeOptions(BuildContext context, Member m) {
           ),
         ),
         SparkButton(
-          label: 'Send like with note',
+          label: 'Send heart with note',
           icon: Icons.favorite,
           onPressed: () {
             final t = note.text.trim();
@@ -215,7 +215,7 @@ Future<LikeChoice?> showLikeOptions(BuildContext context, Member m) {
         ),
         const SizedBox(height: 6),
         Text(
-          'A Spark puts you at the top of their Likes, with your note. '
+          'A crush puts you at the top of their hearts, with your note. '
           '1 free a day; resets at midnight. No fake "only 2 left!" timers.',
           style: Theme.of(context).textTheme.bodySmall,
           textAlign: TextAlign.center,

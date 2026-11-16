@@ -66,11 +66,11 @@ class _LikesManagerScreenState extends State<LikesManagerScreen> {
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     return GlassScaffold(
-      appBar: AppBar(title: const Text('Likes & introductions')),
+      appBar: AppBar(title: const Text('Hearts & introductions')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text('You liked', style: text.titleMedium),
+          Text('Your hearts', style: text.titleMedium),
           const SizedBox(height: 6),
           if (_prefs.liked.isEmpty)
             Text('Nobody yet. Swipe right or double-tap a card in Dates.',
@@ -84,10 +84,10 @@ class _LikesManagerScreenState extends State<LikesManagerScreen> {
                   contentPadding: EdgeInsets.zero,
                   leading: CircleAvatar(backgroundImage: AssetImage(m.photoAsset)),
                   title: Text(m.firstName),
-                  subtitle: Text(matched ? "It's a match — say hi" : 'Waiting for them to like you back'),
+                  subtitle: Text(matched ? "It's mutual 💞 say hi" : 'Waiting for them to heart you back'),
                   trailing: TextButton(
                     onPressed: () => setState(() => _prefs.liked.remove(id)),
-                    child: const Text('Undo like'),
+                    child: const Text('Take back heart'),
                   ),
                 );
               }),
@@ -105,7 +105,7 @@ class _LikesManagerScreenState extends State<LikesManagerScreen> {
             contentPadding: EdgeInsets.zero,
             title: const Text('Not ready for introductions'),
             subtitle: const Text(
-                'Your card shows “taking a breather” — likes queue quietly.'),
+                'Your card shows “taking a breather” — hearts wait quietly.'),
             value: _notReady,
             onChanged: (v) => setState(() => _notReady = v),
           ),

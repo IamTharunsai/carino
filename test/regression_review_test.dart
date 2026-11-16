@@ -177,7 +177,7 @@ void main() {
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
-    expect(find.text('Like ${MockData.friends.first.firstName}'), findsOneWidget);
+    expect(find.text('Heart ${MockData.friends.first.firstName} 💗'), findsOneWidget);
   });
 
   // 10. Long-press on the heart opens options (no Tooltip gesture conflict).
@@ -185,12 +185,12 @@ void main() {
     await _phone(tester);
     await tester.pumpWidget(MaterialApp(theme: AppTheme.dark(), home: const DiscoverScreen()));
     await tester.pump(const Duration(milliseconds: 300));
-    final heart = find.bySemanticsLabel(RegExp('Like. Long-press'));
+    final heart = find.bySemanticsLabel(RegExp('Send a heart. Long-press'));
     expect(find.ancestor(of: heart.first, matching: find.byType(Tooltip)), findsNothing);
     await tester.longPress(heart.first);
     await tester.pumpAndSettle();
-    expect(find.textContaining('Like '), findsWidgets);
-    expect(find.text('Send like with note'), findsOneWidget);
+    expect(find.textContaining('Heart '), findsWidgets);
+    expect(find.text('Send heart with note'), findsOneWidget);
   });
 
   // FLAG_SECURE: nested secure screens stay protected until the last closes.

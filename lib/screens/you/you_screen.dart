@@ -202,7 +202,7 @@ class _YouScreenState extends State<AccountCentreScreen> {
           _row(
             context,
             icon: Icons.favorite_outline,
-            title: 'Likes & introductions',
+            title: 'Hearts & introductions',
             subtitle: 'Pause discovery, set a daily limit, close kindly',
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
@@ -249,7 +249,7 @@ class _YouScreenState extends State<AccountCentreScreen> {
             title: AppConfig.plusName,
             subtitle: Services.payments.isPlus
                 ? 'Active — manage subscription'
-                : 'See who liked you, unlimited likes, rewind, travel',
+                : 'See your crushes, unlimited hearts, rewind, travel',
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
                 builder: (_) => Services.payments.isPlus

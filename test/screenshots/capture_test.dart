@@ -51,7 +51,6 @@ import 'package:carino/screens/you/paywall_screen.dart';
 import 'package:carino/screens/you/privacy_centre_screen.dart';
 import 'package:carino/screens/you/settings_screen.dart';
 import 'package:carino/screens/you/trust_safety_screen.dart';
-import 'package:carino/screens/you/you_screen.dart';
 import 'package:carino/screens/you/my_profile_screen.dart';
 import 'package:carino/theme/app_theme.dart';
 import 'package:carino/widgets/glass_card.dart';
@@ -255,7 +254,7 @@ void main() {
     Shot('50_referral', () => const ReferralScreen()),
     Shot('51_insights', () => const InsightsScreen()),
     Shot('52_like_options', () => const DiscoverScreen(), (t) async {
-      await t.longPress(find.bySemanticsLabel(RegExp('Like. Long-press')).first, warnIfMissed: false);
+      await t.longPress(find.bySemanticsLabel(RegExp('Send a heart. Long-press')).first, warnIfMissed: false);
       await t.pump(const Duration(milliseconds: 600));
     }),
     Shot('53_chat_attach_menu', () => ConversationScreen(conversation: MockData.conversations().first),

@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../config/env.dart';
 import '../../data/mock_data.dart';
 import '../../models/platform.dart';
 import '../../services/services.dart';
 import '../../theme/app_colors.dart';
-import '../../widgets/glass_card.dart';
 import '../../widgets/post_to_plan_sheet.dart';
 import '../../widgets/spark_button.dart';
 import '../moments/moments_screen.dart';
@@ -191,7 +189,7 @@ class _FeedViewState extends State<_FeedView> {
                           Navigator.pop(s);
                           showPlusNudge(context,
                               title: 'Comments are for Plus & subscribers',
-                              body: 'Likes are free for everyone. Comments are for Plus members and '
+                              body: 'Hearts are free for everyone. Comments are for Plus members and '
                                   '${item.creatorName}\'s subscribers — it keeps comment sections kind and spam-free.');
                         },
                       ),
@@ -310,7 +308,7 @@ class _FeedViewState extends State<_FeedView> {
                 ]),
               ),
             ),
-            _railButton(liked ? Icons.favorite : Icons.favorite_border, liked ? 'Liked' : 'Like', () => _like(item),
+            _railButton(liked ? Icons.favorite : Icons.favorite_border, liked ? 'Hearted' : 'Heart', () => _like(item),
                 color: liked ? AppColors.emberCrimson : AppColors.warmIvory),
             _railButton(Icons.mode_comment_outlined, '${_comments[item.id]?.length ?? 0}', () => _openComments(item)),
             if (item.creatorId != 'me') _railButton(Icons.card_giftcard, 'Gift', () => showGiftSheet(context, item.creatorName)),

@@ -217,7 +217,7 @@ class ConnectScreen extends StatelessWidget {
           ),
           const SizedBox(height: 18),
           // --- S-021 Likes You ---
-          Text('Likes you', style: Theme.of(context).textTheme.titleLarge),
+          Text('Hearts for you 💗', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 8),
           _LikesYou(),
           const SizedBox(height: 18),
@@ -235,7 +235,7 @@ class ConnectScreen extends StatelessWidget {
               icon: Icons.favorite_border,
               title: 'No matches yet',
               body:
-                  'Likes that come back mutual land here — with a real clock on saying hello.',
+                  'When it’s mutual, they land here 💞 Say hello while it’s fresh.',
             ),
           const SizedBox(height: 6),
           SparkButton(
@@ -375,7 +375,7 @@ class _LikesYou extends StatelessWidget {
     if (likes.isEmpty) {
       return GlassContainer(
         child: Text(
-          'No likes yet — they\'ll show up here the moment they\'re real.',
+          'No hearts yet — they’ll show up here the moment someone falls for you.',
           style: Theme.of(context).textTheme.bodyMedium,
         ),
       );
@@ -388,8 +388,8 @@ class _LikesYou extends StatelessWidget {
               valueListenable: Services.prefs.noCounts,
               builder: (context, hidden, _) => Text(
                   hidden
-                      ? 'People who like you'
-                      : '${likes.length} ${likes.length == 1 ? 'person likes' : 'people like'} you',
+                      ? 'People with a crush on you'
+                      : '${likes.length} ${likes.length == 1 ? 'person has' : 'people have'} a crush on you 💗',
                   style: Theme.of(context).textTheme.titleMedium)),
           const SizedBox(height: 10),
           Row(

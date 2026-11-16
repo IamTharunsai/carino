@@ -55,7 +55,7 @@ class _PrivacyCentreScreenState extends State<PrivacyCentreScreen> {
                 RadioListTile<String>(
                   contentPadding: EdgeInsets.zero,
                   title: Text('Incognito'),
-                  subtitle: Text('Only people you like first can see you.'),
+                  subtitle: Text('Only people you heart first can see you.'),
                   value: 'Incognito',
                 ),
                 RadioListTile<String>(
