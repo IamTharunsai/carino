@@ -7,6 +7,7 @@ import '../models/member.dart';
 import '../models/notify.dart' show NotifTone;
 import '../models/plans.dart';
 import '../models/posts.dart';
+import '../models/safety.dart';
 import '../models/platform.dart';
 import '../models/social.dart';
 import '../models/sync.dart';
@@ -167,8 +168,9 @@ class UserPrefs {
 
   /// Date Check-in: one trusted contact (name + number) kept on-device in
   /// the demo; production stores it server-side, own-row RLS only.
-  String trustedContactName = '';
-  String trustedContactPhone = '';
+  final List<({String name, String phone})> trustedContacts = [];
+  String alertMessage = defaultAlertMessage;
+  String get trustedContactName => trustedContacts.isEmpty ? '' : trustedContacts.first.name;
 
   /// Profile Soundtrack — connected through the official music service.
   bool musicConnected = false;
@@ -433,6 +435,8 @@ class UserPrefs {
         'following': following.toList(),
         'credits': credits,
         'myLanguage': myLanguage,
+        'alertMessage': alertMessage,
+        'trusted': [for (final c in trustedContacts) {'n': c.name, 'p': c.phone}],
         'chatWallpapers': chatWallpapers,
         'autoTranslate': autoTranslate,
         'subscriptions': subscriptions.toList(),
@@ -492,6 +496,10 @@ class UserPrefs {
         ..addAll(strs(j['following']));
       credits = (j['credits'] as num?)?.toInt() ?? 0;
       myLanguage = j['myLanguage'] as String? ?? myLanguage;
+      alertMessage = j['alertMessage'] as String? ?? alertMessage;
+      trustedContacts
+        ..clear()
+        ..addAll([for (final c in (j['trusted'] as List? ?? const [])) (name: '${(c as Map)['n']}', phone: '${c['p']}')]);
       chatWallpapers
         ..clear()
         ..addAll({for (final e in (j['chatWallpapers'] as Map? ?? const {}).entries) '${e.key}': '${e.value}'});

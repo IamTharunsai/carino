@@ -6,6 +6,8 @@ import '../../theme/app_colors.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/spark_button.dart';
 import '../../widgets/plan_split_card.dart';
+import '../../widgets/safety_alert.dart';
+import '../you/trusted_contacts_screen.dart';
 import 'decompress_screens.dart';
 import 'plan_composer_screen.dart';
 
@@ -142,11 +144,24 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
             ),
             const SizedBox(height: 8),
             SparkButton(
-              label: _homeSafe ? 'Home safe ✓' : 'Home safe',
+              label: _homeSafe ? 'Home safe ✓' : 'I’m home safe',
               icon: Icons.home_outlined,
               secondary: _homeSafe,
-              onPressed:
-                  _homeSafe ? null : () => setState(() => _homeSafe = true),
+              onPressed: _homeSafe
+                  ? null
+                  : () {
+                      setState(() => _homeSafe = true);
+                      if (Services.prefs.trustedContacts.isNotEmpty) sendHomeSafe(context);
+                    },
+            ),
+            Text('Tap when you’re back home: it ends the check-in and lets your people know you’re OK.',
+                style: text.bodySmall),
+            const SizedBox(height: 8),
+            SparkButton(
+              label: 'I don’t feel safe',
+              icon: Icons.sos_outlined,
+              secondary: true,
+              onPressed: () => showSosSheet(context),
             ),
             const SizedBox(height: 6),
             Text(
@@ -243,14 +258,13 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
           const SizedBox(height: 6),
           if (!hasContact) ...[
             Text(
-              'Add one trusted contact. If you miss a check-in, they get the '
-              'venue, time and ${member.firstName}\'s first name and photo — '
-              'never your live location.',
+              'Add your trusted people. If you miss a check-in, they get the '
+              'venue, time and ${member.firstName}\'s first name and photo.',
               style: text.bodyMedium,
             ),
             const SizedBox(height: 10),
             SparkButton(
-              label: 'Add trusted contact',
+              label: 'Add trusted contacts',
               icon: Icons.person_add_alt_outlined,
               secondary: true,
               onPressed: _addContact,
@@ -281,7 +295,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
             ),
             TextButton(
               onPressed: _addContact,
-              child: const Text('Change contact'),
+              child: const Text('Edit contacts'),
             ),
           ] else ...[
             Text(
@@ -310,30 +324,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
               label: 'I need help now',
               icon: Icons.sos_outlined,
               secondary: true,
-              onPressed: () => showGlassSheet<void>(
-                context,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text('If you\'re in danger, call 911 now.',
-                        style: Theme.of(context).textTheme.titleLarge),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Cariño is not an emergency service. We\'ve flagged '
-                      'this plan to ${prefs.trustedContactName} and to our '
-                      'Trust team (demo: nothing is sent).',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    const SizedBox(height: 12),
-                    SparkButton(
-                      label: 'Close',
-                      secondary: true,
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                  ],
-                ),
-              ),
+              onPressed: () => showSosSheet(context),
             ),
           ],
         ],
@@ -341,54 +332,9 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
     );
   }
 
-  void _addContact() {
-    final name = TextEditingController(text: Services.prefs.trustedContactName);
-    final phone =
-        TextEditingController(text: Services.prefs.trustedContactPhone);
-    showGlassSheet<void>(
-      context,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text('Trusted contact',
-              style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 4),
-          Text('Only used for missed check-ins. They don\'t need the app.',
-              style: Theme.of(context).textTheme.bodySmall),
-          const SizedBox(height: 12),
-          TextField(
-            controller: name,
-            decoration: const InputDecoration(labelText: 'Name'),
-          ),
-          TextField(
-            controller: phone,
-            keyboardType: TextInputType.phone,
-            decoration: const InputDecoration(labelText: 'Mobile number'),
-          ),
-          const SizedBox(height: 14),
-          SparkButton(
-            label: 'Save',
-            onPressed: () {
-              final n = name.text.trim();
-              final p = phone.text.trim();
-              // Validate at the trust boundary: a check-in can't silently
-              // point at nobody.
-              if (n.isEmpty || p.replaceAll(RegExp(r'\D'), '').length < 7) {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text('Add a name and a full phone number.')));
-                return;
-              }
-              Services.prefs
-                ..trustedContactName = n
-                ..trustedContactPhone = p;
-              Navigator.of(context).pop();
-              setState(() {});
-            },
-          ),
-        ],
-      ),
-    );
+  Future<void> _addContact() async {
+    await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const TrustedContactsScreen()));
+    if (mounted) setState(() {});
   }
 
   void _politeSheet({

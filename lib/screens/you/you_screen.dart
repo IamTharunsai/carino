@@ -18,6 +18,7 @@ import 'paywall_screen.dart';
 import 'privacy_centre_screen.dart';
 import 'settings_screen.dart';
 import 'trust_safety_screen.dart';
+import 'trusted_contacts_screen.dart';
 import 'wingperson_screen.dart';
 import '../experience/experience_screens.dart';
 import 'facets_screen.dart';
@@ -326,6 +327,15 @@ class _YouScreenState extends State<AccountCentreScreen> {
               MaterialPageRoute<void>(
                 builder: (_) => const NotificationsScreen(),
               ),
+            ),
+          ),
+          _row(
+            context,
+            icon: Icons.sos_outlined,
+            title: 'Trusted contacts & SOS',
+            subtitle: 'Who gets your alert, your message, emergency call',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const TrustedContactsScreen()),
             ),
           ),
           _row(

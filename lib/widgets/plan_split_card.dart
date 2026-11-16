@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../models/safety.dart';
+import 'safety_alert.dart' show deviceCountry;
 import '../models/platform.dart';
 import '../services/services.dart';
 import 'glass_card.dart';
@@ -63,18 +65,18 @@ class _PlanSplitCardState extends State<PlanSplitCard> {
             }),
       ] else ...[
         const SizedBox(height: 10),
-        Text('Total: ${formatCents(split.totalCents)}'),
+        Text('Total: ${formatMoney(split.totalCents, deviceCountry())}'),
         ListTile(
             contentPadding: EdgeInsets.zero,
             title: const Text('You'),
             subtitle: Text(
                 split.mySharePaid ? 'Marked paid by you' : 'Not marked paid'),
-            trailing: Text(formatCents(split.amounts.first))),
+            trailing: Text(formatMoney(split.amounts.first, deviceCountry()))),
         ListTile(
             contentPadding: EdgeInsets.zero,
             title: Text(widget.otherName),
             subtitle: const Text('Payment not verified'),
-            trailing: Text(formatCents(split.amounts[1]))),
+            trailing: Text(formatMoney(split.amounts[1], deviceCountry()))),
         SparkButton(
             label:
                 split.mySharePaid ? 'Undo my paid mark' : 'Mark my share paid',
