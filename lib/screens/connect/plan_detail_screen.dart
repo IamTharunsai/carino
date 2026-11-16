@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../models/booking.dart';
 import '../../data/mock_data.dart';
 import '../../models/member.dart';
 import '../../services/services.dart';
@@ -127,6 +129,12 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
           ],
           if (_confirmed && widget.upcoming && !_cancelled) ...[
             Text('On the day', style: text.titleMedium),
+            const SizedBox(height: 8),
+            SparkButton(
+              label: 'Book it — table, tickets, stay',
+              icon: Icons.confirmation_number_outlined,
+              onPressed: () => _bookSheet(member),
+            ),
             const SizedBox(height: 8),
             SparkButton(
               label: 'Start Phone-Down together',
@@ -328,6 +336,30 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
             ),
           ],
         ],
+      ),
+    );
+  }
+
+  void _bookSheet(Member member) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (s) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Text('Book for ${widget.placeType}', style: Theme.of(s).textTheme.titleLarge),
+          const SizedBox(height: 4),
+          Text('Opens the booking site with your plan filled in.', style: Theme.of(s).textTheme.bodySmall),
+          for (final k in kindsFor(widget.placeType))
+            ListTile(
+              leading: Text(k.emoji, style: const TextStyle(fontSize: 24)),
+              title: Text(k.label),
+              trailing: const Icon(Icons.open_in_new, size: 18),
+              onTap: () {
+                Navigator.pop(s);
+                launchUrl(bookingUri(k, widget.placeType, member.city), mode: LaunchMode.externalApplication);
+              },
+            ),
+        ]),
       ),
     );
   }
