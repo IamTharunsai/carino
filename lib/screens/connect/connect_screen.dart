@@ -40,6 +40,8 @@ class ConnectScreen extends StatelessWidget {
         children: [
           Text('Plans', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 12),
+          const _YourPlansCard(),
+          const SizedBox(height: 12),
           // --- Spark Sessions ---
           GlassContainer(
             child: Column(
@@ -442,6 +444,63 @@ class _LikesYou extends StatelessWidget {
           ],
         ],
       ),
+    );
+  }
+}
+
+
+/// The top of Plans: how many you have, make one, and how it works
+/// (pick → agree → book → go, with check-ins).
+class _YourPlansCard extends StatelessWidget {
+  const _YourPlansCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Theme.of(context).textTheme;
+    final upcoming = MockData.plans.where((p) => p.upcoming).length;
+    Widget step(String n, String title, String body) => Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            CircleAvatar(radius: 12, backgroundColor: AppColors.emberCrimson, child: Text(n, style: const TextStyle(fontSize: 12, color: AppColors.warmIvory))),
+            const SizedBox(width: 10),
+            Expanded(child: Text.rich(TextSpan(children: [
+              TextSpan(text: '$title  ', style: const TextStyle(fontWeight: FontWeight.w600)),
+              TextSpan(text: body),
+            ]))),
+          ]),
+        );
+    return GlassContainer(
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Row(children: [
+          Expanded(
+            child: Text(upcoming == 0 ? 'No plans yet' : '$upcoming upcoming ${upcoming == 1 ? 'plan' : 'plans'} 💫',
+                style: t.titleLarge),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const PlansListScreen())),
+            child: const Text('See all'),
+          ),
+        ]),
+        step('1', 'Pick', 'a match and an idea — AI suggests ones you’ll both love.'),
+        step('2', 'Agree', 'on a time. They confirm, you both see the details.'),
+        step('3', 'Book', 'a table, tickets or a stay right from the plan.'),
+        step('4', 'Go', 'with check-ins on. Tap “I’m home safe” after.'),
+        const SizedBox(height: 12),
+        SparkButton(
+          label: 'Create a plan',
+          icon: Icons.add,
+          onPressed: () {
+            final matches = MockData.matches;
+            if (matches.isEmpty) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Match with someone first — then plan something lovely.')));
+              return;
+            }
+            Navigator.of(context).push(MaterialPageRoute<void>(
+                builder: (_) => PlanComposerScreen(member: matches.first.member)));
+          },
+        ),
+      ]),
     );
   }
 }

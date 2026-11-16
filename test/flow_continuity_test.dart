@@ -88,7 +88,7 @@ void main() {
     await t.dragFrom(centre, const Offset(320, 0)); // right = like
     await settle(t);
     expect(Services.prefs.liked, hasLength(1));
-    expect(find.textContaining("If they like you back, it's a match"), findsOneWidget);
+    expect(find.byType(SnackBar), findsNothing); // a plain like has no pop-up
     expect(find.text("It's a spark"), findsNothing); // no fake match
     await t.dragFrom(centre, const Offset(-320, 0)); // left = pass
     await settle(t);

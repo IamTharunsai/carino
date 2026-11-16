@@ -46,43 +46,7 @@ class _YouScreenState extends State<AccountCentreScreen> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
         children: [
-          GlassContainer(
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => ProfileCreationScreen(
-                  onPublished: () => Navigator.of(context).pop(),
-                ),
-              ),
-            ),
-            child: Row(
-              children: [
-                CircleAvatar(
-                    radius: 32, backgroundImage: AssetImage(me.photoAsset)),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(me.name,
-                              style: Theme.of(context).textTheme.titleLarge),
-                          const SizedBox(width: 6),
-                          const Icon(Icons.verified,
-                              size: 17, color: AppColors.sparkCoral),
-                        ],
-                      ),
-                      Text(me.headline,
-                          style: Theme.of(context).textTheme.bodySmall),
-                      Text('Here for: ${me.intention.label}',
-                          style: Theme.of(context).textTheme.bodySmall),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
+          _section(context, 'Your profile'),
           // Profile Aura: a glow that grows with EFFORT (verified, video,
           // photos, prompts, voice, boundaries) — never looks, never
           // popularity, and only you see the meter.
@@ -153,45 +117,6 @@ class _YouScreenState extends State<AccountCentreScreen> {
               ),
             );
           }),
-          const SizedBox(height: 12),
-          _row(context,
-              icon: Icons.chat_bubble_outline,
-              title: 'How I text & comfort',
-              subtitle: 'Your texting style + rules Cariño keeps for you',
-              onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
-                  builder: (_) => const SyncSettingsScreen()))),
-          _row(context,
-              icon: Icons.layers_outlined,
-              title: 'Facets',
-              subtitle: 'Choose an audience for each field',
-              onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
-                  builder: (_) => const FacetsScreen()))),
-          _row(context,
-              icon: Icons.work_outline,
-              title: 'Work facet',
-              subtitle: 'Your role, projects and coffee chat interests',
-              onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
-                  builder: (_) => const WorkFacetScreen()))),
-          _row(context,
-              icon: Icons.handshake_outlined,
-              title: 'Trust Graph',
-              subtitle: 'People you have met and personal vouches',
-              onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
-                  builder: (_) => const TrustGraphScreen()))),
-          Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: GlassContainer(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  child: ValueListenableBuilder<bool>(
-                      valueListenable: Services.prefs.noCounts,
-                      builder: (context, hidden, _) => SwitchListTile(
-                          title: const Text('No-Counts'),
-                          subtitle: const Text(
-                              'Hide public popularity totals and the Likes You count.'),
-                          value: hidden,
-                          onChanged: (v) =>
-                              Services.prefs.noCounts.value = v)))),
           _row(
             context,
             icon: Icons.edit_outlined,
@@ -203,6 +128,18 @@ class _YouScreenState extends State<AccountCentreScreen> {
                 builder: (_) => ProfileCreationScreen(
                   onPublished: () => Navigator.of(context).pop(),
                 ),
+              ),
+            ),
+          ),
+          _row(
+            context,
+            icon: Icons.diversity_3_outlined,
+            title: 'About you',
+            subtitle: 'Gender, pronouns, orientation, who you want to meet',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) =>
+                    IdentityScreen(onDone: () => Navigator.of(context).pop()),
               ),
             ),
           ),
@@ -220,18 +157,6 @@ class _YouScreenState extends State<AccountCentreScreen> {
                     setState(() {}); // show the new intention right away
                   },
                 ),
-              ),
-            ),
-          ),
-          _row(
-            context,
-            icon: Icons.diversity_3_outlined,
-            title: 'About you',
-            subtitle: 'Gender, pronouns, orientation, who you want to meet',
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) =>
-                    IdentityScreen(onDone: () => Navigator.of(context).pop()),
               ),
             ),
           ),
@@ -261,52 +186,19 @@ class _YouScreenState extends State<AccountCentreScreen> {
             subtitle: 'Moments pinned to your profile (up to 3)',
             onTap: () => _highlights(context),
           ),
-          _row(
-            context,
-            icon: Icons.handshake_outlined,
-            title: 'Wingperson',
-            subtitle: 'Let a friend suggest people from your Drop',
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => const WingpersonScreen(),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: GlassContainer(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              child: ValueListenableBuilder<bool>(
-                valueListenable: Services.prefs.calmMode,
-                builder: (context, calm, _) => SwitchListTile(
-                  secondary: const Icon(Icons.spa_outlined),
-                  title: const Text('Calm mode'),
-                  subtitle: const Text(
-                      'Fewer animations, no celebration motion. Easier on the senses.'),
-                  value: calm,
-                  onChanged: (v) => Services.prefs.calmMode.value = v,
-                ),
-              ),
-            ),
-          ),
-          _row(
-            context,
-            icon: Icons.verified_user_outlined,
-            title: 'Verification Centre',
-            subtitle: 'All 3 layers passed · badge active',
-            onTap: () => _verificationCentre(context),
-          ),
-          _row(
-            context,
-            icon: Icons.lock_outline,
-            title: 'Privacy Centre',
-            subtitle: 'Visibility, blocked people, AI consent, your data',
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => const PrivacyCentreScreen(),
-              ),
-            ),
-          ),
+          _row(context,
+              icon: Icons.layers_outlined,
+              title: 'Facets',
+              subtitle: 'Choose an audience for each field',
+              onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
+                  builder: (_) => const FacetsScreen()))),
+          _row(context,
+              icon: Icons.work_outline,
+              title: 'Work facet',
+              subtitle: 'Your role, projects and coffee chat interests',
+              onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
+                  builder: (_) => const WorkFacetScreen()))),
+          _section(context, 'Dating'),
           _row(
             context,
             icon: Icons.favorite_outline,
@@ -318,14 +210,79 @@ class _YouScreenState extends State<AccountCentreScreen> {
               ),
             ),
           ),
+          _row(context,
+              icon: Icons.chat_bubble_outline,
+              title: 'How I text & comfort',
+              subtitle: 'Your texting style + rules Cariño keeps for you',
+              onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
+                  builder: (_) => const SyncSettingsScreen()))),
           _row(
             context,
-            icon: Icons.notifications_outlined,
-            title: 'Notifications',
-            subtitle: 'Matches, messages, plans — real events only',
+            icon: Icons.handshake_outlined,
+            title: 'Wingperson',
+            subtitle: 'Let a friend suggest people from your Drop',
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
-                builder: (_) => const NotificationsScreen(),
+                builder: (_) => const WingpersonScreen(),
+              ),
+            ),
+          ),
+          _row(
+            context,
+            icon: Icons.favorite_outline,
+            title: 'Relationship & couples',
+            subtitle: 'Honest Status, Couples mode, date-night bookings',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const CoupleScreen()),
+            ),
+          ),
+          _row(context,
+              icon: Icons.handshake_outlined,
+              title: 'Trust Graph',
+              subtitle: 'People you have met and personal vouches',
+              onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
+                  builder: (_) => const TrustGraphScreen()))),
+          _section(context, 'Subscription & payments'),
+          _row(
+            context,
+            icon: Icons.workspace_premium_outlined,
+            title: AppConfig.plusName,
+            subtitle: Services.payments.isPlus
+                ? 'Active — manage subscription'
+                : 'See who liked you, unlimited likes, rewind, travel',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => Services.payments.isPlus
+                    ? const SubscriptionScreen()
+                    : const PaywallScreen(),
+              ),
+            ),
+          ),
+          _row(
+            context,
+            icon: Icons.card_giftcard_outlined,
+            title: 'Invite & offers',
+            subtitle: 'Give a week of Plus, get a week · promo codes',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const ReferralScreen()),
+            ),
+          ),
+          _section(context, 'Privacy & safety'),
+          _row(
+            context,
+            icon: Icons.verified_user_outlined,
+            title: 'Verification Centre',
+            subtitle: 'ID + selfie verified · badge active',
+            onTap: () => _verificationCentre(context),
+          ),
+          _row(
+            context,
+            icon: Icons.lock_outline,
+            title: 'Privacy Centre',
+            subtitle: 'Visibility, blocked people, AI consent, your data',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const PrivacyCentreScreen(),
               ),
             ),
           ),
@@ -349,37 +306,58 @@ class _YouScreenState extends State<AccountCentreScreen> {
               ),
             ),
           ),
+          Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: GlassContainer(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  child: ValueListenableBuilder<bool>(
+                      valueListenable: Services.prefs.noCounts,
+                      builder: (context, hidden, _) => SwitchListTile(
+                          title: const Text('No-Counts'),
+                          subtitle: const Text(
+                              'Hide public popularity totals and the Likes You count.'),
+                          value: hidden,
+                          onChanged: (v) =>
+                              Services.prefs.noCounts.value = v)))),
+          _section(context, 'Notifications & app'),
           _row(
             context,
-            icon: Icons.workspace_premium_outlined,
-            title: AppConfig.plusName,
-            subtitle: Services.payments.isPlus
-                ? 'Active — manage subscription'
-                : 'See who liked you, unlimited likes, rewind, travel',
+            icon: Icons.notifications_outlined,
+            title: 'Notifications',
+            subtitle: 'Matches, messages, plans — real events only',
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
-                builder: (_) => Services.payments.isPlus
-                    ? const SubscriptionScreen()
-                    : const PaywallScreen(),
+                builder: (_) => const NotificationsScreen(),
               ),
             ),
           ),
           _row(
             context,
-            icon: Icons.favorite_outline,
-            title: 'Relationship & couples',
-            subtitle: 'Honest Status, Couples mode, date-night bookings',
+            icon: Icons.settings_outlined,
+            title: 'App settings',
+            subtitle: 'Theme, calls, devices, app lock, language',
             onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (_) => const CoupleScreen()),
+              MaterialPageRoute<void>(
+                builder: (_) => const SettingsScreen(),
+              ),
             ),
           ),
-          _row(
-            context,
-            icon: Icons.card_giftcard_outlined,
-            title: 'Invite & offers',
-            subtitle: 'Give a week of Plus, get a week · promo codes',
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (_) => const ReferralScreen()),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: GlassContainer(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              child: ValueListenableBuilder<bool>(
+                valueListenable: Services.prefs.calmMode,
+                builder: (context, calm, _) => SwitchListTile(
+                  secondary: const Icon(Icons.spa_outlined),
+                  title: const Text('Calm mode'),
+                  subtitle: const Text(
+                      'Fewer animations, no celebration motion. Easier on the senses.'),
+                  value: calm,
+                  onChanged: (v) => Services.prefs.calmMode.value = v,
+                ),
+              ),
             ),
           ),
           _row(
@@ -391,18 +369,7 @@ class _YouScreenState extends State<AccountCentreScreen> {
               MaterialPageRoute<void>(builder: (_) => const InsightsScreen()),
             ),
           ),
-          _row(
-            context,
-            icon: Icons.settings_outlined,
-            title: 'Settings',
-            subtitle: 'Notifications, calls, sessions, passkey, app lock',
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => const SettingsScreen(),
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
+          _section(context, 'Account'),
           TextButton.icon(
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
@@ -490,6 +457,12 @@ class _YouScreenState extends State<AccountCentreScreen> {
       ),
     );
   }
+
+  Widget _section(BuildContext context, String title) => Padding(
+        padding: const EdgeInsets.fromLTRB(4, 18, 4, 8),
+        child: Text(title.toUpperCase(),
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(letterSpacing: 1.1, color: AppColors.sparkCoral)),
+      );
 
   Widget _row(
     BuildContext context, {

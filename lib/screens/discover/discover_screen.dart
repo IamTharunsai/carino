@@ -162,36 +162,26 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
         Future<void>.delayed(const Duration(milliseconds: 750), () {
           if (mounted) _showMatch(member);
         });
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('You liked ${member.firstName}. If they like you back, it\'s a match.'),
-        ));
       }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Passed'),
-          action: SnackBarAction(
-            label: Services.payments.isPlus ? 'Undo' : 'Undo · Plus',
-            onPressed: () {
-              if (!Services.payments.isPlus) {
-                showPlusNudge(context,
-                    title: 'Rewind with Plus',
-                    body: 'Passed too fast? Plus brings them back to the top of your deck.');
-                return;
-              }
-              setState(() {
-                if (_lastPassed != null) {
-                  _deck.insert(0, _lastPassed!);
-                  _swiped.remove(_lastPassed!.id);
-                }
-                _lastPassed = null;
-              });
-            },
-          ),
-        ),
-      );
+      // No pop-up for a plain like: the heart burst says it.
     }
+  }
+
+  /// Rewind the last pass (Plus) — a button in the top bar, not a pop-up.
+  void _rewind() {
+    if (!Services.payments.isPlus) {
+      showPlusNudge(context,
+          title: 'Rewind with Plus',
+          body: 'Passed too fast? Plus brings them back to the top of your deck.');
+      return;
+    }
+    setState(() {
+      if (_lastPassed != null) {
+        _deck.insert(0, _lastPassed!);
+        _swiped.remove(_lastPassed!.id);
+      }
+      _lastPassed = null;
+    });
   }
 
   /// Swipe up = Super Like (a "Spark"): 1 a day free, 5 with Plus.
@@ -287,6 +277,12 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.titleLarge),
                 ),
+                if (_lastPassed != null)
+                  IconButton(
+                    icon: const Icon(Icons.replay),
+                    tooltip: 'Rewind last pass',
+                    onPressed: _rewind,
+                  ),
                 IconButton(
                   icon: const Icon(Icons.public),
                   tooltip: 'Worldwide',

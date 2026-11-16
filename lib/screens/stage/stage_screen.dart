@@ -332,6 +332,10 @@ class _FeedViewState extends State<_FeedView> {
                       style: const TextStyle(color: AppColors.warmIvory, fontWeight: FontWeight.w700, fontSize: 16)),
                 ),
               ),
+              if (item.verifiedHuman) ...[
+                const SizedBox(width: 4),
+                const Icon(Icons.verified, size: 18, color: Color(0xFFE8B84A)), // gold = ID-verified
+              ],
               if (item.creatorId != 'me') ...[
                 const SizedBox(width: 8),
                 OutlinedButton(

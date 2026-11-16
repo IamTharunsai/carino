@@ -189,6 +189,15 @@ class ProfileDetailScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
+          // Your flame with them: days in a row you've both kept it going.
+          if ((Services.prefs.streaks[member.id] ?? 0) > 0)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: GlassContainer(
+                child: Text('🔥 ${Services.prefs.streaks[member.id]}-day flame with ${member.firstName}',
+                    style: Theme.of(context).textTheme.titleMedium),
+              ),
+            ),
           if (member.highlights.isNotEmpty) ...[
             _Highlights(member: member),
             const SizedBox(height: 12),
@@ -203,40 +212,6 @@ class ProfileDetailScreen extends StatelessWidget {
                       Expanded(
                         child: Text(prompt.question,
                             style: Theme.of(context).textTheme.bodySmall),
-                      ),
-                      // S-019: react to THIS prompt — the like carries the
-                      // anchor into chat (S-032B opens on it).
-                      IconButton(
-                        icon: const Icon(Icons.videocam_outlined,
-                            size: 18, color: AppColors.sparkCoral),
-                        tooltip: 'Reply with video',
-                        visualDensity: VisualDensity.compact,
-                        onPressed: () async {
-                          final sent = await showVideoReplySheet(context,
-                              member: member, prompt: prompt);
-                          if (sent != true || !context.mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                  "Video replies aren't connected in this preview yet — nothing was sent to ${member.firstName}."),
-                            ),
-                          );
-                        },
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.favorite_border,
-                            size: 18, color: AppColors.sparkCoral),
-                        tooltip: 'React to this prompt',
-                        visualDensity: VisualDensity.compact,
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                  'Liked ${member.firstName} — anchored to this prompt. If it\'s mutual, your chat opens right here.'),
-                            ),
-                          );
-                          Navigator.of(context).pop(true);
-                        },
                       ),
                     ],
                   ),
@@ -317,19 +292,6 @@ class ProfileDetailScreen extends StatelessWidget {
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute<void>(
                       builder: (_) => GamesScreen(member: member),
-                    ),
-                  ),
-                ),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.videocam_outlined,
-                      color: AppColors.sparkCoral),
-                  title: const Text('Invite to Spark'),
-                  subtitle: const Text('Mutual-accept video — they choose too.'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => const SparkPreCallScreen(),
                     ),
                   ),
                 ),
