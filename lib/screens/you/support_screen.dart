@@ -123,8 +123,7 @@ class _SupportScreenState extends State<SupportScreen> {
                     style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 6),
                 Text(
-                  'No open cases. Reports and appeals you file appear here '
-                  'with their live status (S-051/S-046).',
+                  'No open cases. Anything you report shows up here with its status.',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ],

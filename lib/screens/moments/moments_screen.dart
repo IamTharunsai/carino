@@ -433,7 +433,7 @@ class _MomentsScreenState extends State<MomentsScreen> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
-                        'Moment posted to ${audience.label} ($kind) — pre-screen passed (demo). It expires in 24h.'),
+                        'Moment shared with ${audience.label} ✨ It disappears in 24h.'),
                   ),
                 );
               },

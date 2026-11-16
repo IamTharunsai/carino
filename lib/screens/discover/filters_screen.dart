@@ -351,7 +351,7 @@ class _FiltersScreenState extends State<FiltersScreen> {
   void _plusGate(BuildContext context) {
     if (Services.payments.isPlus) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Plus filter enabled (demo).')),
+        const SnackBar(content: Text('Plus filter on.')),
       );
       return;
     }

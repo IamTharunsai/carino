@@ -96,7 +96,7 @@ class TrustSafetyScreen extends StatelessWidget {
             context,
             icon: Icons.flag_outlined,
             title: 'Make a report',
-            subtitle: 'Structured categories — routed to human reviewers, 24h SLA',
+            subtitle: 'Pick what happened — a real person reviews it within 24 hours',
             onTap: () => SafetyActions.showReportFlow(
               context,
               surface: 'Safety Centre',

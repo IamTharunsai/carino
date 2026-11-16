@@ -141,7 +141,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
           TextField(
             decoration: const InputDecoration(
               prefixIcon: Icon(Icons.search, size: 20),
-              hintText: 'Search groups and Keep chats…',
+              hintText: 'Search chats…',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(999)),
               ),

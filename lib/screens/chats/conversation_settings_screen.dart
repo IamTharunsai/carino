@@ -94,7 +94,7 @@ class _ConversationSettingsScreenState
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                      'Mode change proposed to ${member.firstName} — it applies to new messages only when both agree (demo: applied).'),
+                      'Asked ${member.firstName}. It switches for new messages once you both agree.'),
                 ),
               );
             },

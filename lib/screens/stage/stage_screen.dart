@@ -190,7 +190,7 @@ class _FeedViewState extends State<_FeedView> {
                         onPressed: () {
                           Navigator.pop(s);
                           showPlusNudge(context,
-                              title: 'Comments are for members',
+                              title: 'Comments are for Plus & subscribers',
                               body: 'Likes are free for everyone. Comments are for Plus members and '
                                   '${item.creatorName}\'s subscribers — it keeps comment sections kind and spam-free.');
                         },

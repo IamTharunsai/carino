@@ -16,12 +16,12 @@ enum VerificationLayer {
 
   /// Layer 2 — liveness (blueprint S-006): a live selfie proves a real
   /// person is present — not a photo of a photo.
-  liveness('Liveness check', 'A live selfie — proves a real person is here.'),
+  liveness('Live selfie', 'A quick selfie clip — it’s really you, right now.'),
 
   /// Layer 3 — photo-match (blueprint S-006): the live selfie is matched
   /// against the ID photo AND the first profile photo, so the person in
   /// the profile is the person who shows up.
-  photoMatch('Photo match', 'Selfie matched to your ID now, and to your main profile photo when you add it.');
+  photoMatch('Matches your ID', 'Your selfie and your ID photo are the same person.');
 
   const VerificationLayer(this.label, this.tagline);
   final String label;

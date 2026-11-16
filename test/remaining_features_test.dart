@@ -79,12 +79,12 @@ void main() {
     });
     await open(tester, const WorkFacetScreen());
     await tester.enterText(find.byType(TextFormField).first, '');
-    await tester.tap(find.text('Save work facet'));
+    await tester.tap(find.text('Save work profile'));
     await tester.pumpAndSettle();
     expect(find.text('Add your role.'), findsOneWidget);
     await tester.enterText(find.byType(TextFormField).first, 'Designer');
     await tester.enterText(find.byType(TextFormField).last, 'Community tools');
-    await tester.tap(find.text('Save work facet'));
+    await tester.tap(find.text('Save work profile'));
     await tester.pumpAndSettle();
     expect(Services.prefs.workRole, 'Designer');
     expect(Services.prefs.workBuilding, 'Community tools');

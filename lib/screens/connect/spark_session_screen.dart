@@ -233,7 +233,7 @@ class _SparkPreCallScreenState extends State<SparkPreCallScreen> {
                           Center(
                             child: Text(
                               _cameraOn
-                                  ? 'Camera preview (stub)'
+                                  ? 'Your camera'
                                   : 'Camera off — they\'ll see this too',
                               style:
                                   const TextStyle(color: AppColors.warmIvory),

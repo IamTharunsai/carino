@@ -95,7 +95,7 @@ class ConnectScreen extends StatelessWidget {
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.ring_volume_outlined),
-                  title: const Text('Try the incoming-call screen (demo)'),
+                  title: const Text('Preview a Spark call'),
                   subtitle:
                       const Text('See exactly what a Spark ring looks like.'),
                   trailing: const Icon(Icons.chevron_right),

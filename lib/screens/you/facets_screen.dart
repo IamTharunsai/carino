@@ -18,7 +18,7 @@ class _FacetsScreenState extends State<FacetsScreen> {
   };
   @override
   Widget build(BuildContext context) => GlassScaffold(
-        appBar: AppBar(title: const Text('Facets')),
+        appBar: AppBar(title: const Text('Who sees what')),
         body: ListView(padding: const EdgeInsets.all(16), children: [
           const Text(
               'Choose who can see each field in each facet. Changes are saved for this session. Live profile enforcement is not connected yet.'),

@@ -63,7 +63,7 @@ class _WaitlistScreenState extends State<WaitlistScreen> {
             // the flow can be walked end-to-end.
             if (Env.useMockBackend) ...[
             SparkButton(
-              label: 'Continue (demo: batch opened)',
+              label: 'Continue',
               onPressed: widget.onAdmitted,
             ),
             const SizedBox(height: 6),

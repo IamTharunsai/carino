@@ -559,7 +559,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                   style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 12),
               const Text(
-                  'Local demo: new messages sent by you while Vanish is on expire after 24 hours. Existing expiry times stay in place. Screenshots and copies remain possible. Server deletion and group-wide consent are not connected.'),
+                  'New messages disappear after 24 hours. Screenshots can still happen, so share kindly.'),
               const SizedBox(height: 12),
               SparkButton(
                   label: enable ? 'Enable in demo' : 'Turn off',
@@ -574,7 +574,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       _g.messages.add(GroupMessage(
           senderId: 'me',
           text: enable
-              ? 'Vanish enabled in local demo: new messages expire in 24 hours.'
+              ? 'Vanish is on: new messages disappear after 24 hours.'
               : 'Vanish turned off in local demo.',
           timeLabel: 'now',
           isSystem: true));

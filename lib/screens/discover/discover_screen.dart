@@ -118,7 +118,9 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
       );
       if (gift == null || !mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('$gift sent with your like (demo — no charge).')));
+          content: Text(Env.useMockBackend
+              ? '$gift sent with your like 🎁 (demo — no charge)'
+              : 'Your like was sent. Gifts open when store products are live — nothing was charged.')));
     }
     _commit(like: true, spark: choice.kind == LikeKind.spark, note: choice.note);
   }

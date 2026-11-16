@@ -116,9 +116,9 @@ class ProfileDetailScreen extends StatelessWidget {
                   spacing: 6,
                   runSpacing: 6,
                   children: [
-                    Chip(label: Text('Structure · ${member.structure}')),
+                    Chip(label: Text('Relationship · ${member.structure}')),
                     Chip(label: Text('Pace · ${member.pace}')),
-                    Chip(label: Text('Free · ${member.availability}')),
+                    Chip(label: Text('Usually free · ${member.availability}')),
                     if (member.gender.isNotEmpty &&
                         member.shows('gender', matched: matched))
                       Chip(label: Text(member.gender.join(' · '))),
@@ -136,7 +136,7 @@ class ProfileDetailScreen extends StatelessWidget {
                           size: 16, color: AppColors.sparkCoral),
                       const SizedBox(width: 6),
                       Expanded(
-                        child: Text('Access: ${member.accessNote}',
+                        child: Text('Accessibility: ${member.accessNote}',
                             style: Theme.of(context).textTheme.bodyMedium),
                       ),
                     ],
@@ -194,7 +194,7 @@ class ProfileDetailScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: GlassContainer(
-                child: Text('🔥 ${Services.prefs.streaks[member.id]}-day flame with ${member.firstName}',
+                child: Text('🔥 ${Services.prefs.streaks[member.id]}-day Flame with ${member.firstName}',
                     style: Theme.of(context).textTheme.titleMedium),
               ),
             ),

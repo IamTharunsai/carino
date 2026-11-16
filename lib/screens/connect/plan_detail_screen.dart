@@ -182,11 +182,11 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
               label: 'Add to calendar',
               secondary: true,
               icon: Icons.event_outlined,
-              onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                    content: Text(
-                        'Calendar export opens your calendar app (integration point).')),
-              ),
+              onPressed: () => launchUrl(Uri.parse(
+                  'https://calendar.google.com/calendar/render?action=TEMPLATE'
+                  '&text=${Uri.encodeComponent('${widget.placeType} with ${member.firstName}')}'
+                  '&details=${Uri.encodeComponent('${widget.timeLabel} · planned on Cariño 💛')}'),
+                  mode: LaunchMode.externalApplication),
             ),
             const SizedBox(height: 8),
             SparkButton(

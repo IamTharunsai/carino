@@ -23,7 +23,7 @@ class _WorkFacetScreenState extends State<WorkFacetScreen> {
 
   @override
   Widget build(BuildContext context) => GlassScaffold(
-        appBar: AppBar(title: const Text('Work facet')),
+        appBar: AppBar(title: const Text('Work profile')),
         body: Form(
             key: _form,
             child: ListView(padding: const EdgeInsets.all(16), children: [
@@ -69,7 +69,7 @@ class _WorkFacetScreenState extends State<WorkFacetScreen> {
               ]),
               const SizedBox(height: 16),
               SparkButton(
-                  label: 'Save work facet',
+                  label: 'Save work profile',
                   onPressed: () {
                     if (!_form.currentState!.validate()) return;
                     Services.prefs

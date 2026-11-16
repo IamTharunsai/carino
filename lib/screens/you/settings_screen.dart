@@ -95,18 +95,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               body: 'Off = invitations arrive silently in Connect.'),
           const Divider(),
           Text('Security', style: text.titleMedium),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.fingerprint),
-            title: const Text('Passkey'),
-            subtitle: const Text('Set up — sign in without codes.'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                  content: Text(
-                      'Passkey management opens the platform credential UI (integration point).')),
-            ),
-          ),
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
             secondary: const Icon(Icons.lock_outline),

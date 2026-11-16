@@ -188,13 +188,13 @@ class _YouScreenState extends State<AccountCentreScreen> {
           ),
           _row(context,
               icon: Icons.layers_outlined,
-              title: 'Facets',
-              subtitle: 'Choose an audience for each field',
+              title: 'Who sees what',
+              subtitle: 'Pick who sees each part of your profile',
               onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
                   builder: (_) => const FacetsScreen()))),
           _row(context,
               icon: Icons.work_outline,
-              title: 'Work facet',
+              title: 'Work profile',
               subtitle: 'Your role, projects and coffee chat interests',
               onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
                   builder: (_) => const WorkFacetScreen()))),
@@ -231,7 +231,7 @@ class _YouScreenState extends State<AccountCentreScreen> {
             context,
             icon: Icons.favorite_outline,
             title: 'Relationship & couples',
-            subtitle: 'Honest Status, Couples mode, date-night bookings',
+            subtitle: 'Relationship status, Couples mode, date nights',
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(builder: (_) => const CoupleScreen()),
             ),
@@ -401,7 +401,7 @@ class _YouScreenState extends State<AccountCentreScreen> {
               const SizedBox(height: 6),
               Text(
                 connected
-                    ? 'Connected (demo). Your top artists show on your profile; '
+                    ? 'Connected. Your top artists show on your profile; '
                         'shared artists become conversation starters.'
                     : 'Connect Spotify or Apple Music to show your top artists '
                         'and an anthem. We read artist names only — never your '
@@ -410,7 +410,7 @@ class _YouScreenState extends State<AccountCentreScreen> {
               ),
               const SizedBox(height: 14),
               SparkButton(
-                label: connected ? 'Disconnect' : 'Connect music (demo)',
+                label: connected ? 'Disconnect' : 'Connect music',
                 icon: Icons.music_note_outlined,
                 secondary: connected,
                 onPressed: () =>
@@ -512,7 +512,7 @@ class _YouScreenState extends State<AccountCentreScreen> {
               leading: const Icon(Icons.check_circle_outline,
                   color: AppColors.sparkCoral),
               title: Text(layer.label),
-              subtitle: Text('${layer.tagline} · Ref VN-DEMO'),
+              subtitle: Text(layer.tagline),
             ),
           const SizedBox(height: 8),
           Text(
