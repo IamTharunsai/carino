@@ -269,6 +269,33 @@ try {
   await db.exec(`select public.report_screenshot('${conv3}')`); // second within a minute: no duplicate
   equal(Number((await db.query(`select count(*) n from public.messages where conversation_id='${conv3}' and is_system_notice and sender='${h}'`)).rows[0].n), 1);
 
+  // --- 0012 staff console ------------------------------------------------------
+  await db.exec('reset role');
+  const mod = '00000000-0000-0000-0000-000000000099';
+  await db.exec(`insert into auth.users(id) values ('${mod}')`);
+  await db.exec(`insert into public.profiles(id) select '${mod}' where not exists (select 1 from public.profiles where id='${mod}')`);
+  await db.exec(`insert into public.reports(reporter,reported,category,reason,surface) values ('${a}','${b}','harassment','rude','chat')`);
+  await db.exec(`insert into public.media(owner,kind,bucket,object_path) values ('${b}','photo','media','b/1.jpg')`);
+  // A normal member sees only their own reports and can't act as staff.
+  await as(outsider);
+  equal(await count('reports'), 0);
+  await assert.rejects(db.exec(`select public.staff_review_report((select id from public.reports limit 1),'actioned','x')`), e => /staff only/.test(e.message)); assertions++;
+  await denied('select * from public.staff');
+  // Make mod a moderator (service role only), then they see the queue and act.
+  await db.exec('reset role');
+  await db.exec(`insert into public.staff(user_id, role) values ('${mod}','moderator')`);
+  await as(mod);
+  equal((await db.query(`select count(*) n from public.reports`)).rows[0].n >= 1, true);
+  await db.exec(`select public.staff_review_report((select id from public.reports where reason='rude'),'actioned','warned user')`);
+  await db.exec(`select public.staff_moderate_media((select id from public.media where object_path='b/1.jpg'),'rejected','nudity')`);
+  await db.exec('reset role');
+  equal((await db.query(`select status from public.reports where reason='rude'`)).rows[0].status, 'actioned');
+  equal((await db.query(`select moderation_state from public.media where object_path='b/1.jpg'`)).rows[0].moderation_state, 'rejected');
+  equal(Number((await db.query(`select count(*) n from public.staff_actions where staff_id='${mod}'`)).rows[0].n), 2);
+  // Bad action values are refused.
+  await as(mod);
+  await assert.rejects(db.exec(`select public.staff_review_report((select id from public.reports limit 1),'deleted','x')`)); assertions++;
+
   await db.exec('reset role; set role anon');
   await denied('select * from public.social_preferences');
   await denied('select public.is_social_group_member(null)');

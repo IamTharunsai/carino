@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Cariño Staff</title>
+<style>
+  :root { --bg:#151014; --card:#221a20; --text:#f6ece4; --muted:#c9a9a6; --accent:#c8304a; --ok:#2f9e6b; --line:#3a2c34; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:15px/1.45 system-ui, sans-serif; background:var(--bg); color:var(--text); }
+  header { display:flex; gap:12px; align-items:center; padding:14px 16px; border-bottom:1px solid var(--line); flex-wrap:wrap; }
+  header h1 { font-size:18px; margin:0 auto 0 0; }
+  nav button, button { background:var(--card); color:var(--text); border:1px solid var(--line); border-radius:10px; padding:8px 12px; cursor:pointer; }
+  nav button.on { background:var(--accent); border-color:var(--accent); }
+  button.ok { background:var(--ok); border-color:var(--ok); } button.bad { background:var(--accent); border-color:var(--accent); }
+  main { padding:16px; max-width:1100px; margin:0 auto; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:12px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:12px; }
+  .stat b { display:block; font-size:28px; }
+  .muted { color:var(--muted); font-size:13px; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:8px; }
+  input { background:#0f0b0e; color:var(--text); border:1px solid var(--line); border-radius:10px; padding:9px 11px; width:100%; }
+  img.thumb { width:100%; height:220px; object-fit:cover; border-radius:10px; }
+  .late { color:#ff8a8a; font-weight:600; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Cariño · Staff</h1>
+  <nav id="tabs" hidden>
+    <button data-tab="overview">Overview</button>
+    <button data-tab="reports">Reports</button>
+    <button data-tab="photos">Photos</button>
+    <button data-tab="appeals">Appeals</button>
+    <button data-tab="members">Members</button>
+    <button data-tab="audit">Audit log</button>
+    <button id="signout">Sign out</button>
+  </nav>
+</header>
+<main id="app"></main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+// Staff console. Access is enforced by the database (public.is_staff() +
+// RLS + audited staff_* functions in migration 0012) — this page only shows
+// what the signed-in staff account is allowed to read.
+const $ = (h) => { const t = document.createElement('template'); t.innerHTML = h.trim(); return t.content.firstChild; };
+const el = (tag, text, cls) => { const e = document.createElement(tag); if (text != null) e.textContent = text; if (cls) e.className = cls; return e; };
+const app = document.getElementById('app');
+let sb;
+
+function config() {
+  let url = localStorage.getItem('sb_url'), key = localStorage.getItem('sb_anon');
+  if (!url || !key) {
+    app.replaceChildren($(`<div class="card"><h2>Connect</h2>
+      <p class="muted">Your Supabase project URL and the public anon key (Settings → API). Never the service-role key.</p>
+      <input id="u" placeholder="https://xxxx.supabase.co"><div style="height:8px"></div>
+      <input id="k" placeholder="anon public key"><div class="row"><button class="ok" id="save">Save</button></div></div>`));
+    document.getElementById('save').onclick = () => {
+      localStorage.setItem('sb_url', document.getElementById('u').value.trim());
+      localStorage.setItem('sb_anon', document.getElementById('k').value.trim());
+      start();
+    };
+    return null;
+  }
+  return supabase.createClient(url, key);
+}
+
+async function start() {
+  sb = config(); if (!sb) return;
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) return signIn();
+  const { data: staff } = await sb.rpc('is_staff');
+  if (!staff) { app.replaceChildren(el('div', 'This account is not staff. Ask an admin to add you.', 'card')); return; }
+  document.getElementById('tabs').hidden = false;
+  show('overview');
+}
+
+function signIn() {
+  app.replaceChildren($(`<div class="card"><h2>Staff sign in</h2>
+    <input id="e" type="email" placeholder="Email"><div style="height:8px"></div>
+    <input id="p" type="password" placeholder="Password"><div class="row"><button class="ok" id="go">Sign in</button></div>
+    <p class="muted" id="err"></p></div>`));
+  document.getElementById('go').onclick = async () => {
+    const { error } = await sb.auth.signInWithPassword({ email: document.getElementById('e').value, password: document.getElementById('p').value });
+    if (error) document.getElementById('err').textContent = error.message; else start();
+  };
+}
+
+async function act(fn, args) {
+  const note = prompt('Note for the audit log (what and why):') ?? '';
+  const { error } = await sb.rpc(fn, { ...args, p_note: note });
+  if (error) alert(error.message);
+}
+
+const views = {
+  async overview() {
+    const count = async (t, f) => { let q = sb.from(t).select('*', { count: 'exact', head: true }); if (f) q = f(q); return (await q).count ?? 0; };
+    const now = new Date().toISOString();
+    const stats = [
+      ['Open reports', await count('reports', q => q.in('status', ['new', 'in_review']))],
+      ['Past 24h SLA', await count('reports', q => q.in('status', ['new', 'in_review']).lt('sla_due', now))],
+      ['Photos to review', await count('media', q => q.in('moderation_state', ['held', 'pending']))],
+      ['Open appeals', await count('appeals', q => q.eq('status', 'open'))],
+      ['Members', await count('profiles')],
+      ['Restricted', await count('profiles', q => q.eq('account_status', 'restricted'))],
+      ['Blocks', await count('blocks')],
+    ];
+    const g = el('div', null, 'grid');
+    for (const [k, v] of stats) { const c = el('div', null, 'card stat'); c.append(el('b', String(v)), el('span', k, 'muted')); g.append(c); }
+    return g;
+  },
+  async reports() {
+    const { data } = await sb.from('reports').select('*').in('status', ['new', 'in_review']).order('sla_due');
+    const wrap = el('div');
+    if (!data?.length) wrap.append(el('div', 'No open reports. 🎉', 'card'));
+    for (const r of data ?? []) {
+      const c = el('div', null, 'card');
+      c.append(el('b', `${r.case_ref} · ${r.category}`), el('div', r.reason), el('div', r.details ?? '', 'muted'),
+        el('div', `Surface: ${r.surface} · Reported member: ${r.reported ?? 'n/a'}`, 'muted'),
+        el('div', `Due ${new Date(r.sla_due).toLocaleString()}`, new Date(r.sla_due) < new Date() ? 'late' : 'muted'));
+      const row = el('div', null, 'row');
+      for (const [label, status, cls] of [['Reviewing', 'in_review', ''], ['Action taken', 'actioned', 'bad'], ['No action', 'closed_no_action', 'ok']]) {
+        const b = el('button', label, cls); b.onclick = async () => { await act('staff_review_report', { p_report: r.id, p_status: status }); show('reports'); }; row.append(b);
+      }
+      if (r.reported) { const b = el('button', 'Restrict member', 'bad'); b.onclick = async () => { await act('staff_set_account', { p_user: r.reported, p_status: 'restricted' }); }; row.append(b); }
+      c.append(row); wrap.append(c);
+    }
+    return wrap;
+  },
+  async photos() {
+    const { data } = await sb.from('media').select('*').in('moderation_state', ['held', 'pending']).order('created_at').limit(60);
+    const g = el('div', null, 'grid');
+    if (!data?.length) g.append(el('div', 'Nothing waiting. 🎉', 'card'));
+    for (const m of data ?? []) {
+      const c = el('div', null, 'card');
+      const { data: s } = await sb.storage.from(m.bucket).createSignedUrl(m.object_path, 300);
+      if (s?.signedUrl && m.kind !== 'voice_intro') { const i = el('img', null, 'thumb'); i.src = s.signedUrl; i.alt = 'Media to review'; c.append(i); }
+      c.append(el('div', `${m.kind} · ${m.moderation_state}`, 'muted'));
+      const row = el('div', null, 'row');
+      for (const [label, st, cls] of [['Approve', 'approved', 'ok'], ['Reject', 'rejected', 'bad']]) {
+        const b = el('button', label, cls); b.onclick = async () => { await act('staff_moderate_media', { p_media: m.id, p_state: st }); show('photos'); }; row.append(b);
+      }
+      c.append(row); g.append(c);
+    }
+    return g;
+  },
+  async appeals() {
+    const { data } = await sb.from('appeals').select('*').eq('status', 'open').order('created_at');
+    const wrap = el('div');
+    if (!data?.length) wrap.append(el('div', 'No open appeals.', 'card'));
+    for (const a of data ?? []) {
+      const c = el('div', null, 'card');
+      c.append(el('b', `${a.appeal_ref} · ${a.subject}`), el('div', `Case ${a.case_ref ?? '—'} · member ${a.user_id}`, 'muted'));
+      const row = el('div', null, 'row');
+      for (const [label, st, cls] of [['Keep decision', 'upheld', ''], ['Overturn', 'overturned', 'ok']]) {
+        const b = el('button', label, cls); b.onclick = async () => { await act('staff_decide_appeal', { p_appeal: a.id, p_status: st }); show('appeals'); }; row.append(b);
+      }
+      c.append(row); wrap.append(c);
+    }
+    return wrap;
+  },
+  async members() {
+    const wrap = el('div');
+    const box = $(`<div class="card"><input id="q" placeholder="Search by email, phone or member id"><div class="row"><button class="ok" id="s">Search</button></div></div>`);
+    const out = el('div'); wrap.append(box, out);
+    box.querySelector('#s').onclick = async () => {
+      const q = box.querySelector('#q').value.trim(); if (!q) return;
+      const isId = /^[0-9a-f-]{36}$/i.test(q);
+      const { data } = await (isId ? sb.from('profiles').select('*').eq('id', q)
+        : sb.from('profiles').select('*').or(`email.ilike.%${q.replace(/[,%()]/g, '')}%,phone.ilike.%${q.replace(/[,%()]/g, '')}%`)).limit(20);
+      out.replaceChildren();
+      for (const p of data ?? []) {
+        const c = el('div', null, 'card');
+        c.append(el('b', p.email ?? p.phone ?? p.id), el('div', `${p.id} · ${p.account_status} · joined ${new Date(p.created_at).toLocaleDateString()}`, 'muted'));
+        const { data: v } = await sb.from('verification_records').select('badge_state,age21_result,liveness_result,photo_match_result').eq('user_id', p.id).maybeSingle();
+        c.append(el('div', v ? `Verification: ${v.badge_state} (age ${v.age21_result}, selfie ${v.liveness_result}, match ${v.photo_match_result})` : 'Not verified', 'muted'));
+        const row = el('div', null, 'row');
+        for (const [label, st, cls] of [['Active', 'active', 'ok'], ['Pause', 'paused', ''], ['Restrict', 'restricted', 'bad']]) {
+          const b = el('button', label, cls); b.onclick = () => act('staff_set_account', { p_user: p.id, p_status: st }); row.append(b);
+        }
+        c.append(row); out.append(c);
+      }
+      if (!data?.length) out.append(el('div', 'No members found.', 'card'));
+    };
+    return wrap;
+  },
+  async audit() {
+    const { data } = await sb.from('staff_actions').select('*').order('created_at', { ascending: false }).limit(100);
+    const wrap = el('div');
+    for (const a of data ?? []) wrap.append(el('div', `${new Date(a.created_at).toLocaleString()} · ${a.target_kind} ${a.target_id} → ${a.action} · ${a.note ?? ''}`, 'card muted'));
+    if (!data?.length) wrap.append(el('div', 'No actions yet.', 'card'));
+    return wrap;
+  },
+};
+
+async function show(tab) {
+  document.querySelectorAll('#tabs button[data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+  app.replaceChildren(el('div', 'Loading…', 'muted'));
+  app.replaceChildren(await views[tab]());
+}
+document.querySelectorAll('#tabs button[data-tab]').forEach(b => b.onclick = () => show(b.dataset.tab));
+document.getElementById('signout').onclick = async () => { await sb.auth.signOut(); location.reload(); };
+start();
+</script>
+</body>
+</html>

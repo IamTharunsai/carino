@@ -92,3 +92,17 @@ need the Apple Developer Program ($99/yr) and a Mac or a cloud Mac to sign.
 - NVIDIA key — it was shared in chat; create a new one and update
   `backend/supabase/.env` + `supabase secrets set`.
 - Stripe: keep test keys until launch; live keys only in Supabase secrets.
+
+## 8. Staff console (admin page) 🔑
+- Open `https://carino-liard.vercel.app/admin.html`, paste the project URL and the **anon** key once.
+- Make someone staff (SQL editor, service role only — nobody can do this from the app):
+  ```sql
+  insert into public.staff(user_id, role) values ('<their-user-uuid>', 'admin');
+  ```
+- Staff see: overview counts, reports (24h SLA, overdue in red), photos waiting for review,
+  appeals, member search (pause / restrict), and an audit log. Every action needs a note
+  and is recorded in `staff_actions`.
+- Photo checks: `moderation-intake` scores each upload with an NVIDIA vision model
+  (`NVIDIA_VISION_MODEL`, default `meta/llama-3.2-90b-vision-instruct`). Clear → live;
+  unsure or failed → "Photos" queue for a person; illegal signals → rejected + a report.
+  Hook it up as a Database Webhook on `public.media` insert with header `x-job-secret: $JOB_SECRET`.
