@@ -60,10 +60,6 @@ class ReportConfirmationScreen extends StatelessWidget {
             onPressed: () => Navigator.of(context).pop(),
           ),
           const SizedBox(height: 8),
-          TextButton(
-            onPressed: () => SafetyActions.showAppealsEntry(context),
-            child: const Text('Appeals — how they work'),
-          ),
           Text(
             'If you are in immediate danger, contact local emergency '
             'services first — then report here.',

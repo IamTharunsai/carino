@@ -768,7 +768,19 @@ const chatThemes = <(String, Color)>[
   ('Midnight plum', Color(0xFF5B2A55)),
   ('Rose gold', Color(0xFFB76E6E)),
   ('Deep teal', Color(0xFF1F5F63)),
+  ('Lavender', Color(0xFF7A5FB0)),
+  ('Ocean', Color(0xFF2E6FB0)),
+  ('Forest', Color(0xFF2F7A4E)),
 ];
+
+/// Chat wallpapers: soft gradients, or your own photo ('photo').
+const chatWallpapers = <String, List<Color>>{
+  'Blush': [Color(0xFF3A1C2B), Color(0xFF7A3048)],
+  'Sunset': [Color(0xFF41204A), Color(0xFFB3523E)],
+  'Night sky': [Color(0xFF0D1330), Color(0xFF2B2F6B)],
+  'Lagoon': [Color(0xFF0E3B3F), Color(0xFF1F7A72)],
+  'Peach': [Color(0xFFF6D5C4), Color(0xFFE79A8A)],
+};
 
 /// Stickers are message CONTENT (big emoji), never UI icons.
 const stickerPacks = <String, List<String>>{
@@ -777,9 +789,10 @@ const stickerPacks = <String, List<String>>{
   'Plans': ['☕', '🍷', '🍜', '🎬', '🌅', '🚲', '🎟️', '🏖️'],
 };
 
-/// Returns the chosen theme index (or null).
-Future<int?> showChatThemeSheet(BuildContext context, int current) {
-  return showGlassSheet<int>(
+/// Returns a bubble colour index (int), a wallpaper name, 'photo' for your
+/// own picture, or 'none' — or null if closed.
+Future<Object?> showChatThemeSheet(BuildContext context, int current) {
+  return showGlassSheet<Object>(
     context,
     child: Column(
       mainAxisSize: MainAxisSize.min,
@@ -825,6 +838,29 @@ Future<int?> showChatThemeSheet(BuildContext context, int current) {
               ),
           ],
         ),
+        const SizedBox(height: 16),
+        Text('Wallpaper', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        Wrap(spacing: 10, runSpacing: 10, children: [
+          for (final e in chatWallpapers.entries)
+            GestureDetector(
+              onTap: () => Navigator.of(context).pop(e.key),
+              child: Column(children: [
+                Container(
+                  width: 56,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    gradient: LinearGradient(colors: e.value, begin: Alignment.topCenter, end: Alignment.bottomCenter),
+                  ),
+                ),
+                Text(e.key, style: Theme.of(context).textTheme.bodySmall),
+              ]),
+            ),
+          ActionChip(avatar: const Icon(Icons.photo_outlined), label: const Text('My photo'),
+              onPressed: () => Navigator.of(context).pop('photo')),
+          ActionChip(label: const Text('None'), onPressed: () => Navigator.of(context).pop('none')),
+        ]),
       ],
     ),
   );

@@ -1,6 +1,8 @@
 import 'dart:ui' as ui;
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../../data/languages.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../widgets/secure_screen.dart';
 import '../../data/mock_data.dart';
 import '../../models/experience.dart';
@@ -13,6 +15,7 @@ import '../connect/decompress_screens.dart' show bookExperience;
 import '../../services/services.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/glass_card.dart';
+import '../../widgets/media.dart';
 import '../../widgets/safety_actions.dart';
 import '../../widgets/spark_button.dart';
 import '../connect/plan_composer_screen.dart';
@@ -85,7 +88,10 @@ class _ConversationScreenState extends State<ConversationScreen> {
 
   // --- Conversation Sync ----------------------------------------------------
   /// Tone tag for the NEXT message you send (optional).
-  ToneTag? _tone;
+  String? _tone;
+  String _aiTone = 'normal';
+  final Map<String, String> _translated = {};
+  final Set<String> _showOriginal = {};
   bool _bridgeDismissed = false;
 
   bool get _met => Services.trust.hasMet(_member.id);
@@ -196,7 +202,8 @@ class _ConversationScreenState extends State<ConversationScreen> {
   }
 
   Future<void> _pickTone() async {
-    final t = await showGlassSheet<ToneTag>(
+    final custom = TextEditingController();
+    final t = await showGlassSheet<String>(
       context,
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -215,9 +222,22 @@ class _ConversationScreenState extends State<ConversationScreen> {
               for (final tag in ToneTag.values)
                 ActionChip(
                   label: Text(tag.label),
-                  onPressed: () => Navigator.of(context).pop(tag),
+                  onPressed: () => Navigator.of(context).pop(tag.label),
                 ),
             ],
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            controller: custom,
+            maxLength: 24,
+            decoration: InputDecoration(
+              hintText: 'Or your own: “half joking”, “sleepy”…',
+              suffixIcon: IconButton(
+                icon: const Icon(Icons.check),
+                tooltip: 'Use this tone',
+                onPressed: () => Navigator.of(context).pop(custom.text.trim().isEmpty ? null : custom.text.trim()),
+              ),
+            ),
           ),
         ],
       ),
@@ -240,7 +260,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
       });
       return;
     }
-    final l = await showGlassSheet<PauseLength>(
+    final l = await showGlassSheet<Object>(
       context,
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -260,15 +280,35 @@ class _ConversationScreenState extends State<ConversationScreen> {
               title: Text('Back ${p.label}'),
               onTap: () => Navigator.of(context).pop(p),
             ),
+          ListTile(
+            leading: const Icon(Icons.edit_calendar_outlined),
+            title: const Text('Pick a day & time…'),
+            onTap: () => Navigator.of(context).pop('custom'),
+          ),
         ],
       ),
     );
     if (l == null || !mounted) return;
+    String label;
+    String notice;
+    if (l is PauseLength) {
+      label = l.label;
+      notice = pauseNotice(l, name: 'You');
+    } else {
+      final now = DateTime.now();
+      final day = await showDatePicker(
+          context: context, firstDate: now, lastDate: now.add(const Duration(days: 30)), initialDate: now);
+      if (day == null || !mounted) return;
+      final time = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(now));
+      if (time == null || !mounted) return;
+      label = 'until ${MaterialLocalizations.of(context).formatMediumDate(day)}, ${time.format(context)}';
+      notice = "You're taking a breather $label — busy, not gone. Back soon 💛";
+    }
     setState(() {
-      conv.pausedLabel = l.label;
+      conv.pausedLabel = label;
       conv.messages.add(ChatMessage(
         id: 'pause-${DateTime.now().millisecondsSinceEpoch}',
-        text: pauseNotice(l, name: 'You'),
+        text: notice,
         fromMe: true,
         timeLabel: 'now',
         isSystemNotice: true,
@@ -286,6 +326,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
     _member = MockData.memberById(widget.conversation.memberId);
     widget.conversation.unreadCount = 0;
     if (_iHaveNotSpoken && _firstHold == null) _loadStarters();
+    _translateIncoming();
     if (_vanish && widget.conversation.vanishMinutes > 0) {
       _vanishTimer = Timer(Duration(minutes: widget.conversation.vanishMinutes), _dissolveRead);
     }
@@ -354,7 +395,19 @@ class _ConversationScreenState extends State<ConversationScreen> {
     final i = await showChatThemeSheet(
         context, Services.prefs.chatThemes[widget.conversation.id] ?? 0);
     if (i == null || !mounted) return;
-    setState(() => Services.prefs.chatThemes[widget.conversation.id] = i);
+    final id = widget.conversation.id;
+    if (i is int) {
+      setState(() => Services.prefs.chatThemes[id] = i);
+    } else if (i == 'photo') {
+      final path = await pickMedia();
+      if (path == null || isVideo(path) || !mounted) return;
+      setState(() => Services.prefs.chatWallpapers[id] = path);
+    } else if (i == 'none') {
+      setState(() => Services.prefs.chatWallpapers.remove(id));
+    } else {
+      setState(() => Services.prefs.chatWallpapers[id] = '$i');
+    }
+    Services.prefs.save();
     Services.analytics.action('chat_theme');
   }
 
@@ -380,12 +433,89 @@ class _ConversationScreenState extends State<ConversationScreen> {
           item(Icons.sports_esports_outlined, 'Play a game', () => Navigator.of(context).push(
                 MaterialPageRoute<void>(builder: (_) => GamesScreen(member: _member)),
               )),
-          item(Icons.calendar_month_outlined, 'Suggest a plan', _openComposer),
+          item(Icons.auto_awesome, 'Plan ideas for you two', _planIdeas),
+          item(Icons.timer_outlined, _vanish ? 'Turn off Vanish mode' : 'Turn on Vanish mode', _proposeModeSwitch),
+          item(Icons.translate, Services.prefs.autoTranslate ? 'Translation: on · ${Services.prefs.myLanguage}' : 'Translation: off',
+              _translationSettings),
           item(Icons.pause_circle_outline,
               widget.conversation.pausedLabel == null ? 'Pause this chat' : 'Resume chat', _pause),
         ],
       ),
     );
+  }
+
+  Future<void> _planIdeas() async {
+    final ideas = await Services.ai.planIdeas(
+      mine: Services.prefs.me.interests,
+      theirs: _member.interests,
+      city: _member.city,
+    );
+    if (!mounted) return;
+    showGlassSheet<void>(
+      context,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, mainAxisSize: MainAxisSize.min, children: [
+        Text('Ideas for you & ${_member.firstName} 💫', style: Theme.of(context).textTheme.titleLarge),
+        const SizedBox(height: 8),
+        for (final i in ideas)
+          Card(
+            child: ListTile(
+              title: Text(i.title),
+              subtitle: Text(i.what),
+              trailing: IconButton(
+                icon: const Icon(Icons.map_outlined),
+                tooltip: 'Find places',
+                onPressed: () => launchUrl(Uri.parse(
+                    'https://www.google.com/maps/search/${Uri.encodeComponent('${i.search} ${_member.city}')}')),
+              ),
+              onTap: () {
+                Navigator.of(context).pop();
+                _openComposer();
+              },
+            ),
+          ),
+      ]),
+    );
+  }
+
+  Future<void> _translationSettings() async {
+    final prefs = Services.prefs;
+    await showGlassSheet<void>(
+      context,
+      child: StatefulBuilder(
+        builder: (ctx, set) => Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Text('Translate messages', style: Theme.of(ctx).textTheme.titleLarge),
+          const SizedBox(height: 6),
+          const Text('Their messages show in your language, with the original one tap away. '
+              'They pick their own language too.'),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Auto-translate'),
+            value: prefs.autoTranslate,
+            onChanged: (v) => set(() => prefs.autoTranslate = v),
+          ),
+          DropdownButtonFormField<String>(
+            initialValue: prefs.myLanguage,
+            decoration: const InputDecoration(labelText: 'My language'),
+            items: [for (final l in worldLanguages) DropdownMenuItem(value: l, child: Text(l))],
+            onChanged: (v) => set(() => prefs.myLanguage = v ?? prefs.myLanguage),
+          ),
+        ]),
+      ),
+    );
+    prefs.save();
+    _translated.clear();
+    _translateIncoming();
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _translateIncoming() async {
+    if (!Services.prefs.autoTranslate) return;
+    for (final m in widget.conversation.messages) {
+      if (m.fromMe || m.isSystemNotice || m.mediaAsset != null || _translated.containsKey(m.id)) continue;
+      final out = await Services.ai.translate(m.text, to: Services.prefs.myLanguage);
+      if (out == null || !mounted) return; // no live AI: show originals
+      if (out.trim() != m.text.trim()) setState(() => _translated[m.id] = out);
+    }
   }
 
   Future<void> _sendSticker() async {
@@ -439,7 +569,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
         text: text,
         fromMe: true,
         timeLabel: 'now',
-        toneTag: _tone?.label,
+        toneTag: _tone,
       ));
       _composer.clear();
       _aiDrafts = const [];
@@ -454,8 +584,34 @@ class _ConversationScreenState extends State<ConversationScreen> {
       return;
     }
     // AI-01: suggestions are drafts — see honesty rules in AIService.
+    final tone = await showGlassSheet<String>(
+      context,
+      child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Text('What vibe?', style: Theme.of(context).textTheme.titleLarge),
+        const SizedBox(height: 8),
+        Wrap(spacing: 8, runSpacing: 8, children: [
+          for (final (k, l) in const [
+            ('normal', '😊 Just me'),
+            ('romantic', '🌹 Romantic'),
+            ('funny', '😂 Funny'),
+            ('flirty', '😏 Flirty'),
+          ])
+            ChoiceChip(label: Text(l), selected: _aiTone == k, onSelected: (_) => Navigator.of(context).pop(k)),
+        ]),
+      ]),
+    );
+    if (tone == null || !mounted) return;
+    _aiTone = tone;
     setState(() => _aiLoading = true);
-    final drafts = await Services.ai.suggestOpeners(memberName: _member.firstName);
+    final last = widget.conversation.messages.where((m) => !m.fromMe && !m.isSystemNotice).lastOrNull;
+    final drafts = await Services.ai.suggestOpeners(
+      memberName: _member.firstName,
+      shared: _chips,
+      tone: tone,
+      language: Services.prefs.myLanguage,
+      mix: Services.prefs.myLanguage != 'English',
+      lastMessage: last?.text,
+    );
     if (!mounted) return;
     setState(() {
       _aiLoading = false;
@@ -491,9 +647,20 @@ class _ConversationScreenState extends State<ConversationScreen> {
               // SCAFFOLD: demo applies immediately. PRODUCTION: sends a
               // proposal; the mode flips only on the other member's accept,
               // and BOTH clients render the banner at the same moment.
-              setState(() => widget.conversation.mode = target);
+              setState(() {
+                widget.conversation.mode = target;
+                widget.conversation.messages.add(ChatMessage(
+                  id: 'mode-${DateTime.now().millisecondsSinceEpoch}',
+                  text: target == ChatMode.vanish
+                      ? 'Vanish mode is on for you both 🔥 New messages disappear after they’re read.'
+                      : 'Vanish mode is off. New messages stay.',
+                  fromMe: true,
+                  timeLabel: 'now',
+                  isSystemNotice: true,
+                ));
+              });
             },
-            child: const Text('Send proposal (demo: applies now)'),
+            child: Text('Ask ${_member.firstName}'),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -662,7 +829,19 @@ class _ConversationScreenState extends State<ConversationScreen> {
               ),
             ),
           Expanded(
-            child: ListView(
+            child: Stack(children: [
+              if (Services.prefs.chatWallpapers[conv.id] case final w?)
+                Positioned.fill(
+                  child: chatWallpapers.containsKey(w)
+                      ? DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                                colors: chatWallpapers[w]!, begin: Alignment.topCenter, end: Alignment.bottomCenter),
+                          ),
+                        )
+                      : Opacity(opacity: 0.55, child: MediaImage(w)),
+                ),
+              ListView(
               controller: _scroll,
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
               children: [
@@ -702,6 +881,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
                 ),
               ],
             ),
+            ]),
           ),
           // AI draft panel (AI-01) — drafts only, clearly labelled.
           if (_aiDrafts.isNotEmpty)
@@ -805,7 +985,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
                 alignment: Alignment.centerLeft,
                 child: InputChip(
                   avatar: const Icon(Icons.theater_comedy_outlined, size: 14),
-                  label: Text('Tone: ${_tone!.label}'),
+                  label: Text('Tone: ${_tone!}'),
                   onDeleted: () => setState(() => _tone = null),
                 ),
               ),
@@ -1034,15 +1214,25 @@ class _ConversationScreenState extends State<ConversationScreen> {
                       ),
               )
             else
-              Text(
-                msg.dissolved ? 'This message dissolved.' : msg.text,
+              GestureDetector(
+                onTap: _translated.containsKey(msg.id)
+                    ? () => setState(() => _showOriginal.contains(msg.id)
+                        ? _showOriginal.remove(msg.id)
+                        : _showOriginal.add(msg.id))
+                    : null,
+                child: Text(
+                msg.dissolved
+                    ? 'This message dissolved.'
+                    : (_translated.containsKey(msg.id) && !_showOriginal.contains(msg.id)
+                        ? '${_translated[msg.id]}\n· translated, tap for original'
+                        : msg.text),
                 style: TextStyle(
                   color: mine
                       ? AppColors.warmIvory
                       : Theme.of(context).textTheme.bodyLarge?.color,
                   fontStyle: msg.dissolved ? FontStyle.italic : FontStyle.normal,
                 ),
-              ),
+              )),
             if (msg.toneTag != null)
               Padding(
                 padding: const EdgeInsets.only(top: 4),
@@ -1127,7 +1317,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
               title: const Text('Translate'),
               onTap: () async {
                 Navigator.of(context).pop();
-                final out = await Services.ai.translate(msg.text);
+                final out = await Services.ai.translate(msg.text, to: Services.prefs.myLanguage);
                 if (!mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   duration: const Duration(seconds: 6),

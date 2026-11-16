@@ -172,8 +172,27 @@ Future<T?> showGlassSheet<T>(BuildContext context, {required Widget child}) {
             top: Radius.circular(AppTheme.radiusCard),
           ),
           opacity: AppColors.glassSheetOpacity,
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
-          child: SingleChildScrollView(child: child),
+          padding: const EdgeInsets.fromLTRB(20, 4, 8, 28),
+          // Every sheet has a visible way out, not just swipe-down.
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Align(
+                alignment: Alignment.centerRight,
+                child: IconButton(
+                  icon: const Icon(Icons.close),
+                  tooltip: 'Close',
+                  onPressed: () => Navigator.of(ctx).pop(),
+                ),
+              ),
+              Flexible(
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 12),
+                  child: SingleChildScrollView(child: child),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     ),

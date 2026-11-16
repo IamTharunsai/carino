@@ -5,6 +5,8 @@ import '../../services/services.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/spark_button.dart';
+import '../../widgets/plus_nudge.dart';
+import '../../services/location.dart';
 import '../you/paywall_screen.dart';
 
 /// Filter configuration (S-017). Filters are RECIPROCAL (blueprint rule):
@@ -20,6 +22,7 @@ class FiltersConfig {
     this.verifiedOnly = true,
     this.exactIntention = false,
     this.worldwideDistance = false,
+    this.city,
   });
 
   final Intention? intention;
@@ -37,6 +40,9 @@ class FiltersConfig {
   /// in its deck filter).
   final bool worldwideDistance;
 
+  /// Plus travel mode: see people in another city before you land.
+  final String? city;
+
   bool get isDefault =>
       intention == null &&
       ageMin == 21 &&
@@ -45,7 +51,8 @@ class FiltersConfig {
       language == null &&
       verifiedOnly &&
       !exactIntention &&
-      !worldwideDistance;
+      !worldwideDistance &&
+      city == null;
 }
 
 /// S-017 Filters — the full screen the lite sheet grows into:
@@ -72,6 +79,38 @@ class _FiltersScreenState extends State<FiltersScreen> {
   late bool _verifiedOnly = widget.initial.verifiedOnly;
   late bool _exactIntention = widget.initial.exactIntention;
   late bool _worldwideDistance = widget.initial.worldwideDistance;
+  late String _where = widget.initial.worldwideDistance
+      ? 'world'
+      : widget.initial.city != null
+          ? 'city'
+          : 'near';
+  late final _city = TextEditingController(text: widget.initial.city);
+
+  @override
+  void dispose() {
+    _city.dispose();
+    super.dispose();
+  }
+
+  Future<void> _setWhere(String w) async {
+    if (w != 'near' && !Services.payments.isPlus) {
+      showPlusNudge(context,
+          title: 'Travel mode',
+          body: 'Browse another city before you land, or the whole world. Part of Plus.');
+      return;
+    }
+    if (w == 'near') {
+      final ok = await askLocation();
+      if (!ok && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Turn on location in your phone settings to see people near you.')));
+      }
+    }
+    setState(() {
+      _where = w;
+      _worldwideDistance = w == 'world';
+    });
+  }
 
   static const List<String> _languages = [
     'Any',
@@ -150,6 +189,31 @@ class _FiltersScreenState extends State<FiltersScreen> {
             labels: RangeLabels('${_ages.start.round()}', '${_ages.end.round()}'),
             onChanged: (v) => setState(() => _ages = v),
           ),
+          Text('Where', style: text.titleMedium),
+          const SizedBox(height: 8),
+          SegmentedButton<String>(
+            showSelectedIcon: false,
+            segments: const [
+              ButtonSegment(value: 'near', icon: Icon(Icons.near_me_outlined), label: Text('Near me')),
+              ButtonSegment(value: 'city', icon: Icon(Icons.flight_outlined), label: Text('Another city')),
+              ButtonSegment(value: 'world', icon: Icon(Icons.public), label: Text('Worldwide')),
+            ],
+            selected: {_where},
+            onSelectionChanged: (v) => _setWhere(v.first),
+          ),
+          if (_where == 'city')
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: TextField(
+                controller: _city,
+                decoration: const InputDecoration(
+                  prefixIcon: Icon(Icons.location_city_outlined),
+                  hintText: 'Which city? e.g. Paris, Mumbai, Austin',
+                ),
+              ),
+            ),
+          const SizedBox(height: 14),
+          if (_where == 'near') ...[
           Text('Distance · up to ${_distance.round()} mi',
               style: text.titleMedium),
           Slider(
@@ -161,6 +225,7 @@ class _FiltersScreenState extends State<FiltersScreen> {
             label: '${_distance.round()} mi',
             onChanged: (v) => setState(() => _distance = v),
           ),
+          ],
           Text('Language', style: text.titleMedium),
           const SizedBox(height: 8),
           Wrap(
@@ -274,6 +339,7 @@ class _FiltersScreenState extends State<FiltersScreen> {
                 verifiedOnly: _verifiedOnly,
                 exactIntention: _exactIntention,
                 worldwideDistance: _worldwideDistance,
+                city: _where == 'city' && _city.text.trim().isNotEmpty ? _city.text.trim() : null,
               ),
             ),
           ),

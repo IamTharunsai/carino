@@ -223,6 +223,7 @@ class UserPrefs {
   final Set<String> pinnedChats = {};
   final Set<String> hiddenChats = {};
   final Map<String, int> chatThemes = {};
+  final Map<String, String> chatWallpapers = {};
 
   /// Daily allowances (models/plans.dart): likes are capped on Free,
   /// Super Likes are 1 free / 5 Plus, plus any bought packs (never expire).
@@ -317,6 +318,10 @@ class UserPrefs {
 
   /// Gift credits, creators I subscribe to, posts I liked.
   int credits = 0;
+
+  /// Chat translation: their messages shown in my language.
+  String myLanguage = 'English';
+  bool autoTranslate = true;
   final Set<String> subscriptions = {};
   final Set<String> likedPosts = {};
 
@@ -427,6 +432,9 @@ class UserPrefs {
         'posts': [for (final p in posts) p.toJson()],
         'following': following.toList(),
         'credits': credits,
+        'myLanguage': myLanguage,
+        'chatWallpapers': chatWallpapers,
+        'autoTranslate': autoTranslate,
         'subscriptions': subscriptions.toList(),
         'likedPosts': likedPosts.toList(),
         'reflections': [
@@ -483,6 +491,11 @@ class UserPrefs {
         ..clear()
         ..addAll(strs(j['following']));
       credits = (j['credits'] as num?)?.toInt() ?? 0;
+      myLanguage = j['myLanguage'] as String? ?? myLanguage;
+      chatWallpapers
+        ..clear()
+        ..addAll({for (final e in (j['chatWallpapers'] as Map? ?? const {}).entries) '${e.key}': '${e.value}'});
+      autoTranslate = j['autoTranslate'] as bool? ?? autoTranslate;
       subscriptions
         ..clear()
         ..addAll(strs(j['subscriptions']));

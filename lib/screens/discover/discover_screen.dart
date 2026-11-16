@@ -75,7 +75,9 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
       }
       final miles =
           double.tryParse(RegExp(r'[0-9.]+').firstMatch(m.distanceBand)?.group(0) ?? '');
-      if (miles != null && miles > _filters.maxDistanceMi) return false;
+      final city = _filters.city?.toLowerCase();
+      if (city != null) return m.city.toLowerCase().contains(city);
+      if (!_filters.worldwideDistance && miles != null && miles > _filters.maxDistanceMi) return false;
       return true;
     }).toList();
   }

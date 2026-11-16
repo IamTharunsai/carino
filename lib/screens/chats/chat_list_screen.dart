@@ -243,7 +243,31 @@ class _ChatListScreenState extends State<ChatListScreen> {
               final member = MockData.memberById(conv.memberId);
               final last = conv.messages.isEmpty ? null : conv.messages.last;
               final pinned = Services.prefs.pinnedChats.contains(conv.id);
-              return GestureDetector(
+              // Swipe right = pin/unpin, swipe left = hide (behind Face ID).
+              return Dismissible(
+                key: ValueKey('chat-${conv.id}'),
+                background: _swipeBg(pinned ? Icons.push_pin_outlined : Icons.push_pin,
+                    pinned ? 'Unpin' : 'Pin', Alignment.centerLeft),
+                secondaryBackground: _swipeBg(Icons.visibility_off_outlined, 'Hide', Alignment.centerRight),
+                confirmDismiss: (dir) async {
+                  final prefs = Services.prefs;
+                  if (dir == DismissDirection.startToEnd) {
+                    setState(() => pinned ? prefs.pinnedChats.remove(conv.id) : prefs.pinnedChats.add(conv.id));
+                    prefs.save();
+                    return false; // stays in the list, just moves
+                  }
+                  setState(() => prefs.hiddenChats.add(conv.id));
+                  prefs.save();
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text('${member.firstName} moved to Hidden chats.'),
+                    action: SnackBarAction(label: 'Undo', onPressed: () {
+                      setState(() => prefs.hiddenChats.remove(conv.id));
+                      prefs.save();
+                    }),
+                  ));
+                  return true;
+                },
+                child: GestureDetector(
                 onLongPress: () => _chatMenu(conv.id, member.firstName),
                 child: GlassContainer(
                 onTap: () => Navigator.of(context).push(
@@ -332,7 +356,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                       ),
                   ],
                 ),
-              ));
+              )));
             }),
             const SizedBox(height: 10),
           ],
@@ -343,13 +367,23 @@ class _ChatListScreenState extends State<ChatListScreen> {
               subtitle: const Text('Unlock with Face, fingerprint or PIN'),
               onTap: _openHidden,
             ),
-          Text('Tip: press and hold a chat to pin or hide it.',
+          Text('Swipe right to pin, left to hide. Hidden chats stay safe behind Face ID or fingerprint.',
               style: Theme.of(context).textTheme.bodySmall,
               textAlign: TextAlign.center),
         ],
       ),
     );
   }
+
+  Widget _swipeBg(IconData icon, String label, Alignment align) => Container(
+        alignment: align,
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        decoration: BoxDecoration(
+          color: AppColors.emberCrimson.withValues(alpha: 0.25),
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [Icon(icon), Text(label)]),
+      );
 
   void _chatMenu(String id, String name) {
     final prefs = Services.prefs;
