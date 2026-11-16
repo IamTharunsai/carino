@@ -57,6 +57,7 @@ import 'package:carino/screens/you/trust_safety_screen.dart';
 import 'package:carino/screens/you/wingperson_screen.dart';
 import 'package:carino/screens/you/work_facet_screen.dart';
 import 'package:carino/screens/you/you_screen.dart';
+import 'package:carino/screens/you/my_profile_screen.dart';
 import 'package:carino/theme/app_theme.dart';
 
 import '../support/real_fonts.dart';
@@ -124,6 +125,7 @@ Map<String, Widget Function()> _screens() {
     'Spark call': () => SparkCallScreen(member: sofia),
     'Incoming call': () => IncomingCallScreen(member: sofia),
     'You tab': () => const YouScreen(),
+    'Settings & account': () => const AccountCentreScreen(),
     'How I text & comfort': () => const SyncSettingsScreen(),
     'Settings': () => const SettingsScreen(),
     'Privacy Centre': () => const PrivacyCentreScreen(),

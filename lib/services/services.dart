@@ -6,6 +6,7 @@ import '../data/mock_data.dart';
 import '../models/member.dart';
 import '../models/notify.dart' show NotifTone;
 import '../models/plans.dart';
+import '../models/posts.dart';
 import '../models/platform.dart';
 import '../models/social.dart';
 import '../models/sync.dart';
@@ -310,6 +311,15 @@ class UserPrefs {
   String? videoIntro;
   String? voiceIntro;
 
+  /// My profile posts, and who I follow (member ids).
+  final List<MyPost> posts = [];
+  final Set<String> following = {};
+
+  /// Gift credits, creators I subscribe to, posts I liked.
+  int credits = 0;
+  final Set<String> subscriptions = {};
+  final Set<String> likedPosts = {};
+
   /// Notifications: written in this language and tone (real events only).
   String notifLanguage = 'English';
   NotifTone notifTone = NotifTone.calm;
@@ -414,6 +424,11 @@ class UserPrefs {
           'videoIntro': videoIntro,
           'voiceIntro': voiceIntro,
         },
+        'posts': [for (final p in posts) p.toJson()],
+        'following': following.toList(),
+        'credits': credits,
+        'subscriptions': subscriptions.toList(),
+        'likedPosts': likedPosts.toList(),
         'reflections': [
           for (final r in reflections)
             {
@@ -461,6 +476,19 @@ class UserPrefs {
       if (pr['photos'] is List) photos = strs(pr['photos']);
       videoIntro = pr['videoIntro'] as String?;
       voiceIntro = pr['voiceIntro'] as String?;
+      posts
+        ..clear()
+        ..addAll([for (final p in (j['posts'] as List? ?? const [])) MyPost.fromJson(Map<String, Object?>.from(p as Map))]);
+      following
+        ..clear()
+        ..addAll(strs(j['following']));
+      credits = (j['credits'] as num?)?.toInt() ?? 0;
+      subscriptions
+        ..clear()
+        ..addAll(strs(j['subscriptions']));
+      likedPosts
+        ..clear()
+        ..addAll(strs(j['likedPosts']));
       notifLanguage = j['notifLanguage'] as String? ?? notifLanguage;
       themeMode.value = ThemeMode.values.asNameMap()[j['theme']] ?? themeMode.value;
       notifTone = NotifTone.values.asNameMap()[j['notifTone']] ?? notifTone;

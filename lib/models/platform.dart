@@ -20,6 +20,7 @@ class FeedItem {
     this.fromCircle = false,
     this.viral = false,
     this.planIdea,
+    this.subscribersOnly = false,
   });
 
   final String id;
@@ -42,6 +43,9 @@ class FeedItem {
 
   /// If set, "Make it a plan" pre-fills this place/activity.
   final String? planIdea;
+
+  /// Only the creator's paying subscribers can open it.
+  final bool subscribersOnly;
 }
 
 /// What the member asked for, in plain words.

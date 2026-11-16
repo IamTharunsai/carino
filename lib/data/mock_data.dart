@@ -248,6 +248,9 @@ class MockData {
 
   // ── Platform (Stage, Trust, Plans engine, Professional, Money) ─────────
 
+  /// Demo presence (live: Supabase Realtime presence).
+  static bool isOnline(String id) => id.codeUnits.fold(0, (a, b) => a + b).isEven;
+
   static const List<FeedItem> feed = [
     FeedItem(id: 'v1', creatorId: 'f-jordan', creatorName: 'Jordan', caption: 'Sunrise 5K with the club — come next week', topic: 'Fitness', minutesAgo: 40, imageAsset: AppConfig.assetHeroWelcome, fromCircle: true, planIdea: 'Run club 5K'),
     FeedItem(id: 'v2', creatorId: 'c-taco', creatorName: 'Taco Atlas', caption: 'Ranking every taco truck on Parsons Ave (part 3)', topic: 'Food', minutesAgo: 90, imageAsset: AppConfig.assetBackdropDiscover, viral: true, planIdea: 'Taco truck crawl'),
@@ -255,6 +258,7 @@ class MockData {
     FeedItem(id: 'v4', creatorId: 'f-sam', creatorName: 'Sam', caption: 'Tiny gig in a record shop. Unreal.', topic: 'Music', minutesAgo: 120, imageAsset: AppConfig.assetBackdropMatch, fromCircle: true, planIdea: 'Record shop gig'),
     FeedItem(id: 'v5', creatorId: 'c-fitfuel', creatorName: 'FitFuel', caption: '1,000-calorie day: what I eat', topic: 'Diet', minutesAgo: 60, imageAsset: AppConfig.assetHeroWelcome, viral: true),
     FeedItem(id: 'v6', creatorId: 'c-clay', creatorName: 'Clay & Coffee', caption: 'Wheel-throwing for total beginners', topic: 'Art', minutesAgo: 200, imageAsset: AppConfig.assetBackdropDiscover, planIdea: 'Pottery drop-in'),
+    FeedItem(id: 'v9', creatorId: 'c-clay', creatorName: 'Clay & Coffee', caption: 'Subscribers: full 20-min glazing class', topic: 'Art', minutesAgo: 240, imageAsset: AppConfig.assetBackdropMatch, subscribersOnly: true),
     FeedItem(id: 'v7', creatorId: 'c-jazzcbus', creatorName: 'Jazz Columbus', caption: 'Friday trio — first set is free', topic: 'Music', minutesAgo: 300, imageAsset: AppConfig.assetBackdropMatch, planIdea: 'Jazz bar'),
     FeedItem(id: 'v8', creatorId: 'c-botcomedy', creatorName: 'AutoLaughs', caption: 'AI writes stand-up (it\'s bad)', topic: 'Comedy', minutesAgo: 15, imageAsset: AppConfig.assetHeroWelcome, aiGenerated: true, verifiedHuman: false),
   ];

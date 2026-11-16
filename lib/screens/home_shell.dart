@@ -6,8 +6,10 @@ import '../widgets/glass_card.dart';
 import 'chats/chat_list_screen.dart';
 import 'connect/connect_screen.dart';
 import 'discover/discover_screen.dart';
+import 'stage/creator_profile_screen.dart';
 import 'stage/stage_screen.dart';
-import 'you/you_screen.dart';
+import '../services/links.dart';
+import 'you/my_profile_screen.dart';
 
 /// The five-tab shell: Feed · Dates · Chats · Plans · You. Floating GLASS bottom bar over content; each tab keeps its
 /// own navigation stack/state (IndexedStack). Badge counts are REAL
@@ -21,6 +23,29 @@ class HomeShell extends StatefulWidget {
 
 class _HomeShellState extends State<HomeShell> {
   int _index = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    pendingProfile.addListener(_openShared);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _openShared());
+  }
+
+  @override
+  void dispose() {
+    pendingProfile.removeListener(_openShared);
+    super.dispose();
+  }
+
+  /// A shared profile link opens that profile once you're in the app.
+  void _openShared() {
+    final id = pendingProfile.value;
+    if (id == null || !mounted) return;
+    pendingProfile.value = null;
+    final name = MockData.feed.where((f) => f.creatorId == id).map((f) => f.creatorName).firstOrNull ?? 'Profile';
+    Navigator.of(context).push(MaterialPageRoute<void>(
+        builder: (_) => CreatorProfileScreen(creatorId: id, name: name)));
+  }
 
   int get _unreadChats =>
       MockData.conversations().fold(0, (sum, c) => sum + c.unreadCount);

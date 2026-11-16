@@ -28,24 +28,23 @@ import 'sync_settings_screen.dart';
 /// S-043 My Profile (You tab) — hub to Edit (S-044), Intentions (S-045),
 /// Verification Centre (S-046), Privacy Centre (S-047), Trust & Safety
 /// Centre (S-052), Plus (S-054), Settings (S-050) and Delete (S-055).
-class YouScreen extends StatefulWidget {
-  const YouScreen({super.key});
+class AccountCentreScreen extends StatefulWidget {
+  const AccountCentreScreen({super.key});
 
   @override
-  State<YouScreen> createState() => _YouScreenState();
+  State<AccountCentreScreen> createState() => _YouScreenState();
 }
 
-class _YouScreenState extends State<YouScreen> {
+class _YouScreenState extends State<AccountCentreScreen> {
 
   @override
   Widget build(BuildContext context) {
     final me = Services.prefs.me;
     return GlassScaffold(
+      appBar: AppBar(title: const Text('Settings & account')),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 110),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
         children: [
-          Text('You', style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 12),
           GlassContainer(
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(

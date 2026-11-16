@@ -1,8 +1,10 @@
+import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'config/app_config.dart';
 import 'config/env.dart';
 import 'screens/root_flow.dart';
+import 'services/links.dart';
 import 'services/services.dart';
 import 'theme/app_theme.dart';
 import 'widgets/app_lock_gate.dart';
@@ -24,6 +26,14 @@ Future<void> main() async {
     await Services.remoteConfig.fetch().timeout(const Duration(seconds: 10));
     // Persisted gates (app lock, hidden chats, under-21 block) before UI.
     await Services.prefs.load();
+    // A shared profile link that opened the app (web URL or app link).
+    pendingProfile.value = profileIdFromLink(Uri.base);
+    if (!kIsWeb) {
+      final links = AppLinks();
+      final first = await links.getInitialLink().timeout(const Duration(seconds: 2), onTimeout: () => null);
+      if (first != null) pendingProfile.value = profileIdFromLink(first) ?? pendingProfile.value;
+      links.uriLinkStream.listen((u) => pendingProfile.value = profileIdFromLink(u) ?? pendingProfile.value);
+    }
   } catch (e) {
     debugPrint('[startup] failed: $e');
     runApp(const _StartupFailedApp());

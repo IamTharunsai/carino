@@ -171,7 +171,7 @@ void main() {
       'Chats (close the loop)': () => const ChatListScreen(),
       'Conversation': () =>
           ConversationScreen(conversation: MockData.conversations().first),
-      'You (aura)': () => const YouScreen(),
+      'You (aura)': () => const AccountCentreScreen(),
       'Wingperson': () => const WingpersonScreen(),
     };
 

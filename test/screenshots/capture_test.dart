@@ -52,6 +52,7 @@ import 'package:carino/screens/you/privacy_centre_screen.dart';
 import 'package:carino/screens/you/settings_screen.dart';
 import 'package:carino/screens/you/trust_safety_screen.dart';
 import 'package:carino/screens/you/you_screen.dart';
+import 'package:carino/screens/you/my_profile_screen.dart';
 import 'package:carino/theme/app_theme.dart';
 import 'package:carino/widgets/glass_card.dart';
 import 'package:carino/widgets/match_celebration.dart';
