@@ -40,4 +40,6 @@ abstract final class CarinoRadius {
   static const chip = 18.0; // chips, tabs
   static const button = 16.0; // buttons, inputs
   static const badge = 15.0;
+  static const input = 14.0; // text fields
+  static const digit = 12.0; // code boxes
 }

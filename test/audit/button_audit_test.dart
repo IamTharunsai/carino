@@ -32,7 +32,9 @@ import 'package:carino/screens/discover/worldwide_screen.dart';
 import 'package:carino/screens/experience/experience_screens.dart';
 import 'package:carino/screens/moments/moments_screen.dart';
 import 'package:carino/screens/onboarding/age_gate_screen.dart';
-import 'package:carino/screens/onboarding/auth_screen.dart';
+import 'package:carino/features/onboarding/code_screen.dart';
+import 'package:carino/features/onboarding/contact_screen.dart';
+import 'package:carino/features/onboarding/create_account_screen.dart';
 import 'package:carino/screens/onboarding/identity_screen.dart';
 import 'package:carino/screens/onboarding/intentions_screen.dart';
 import 'package:carino/screens/onboarding/profile_creation_screen.dart';
@@ -85,7 +87,9 @@ Map<String, Widget Function()> _screens() {
     'Welcome': () => WelcomeScreen(onContinue: _cb, onSignIn: _cb),
     'Sign in': () => SignInScreen(onSignedIn: _cb, onUseCode: _cb),
     'Age check': () => AgeGateScreen(onPassed: _cb),
-    'Code sign-in': () => AuthScreen(onAuthenticated: _cb),
+    'Create account': () => CreateAccountScreen(onAuthenticated: _cb, onUseContact: _cb),
+    'Phone or email': () => ContactScreen(onCodeSent: (_) {}, onSignIn: _cb),
+    'Enter code': () => CodeScreen(contact: 'alex@example.com', onVerified: _cb, onChangeContact: _cb),
     'Verification intro': () => VerificationIntroScreen(onStart: _cb, onExit: _cb),
     'Verification steps': () => VerificationProviderScreen(onComplete: _cb, onCancel: _cb),
     'Verification result': () => VerificationResultScreen(onPassed: _cb, onRetry: _cb),

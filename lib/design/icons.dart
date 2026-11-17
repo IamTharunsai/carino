@@ -8,6 +8,9 @@ abstract final class CarinoIcons {
   static const heartWhite = 'assets/icons/heart_white.svg';
   static const heartTab = 'assets/icons/heart_tab.svg';
   static const shield = 'assets/icons/shield.svg';
+  static const shieldPrimary = 'assets/icons/shield_primary.svg';
+  static const back = 'assets/icons/back.svg';
+  static const eye = 'assets/icons/eye.svg';
   static const close = 'assets/icons/close.svg';
   static const spark = 'assets/icons/spark.svg';
   static const filter = 'assets/icons/filter.svg';

@@ -6,7 +6,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:carino/screens/onboarding/age_gate_screen.dart';
 import 'package:carino/screens/onboarding/sign_in_screen.dart';
+import 'package:carino/features/onboarding/code_screen.dart';
+import 'package:carino/features/onboarding/contact_screen.dart';
 import 'package:carino/features/onboarding/welcome_screen.dart';
+import 'package:carino/ui/button.dart';
 import 'package:carino/theme/app_theme.dart';
 import 'package:carino/widgets/glass_card.dart';
 
@@ -86,5 +89,33 @@ void main() {
     await tester.tap(find.text('I already have an account'));
     expect(created && signedIn, isTrue);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Figma 01.03: Send me a code waits for a real email + 8-char password', (tester) async {
+    String? sentTo;
+    await _pump(tester, ContactScreen(onCodeSent: (c) => sentTo = c, onSignIn: () {}));
+    CarinoButton send() => tester.widget<CarinoButton>(find.widgetWithText(CarinoButton, 'Send me a code'));
+    expect(send().onPressed, isNull);
+    await tester.enterText(find.byKey(const Key('auth-contact')), 'alex@example');
+    await tester.enterText(find.byKey(const Key('auth-password')), 'longenough');
+    await tester.pump();
+    expect(send().onPressed, isNull, reason: 'no top-level domain');
+    await tester.enterText(find.byKey(const Key('auth-contact')), 'alex@example.com');
+    await tester.pump();
+    await tester.tap(find.text('Send me a code'));
+    await tester.pump(const Duration(seconds: 1));
+    expect(sentTo, 'alex@example.com');
+  });
+
+  testWidgets('Figma 01.04: six digits fill the boxes, countdown is real', (tester) async {
+    await _pump(tester, CodeScreen(contact: 'alex@example.com', onVerified: () {}, onChangeContact: () {}));
+    expect(find.text('Send a new code in 00:30'), findsOneWidget);
+    await tester.enterText(find.byKey(const Key('auth-code')), '24a8619');
+    await tester.pump(const Duration(seconds: 2));
+    expect(find.text('Send a new code in 00:28'), findsOneWidget);
+    for (final d in ['2', '4', '8', '6', '1', '9']) {
+      expect(find.text(d), findsWidgets);
+    }
+    expect(tester.widget<CarinoButton>(find.widgetWithText(CarinoButton, 'Verify and continue')).onPressed, isNotNull);
   });
 }

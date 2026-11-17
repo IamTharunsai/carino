@@ -34,7 +34,9 @@ import 'package:carino/screens/discover/filters_screen.dart';
 import 'package:carino/screens/discover/profile_detail_screen.dart';
 import 'package:carino/screens/home_shell.dart';
 import 'package:carino/screens/onboarding/age_gate_screen.dart';
-import 'package:carino/screens/onboarding/auth_screen.dart';
+import 'package:carino/features/onboarding/code_screen.dart';
+import 'package:carino/features/onboarding/contact_screen.dart';
+import 'package:carino/features/onboarding/create_account_screen.dart';
 import 'package:carino/screens/onboarding/identity_screen.dart';
 import 'package:carino/screens/onboarding/intentions_screen.dart';
 import 'package:carino/screens/onboarding/profile_creation_screen.dart';
@@ -146,11 +148,9 @@ void main() {
       await t.pump(const Duration(seconds: 1));
       await _tapText(t, 'Continue');
     }),
-    Shot('08_otp_contact', () => AuthScreen(onAuthenticated: () {})),
-    Shot('09_otp_invalid_contact', () => AuthScreen(onAuthenticated: () {}), (t) async {
-      await t.enterText(find.byType(TextField).first, 'abc');
-      await _tapText(t, 'Send me a code');
-    }),
+    Shot('07a_create_account', () => CreateAccountScreen(onAuthenticated: () {}, onUseContact: () {})),
+    Shot('08_otp_contact', () => ContactScreen(onCodeSent: (_) {}, onSignIn: () {})),
+    Shot('09_otp_code', () => CodeScreen(contact: 'alex@example.com', onVerified: () {}, onChangeContact: () {})),
     Shot('10_verification_intro', () => VerificationIntroScreen(onStart: () {}, onExit: () {})),
     Shot('11_verification_provider', () => VerificationProviderScreen(onComplete: () {}, onCancel: () {})),
     Shot('12_verification_result', () => VerificationResultScreen(onPassed: () {}, onRetry: () {})),
