@@ -3,7 +3,7 @@
 //   CAPTURE=1 flutter test test/screenshots/capture_test.dart
 //
 // Renders every screen + key scenarios (empty, wrong input, errors,
-// success) at 390x844 with the real Roboto + Material Icons fonts, and
+// success) at 393x852 (the Figma frame) with the real Roboto + Material Icons fonts, and
 // writes PNGs to build/screens/. Use them for UX review and store assets.
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -13,6 +13,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:carino/features/onboarding/face_check_screen.dart';
 import 'package:carino/config/app_config.dart';
 import 'package:carino/data/mock_data.dart';
 import 'package:carino/models/message.dart';
@@ -33,7 +34,7 @@ import 'package:carino/screens/experience/experience_screens.dart';
 import 'package:carino/screens/discover/filters_screen.dart';
 import 'package:carino/screens/discover/profile_detail_screen.dart';
 import 'package:carino/screens/home_shell.dart';
-import 'package:carino/screens/onboarding/age_gate_screen.dart';
+import 'package:carino/features/onboarding/birthday_screen.dart';
 import 'package:carino/features/onboarding/code_screen.dart';
 import 'package:carino/features/onboarding/contact_screen.dart';
 import 'package:carino/features/onboarding/create_account_screen.dart';
@@ -60,7 +61,7 @@ import 'package:carino/widgets/match_celebration.dart';
 import '../support/real_fonts.dart';
 
 final bool _capture = Platform.environment['CAPTURE'] == '1';
-const _size = Size(390, 844);
+const _size = Size(393, 852); // Figma frame size
 final _outDir = Directory('build/screens');
 
 Future<void> _loadFonts() => loadRealFonts();
@@ -138,12 +139,12 @@ void main() {
       await t.tap(find.byTooltip('Show password'));
       await t.pump();
     }),
-    Shot('05_dob_default_today', () => OnboardingBack(onBack: () {}, child: AgeGateScreen(onPassed: () {}))),
-    Shot('06_dob_scrolled_adult', () => AgeGateScreen(onPassed: () {}), (t) async {
+    Shot('05_dob_default_today', () => OnboardingBack(onBack: () {}, child: BirthdayScreen(onPassed: () {}))),
+    Shot('06_dob_scrolled_adult', () => BirthdayScreen(onPassed: () {}), (t) async {
       await t.drag(find.text('${DateTime.now().year}').first, const Offset(0, 400));
       await t.pump(const Duration(seconds: 1));
     }),
-    Shot('07_dob_under21_blocked', () => AgeGateScreen(onPassed: () {}), (t) async {
+    Shot('07_dob_under21_blocked', () => BirthdayScreen(onPassed: () {}), (t) async {
       await t.drag(find.text('${DateTime.now().year}').first, const Offset(0, 120));
       await t.pump(const Duration(seconds: 1));
       await _tapText(t, 'Continue');
@@ -151,6 +152,7 @@ void main() {
     Shot('07a_create_account', () => CreateAccountScreen(onAuthenticated: () {}, onUseContact: () {})),
     Shot('08_otp_contact', () => ContactScreen(onCodeSent: (_) {}, onSignIn: () {})),
     Shot('09_otp_code', () => CodeScreen(contact: 'alex@example.com', onVerified: () {}, onChangeContact: () {})),
+    Shot('09b_face_check', () => FaceCheckScreen(onComplete: () {})),
     Shot('10_verification_intro', () => VerificationIntroScreen(onStart: () {}, onExit: () {})),
     Shot('11_verification_provider', () => VerificationProviderScreen(onComplete: () {}, onCancel: () {})),
     Shot('12_verification_result', () => VerificationResultScreen(onPassed: () {}, onRetry: () {})),

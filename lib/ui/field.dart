@@ -31,7 +31,7 @@ class CarinoField extends StatelessWidget {
         const SizedBox(height: CarinoSpace.sm),
         Container(
           constraints: const BoxConstraints(minHeight: CarinoSpace.minTarget),
-          padding: const EdgeInsets.only(left: CarinoSpace.lg, right: 6),
+          padding: EdgeInsets.only(left: CarinoSpace.lg, right: trailing == null ? CarinoSpace.lg : 5),
           decoration: BoxDecoration(color: CarinoColors.soft, borderRadius: BorderRadius.circular(CarinoRadius.input)),
           child: Row(children: [
             Expanded(
@@ -52,7 +52,7 @@ class CarinoField extends StatelessWidget {
                 ),
               ),
             ),
-            if (trailing != null) trailing! else const SizedBox(width: 10),
+            if (trailing != null) trailing!,
           ]),
         ),
       ]);

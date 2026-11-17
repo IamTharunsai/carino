@@ -4,7 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:carino/screens/onboarding/age_gate_screen.dart';
+import 'package:carino/features/onboarding/birthday_screen.dart';
 import 'package:carino/screens/onboarding/sign_in_screen.dart';
 import 'package:carino/features/onboarding/code_screen.dart';
 import 'package:carino/features/onboarding/contact_screen.dart';
@@ -58,11 +58,11 @@ void main() {
 
   testWidgets('DOB: wheels start on today, continue disabled until scrolled',
       (tester) async {
-    await _pump(tester, AgeGateScreen(onPassed: () {}));
+    await _pump(tester, BirthdayScreen(onPassed: () {}));
     final now = DateTime.now();
     expect(find.text('${now.year}'), findsWidgets);
     expect(find.text('Scroll to your date of birth'), findsOneWidget);
-    expect(_button(tester, 'Continue').onPressed, isNull);
+    expect(tester.widget<CarinoButton>(find.widgetWithText(CarinoButton, 'Continue')).onPressed, isNull);
     expect(tester.takeException(), isNull);
   });
 
@@ -70,9 +70,9 @@ void main() {
     var back = 0;
     await _pump(
       tester,
-      OnboardingBack(onBack: () => back++, child: AgeGateScreen(onPassed: () {})),
+      OnboardingBack(onBack: () => back++, child: BirthdayScreen(onPassed: () {})),
     );
-    await tester.tap(find.byType(BackButton));
+    await tester.tap(find.bySemanticsLabel('Back'));
     expect(back, 1);
   });
 

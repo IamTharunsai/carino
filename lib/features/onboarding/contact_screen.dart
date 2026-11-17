@@ -76,9 +76,9 @@ class _ContactScreenState extends State<ContactScreen> {
             style: CarinoText.lead,
           ),
           Row(children: [
-            CarinoChip('Email', selected: _email, onTap: () => setState(() => _email = true)),
+            CarinoChip('Email', padX: 14, selected: _email, onTap: () => setState(() => _email = true)),
             const SizedBox(width: 10),
-            CarinoChip('Phone', selected: !_email, onTap: () => setState(() => _email = false)),
+            CarinoChip('Phone', padX: 14, selected: !_email, onTap: () => setState(() => _email = false)),
           ]),
           CarinoField(
             fieldKey: const Key('auth-contact'),
@@ -96,6 +96,8 @@ class _ContactScreenState extends State<ContactScreen> {
             obscure: _obscure,
             autofillHints: const [AutofillHints.newPassword],
             trailing: IconButton(
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints.tightFor(width: 44, height: 44),
               tooltip: _obscure ? 'Show password' : 'Hide password',
               onPressed: () => setState(() => _obscure = !_obscure),
               icon: CarinoIcon(CarinoIcons.eye, color: _obscure ? null : CarinoColors.primary),

@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:carino/features/onboarding/face_check_screen.dart';
 import 'package:carino/data/mock_data.dart';
 import 'package:carino/models/member.dart';
 import 'package:carino/models/message.dart';
@@ -70,11 +71,10 @@ void main() {
     await Services.prefs.setFaceVerified(false);
     await Services.prefs.setMockVerified(false);
     var done = false;
-    await show(t, VerificationProviderScreen(
-        faceOnly: true, onComplete: () => done = true, onCancel: () {}, captureSelfie: (_) async => 'video:clip'));
-    expect(find.text('Quick face check · about 10 seconds'), findsOneWidget);
+    await show(t, FaceCheckScreen(onComplete: () => done = true, captureSelfie: (_) async => 'video:clip'));
+    expect(find.text('Quick face check'), findsOneWidget);
     expect(find.text('Take photo'), findsNothing); // no ID photos
-    await t.tap(find.text('Start selfie'));
+    await t.tap(find.text('Start face check'));
     await t.pump(const Duration(seconds: 3));
     expect(done, isTrue);
     expect(Services.prefs.faceVerified, isTrue);

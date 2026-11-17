@@ -4,15 +4,16 @@ import '../services/auth_service.dart';
 import '../widgets/glass_card.dart';
 import '../services/services.dart';
 import 'home_shell.dart';
-import 'onboarding/age_gate_screen.dart';
 import 'onboarding/profile_creation_screen.dart';
 import 'onboarding/sign_in_screen.dart';
 import 'onboarding/verification_flow_screen.dart';
 import 'onboarding/verification_intro_screen.dart';
 import 'onboarding/waitlist_screen.dart';
+import '../features/onboarding/birthday_screen.dart';
 import '../features/onboarding/code_screen.dart';
 import '../features/onboarding/contact_screen.dart';
 import '../features/onboarding/create_account_screen.dart';
+import '../features/onboarding/face_check_screen.dart';
 import '../features/onboarding/welcome_screen.dart';
 
 /// The first-run flow (blueprint NAV & IA): a linear onboarding stack with
@@ -96,7 +97,7 @@ class _RootFlowState extends State<RootFlow> {
     if (_returning) {
       _afterSignIn();
     } else {
-      _go(_Stage.faceCheck);
+      _go(_Stage.ageGate);
     }
   }
 
@@ -156,7 +157,7 @@ class _RootFlowState extends State<RootFlow> {
     switch (_stage) {
       case _Stage.welcome:
         return WelcomeScreen(
-          onContinue: () => _go(_Stage.ageGate),
+          onContinue: () => _go(_Stage.createAccount),
           // Returning member: PRODUCTION routes through Auth + a server
           // check that the account is verified and not restricted. The
           // scaffold honours an existing demo session; otherwise it still
@@ -177,12 +178,7 @@ class _RootFlowState extends State<RootFlow> {
           onUseCode: () => _go(_Stage.contact),
         );
       case _Stage.ageGate:
-        return AgeGateScreen(onPassed: () {
-          _returning = false;
-          // Already signed in (returning but unverified)? Straight to
-          // verification — don't ask for a code twice.
-          _go(Services.auth.isSignedIn ? _Stage.faceCheck : _Stage.createAccount);
-        });
+        return BirthdayScreen(onPassed: () => _go(_Stage.faceCheck));
       case _Stage.createAccount:
         return CreateAccountScreen(onAuthenticated: _afterCode, onUseContact: () => _go(_Stage.contact));
       case _Stage.contact:
@@ -218,11 +214,7 @@ class _RootFlowState extends State<RootFlow> {
           onRetry: () => _go(_Stage.verificationProvider),
         );
       case _Stage.faceCheck:
-        return VerificationProviderScreen(
-          faceOnly: true,
-          onComplete: () => _go(_Stage.profile),
-          onCancel: _back,
-        );
+        return FaceCheckScreen(onComplete: () => _go(_Stage.profile));
       case _Stage.waitlist:
         return WaitlistScreen(onAdmitted: () => _go(_Stage.profile));
       case _Stage.profile:
@@ -244,7 +236,7 @@ class _RootFlowState extends State<RootFlow> {
                   _completedOnboarding)
               ? const HomeShell()
               : WelcomeScreen(
-                  onContinue: () => _go(_Stage.ageGate),
+                  onContinue: () => _go(_Stage.createAccount),
                   onSignIn: () {
                     _returning = true;
                     _go(_Stage.signIn);

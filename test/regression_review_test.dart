@@ -9,7 +9,7 @@ import 'package:carino/data/mock_data.dart';
 import 'package:carino/screens/discover/discover_screen.dart';
 import 'package:carino/screens/experience/experience_screens.dart';
 import 'package:carino/screens/home_shell.dart';
-import 'package:carino/screens/onboarding/age_gate_screen.dart';
+import 'package:carino/features/onboarding/birthday_screen.dart';
 import 'package:carino/screens/root_flow.dart';
 import 'package:carino/services/services.dart';
 import 'package:carino/theme/app_theme.dart';
@@ -83,7 +83,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.byType(HomeShell), findsOneWidget);
-    expect(find.byType(AgeGateScreen), findsNothing);
+    expect(find.byType(BirthdayScreen), findsNothing);
   });
 
   testWidgets('returning sign-in of a verified account goes Home', (tester) async {
@@ -103,10 +103,10 @@ void main() {
     await Services.prefs.setMockVerified(false);
   });
 
-  // 6. Under-21 block survives a fresh AgeGateScreen (back → create again).
+  // 6. Under-21 block survives a fresh BirthdayScreen (back → create again).
   testWidgets('under-21 block persists across a new age gate', (tester) async {
     await _phone(tester);
-    await tester.pumpWidget(MaterialApp(theme: AppTheme.dark(), home: AgeGateScreen(onPassed: () {})));
+    await tester.pumpWidget(MaterialApp(theme: AppTheme.dark(), home: BirthdayScreen(onPassed: () {})));
     await tester.pump();
     await tester.drag(find.text('${DateTime.now().year}').first, const Offset(0, 120));
     await tester.pump(const Duration(seconds: 1));
@@ -115,11 +115,11 @@ void main() {
     expect(find.textContaining('21+ only'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox());
-    await tester.pumpWidget(MaterialApp(theme: AppTheme.dark(), home: AgeGateScreen(onPassed: () {})));
+    await tester.pumpWidget(MaterialApp(theme: AppTheme.dark(), home: BirthdayScreen(onPassed: () {})));
     await tester.pump();
     expect(find.textContaining('21+ only'), findsOneWidget,
         reason: 'a new age gate must stay blocked');
-    expect(find.byType(BackButton), findsNothing);
+    expect(find.bySemanticsLabel('Back'), findsNothing);
   });
 
   // 8 + 9. Relationship status + couples data hygiene.
