@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../widgets/love_mark.dart';
 import '../../config/app_config.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
@@ -121,6 +122,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               ]),
             ),
             const SizedBox(height: 32),
+            const Align(alignment: Alignment.centerLeft, child: LoveMark(size: 30)),
+            const SizedBox(height: 6),
             Text('Find your kind\nof spark.', style: t.displaySmall),
             const SizedBox(height: 10),
             Text('Real people, real plans, and a date you’ll actually go on.', style: t.bodyLarge),

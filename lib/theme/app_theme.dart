@@ -23,7 +23,7 @@ class AppTheme {
       displaySmall: TextStyle(fontFamily: displayFont, fontSize: 34, fontWeight: FontWeight.w400, color: primary, height: 1.12),
       headlineMedium: TextStyle(fontFamily: displayFont, fontSize: 30, fontWeight: FontWeight.w400, color: primary, height: 1.15),
       headlineSmall: TextStyle(fontFamily: displayFont, fontSize: 24, fontWeight: FontWeight.w400, color: primary, height: 1.2),
-      titleLarge: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: primary),
+      titleLarge: TextStyle(fontFamily: displayFont, fontSize: 25, fontWeight: FontWeight.w400, color: primary, height: 1.15),
       titleMedium: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: primary),
       bodyLarge: TextStyle(fontSize: 16, color: primary, height: 1.4),
       bodyMedium: TextStyle(fontSize: 14, color: primary, height: 1.4),

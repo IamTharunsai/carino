@@ -25,6 +25,7 @@ class VerificationProviderScreen extends StatefulWidget {
     required this.onComplete,
     required this.onCancel,
     this.captureSelfie = _guidedSelfie,
+    this.faceOnly = false,
   });
 
   final VoidCallback onComplete;
@@ -32,6 +33,9 @@ class VerificationProviderScreen extends StatefulWidget {
 
   /// Opens the guided camera; returns the clip (`video:<path>`) or null.
   final Future<String?> Function(BuildContext) captureSelfie;
+
+  /// Sign-up face check: the live selfie only, no ID (ID = the gold tick, later).
+  final bool faceOnly;
 
   static Future<String?> _guidedSelfie(BuildContext context) => Navigator.of(context)
       .push<String>(MaterialPageRoute(builder: (_) => const SelfieCaptureScreen()));
@@ -47,7 +51,7 @@ enum _Phase { idFront, idBack, reading, selfie, checking }
 
 class _VerificationProviderScreenState
     extends State<VerificationProviderScreen> {
-  _Phase _phase = _Phase.idFront;
+  late _Phase _phase = widget.faceOnly ? _Phase.selfie : _Phase.idFront;
   Timer? _timer;
 
   @override
@@ -82,7 +86,11 @@ class _VerificationProviderScreenState
     if (clip == null || !mounted) return; // cancelled: stay on this step
     // Production: the clip goes to the verification provider with the ID.
     _wait(_Phase.checking, () async {
-          await Services.verification.runDemoFlow();
+          if (widget.faceOnly) {
+            await Services.prefs.setFaceVerified(true);
+          } else {
+            await Services.verification.runDemoFlow();
+          }
           if (mounted) widget.onComplete();
         });
   }
@@ -99,7 +107,9 @@ class _VerificationProviderScreenState
         _Phase.idFront => 'Fit it inside the frame, all four corners showing.',
         _Phase.idBack => 'Now the back.',
         _Phase.reading => 'Confirming your date of birth.',
-        _Phase.selfie => 'We’ll guide you: fit your face in the oval, then slowly turn your head each way. About 10 seconds.',
+        _Phase.selfie => widget.faceOnly
+            ? 'Proves a real person is here — no ID needed. Your selfie is never shown on your profile.'
+            : 'We’ll guide you: fit your face in the oval, then slowly turn your head each way. About 10 seconds.',
         _Phase.checking => 'Matching your selfie to your ID photo.',
       };
 
@@ -131,7 +141,7 @@ class _VerificationProviderScreenState
           children: [
             Row(
               children: [
-                for (var i = 1; i <= 2; i++) ...[
+                for (var i = widget.faceOnly ? 2 : 1; i <= 2; i++) ...[
                   Expanded(
                     child: Container(
                       height: 4,
@@ -148,7 +158,7 @@ class _VerificationProviderScreenState
               ],
             ),
             const SizedBox(height: 8),
-            Text('Step $step of 2 · ${step == 1 ? 'ID' : 'Selfie'}',
+            Text(widget.faceOnly ? 'Quick face check · about 10 seconds' : 'Step $step of 2 · ${step == 1 ? 'ID' : 'Selfie'}',
                 style: Theme.of(context).textTheme.labelMedium),
             const SizedBox(height: 12),
             Text(_title, style: Theme.of(context).textTheme.headlineMedium),

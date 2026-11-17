@@ -26,6 +26,7 @@ enum _Stage {
   verificationProvider,
   verificationResult,
   waitlist,
+  faceCheck,
   profile,
   home,
 }
@@ -165,14 +166,14 @@ class _RootFlowState extends State<RootFlow> {
           _returning = false;
           // Already signed in (returning but unverified)? Straight to
           // verification — don't ask for a code twice.
-          _go(Services.auth.isSignedIn ? _Stage.profile : _Stage.auth);
+          _go(Services.auth.isSignedIn ? _Stage.faceCheck : _Stage.auth);
         });
       case _Stage.auth:
         return AuthScreen(onAuthenticated: () {
           if (_returning) {
             _afterSignIn();
           } else {
-            _go(_Stage.profile);
+            _go(_Stage.faceCheck);
           }
         });
       case _Stage.verificationIntro:
@@ -193,6 +194,12 @@ class _RootFlowState extends State<RootFlow> {
                 : _Stage.profile,
           ),
           onRetry: () => _go(_Stage.verificationProvider),
+        );
+      case _Stage.faceCheck:
+        return VerificationProviderScreen(
+          faceOnly: true,
+          onComplete: () => _go(_Stage.profile),
+          onCancel: _back,
         );
       case _Stage.waitlist:
         return WaitlistScreen(onAdmitted: () => _go(_Stage.profile));

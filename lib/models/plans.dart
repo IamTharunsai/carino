@@ -21,6 +21,7 @@ const List<PlanRow> planRows = [
   (label: 'Matching, messaging, games, Vanish chat', free: 'Included', plus: 'Included'),
   (label: 'Join plans and Decompress experiences', free: 'Included', plus: 'Included'),
   (label: 'Hearts a day', free: '$freeLikesPerDay', plus: 'Unlimited'),
+  (label: 'Gold tick (ID check) · shown first on Dates', free: 'Included', plus: 'Included'),
   (label: 'See who has a crush on you', free: 'Count', plus: 'Everyone'),
   (label: 'Crushes a day 💘', free: '$freeSparksPerDay', plus: '$plusSparksPerDay'),
   (label: 'Rewind a pass', free: 'Included', plus: 'Included'),
@@ -32,3 +33,7 @@ const List<PlanRow> planRows = [
   (label: 'Video posts', free: '1 min', plus: '3 min'),
   (label: 'Spark video calls', free: '15 min', plus: 'Unlimited'),
 ];
+
+/// Gold-tick (ID-checked) profiles are shown first; order is otherwise kept.
+List<T> goldFirst<T>(List<T> deck, {required bool Function(T) isGold}) =>
+    [...deck.where(isGold), ...deck.where((m) => !isGold(m))];

@@ -296,6 +296,33 @@ try {
   await as(mod);
   await assert.rejects(db.exec(`select public.staff_review_report((select id from public.reports limit 1),'deleted','x')`)); assertions++;
 
+  // --- 0013 face-check to join, gold (ID) tick to be boosted -----------------
+  await db.exec('reset role');
+  const face = '00000000-0000-0000-0000-0000000000f1';
+  const gold = '00000000-0000-0000-0000-0000000000f2';
+  const none = '00000000-0000-0000-0000-0000000000f3';
+  await db.exec(`insert into auth.users(id) values ('${face}'),('${gold}'),('${none}')`);
+  await db.exec(`insert into public.profiles(id) values ('${face}'),('${gold}'),('${none}') on conflict do nothing`);
+  await db.exec(`insert into public.verification_records(user_id, liveness_result) values ('${face}','passed')
+                 on conflict (user_id) do update set liveness_result='passed'`);
+  await db.exec(`insert into public.verification_records(user_id, liveness_result, badge_state) values ('${gold}','passed','active')
+                 on conflict (user_id) do update set liveness_result='passed', badge_state='active'`);
+  for (const [id, name] of [[face, 'Fay'], [gold, 'Gia'], [none, 'Noa']]) {
+    await db.exec(`insert into public.member_profiles(user_id, display_name, age, city, intention)
+                   values ('${id}','${name}',25,'Columbus','long_term') on conflict do nothing`);
+  }
+  // Face-checked (no ID yet) can join groups and see Dates; gold shows first, flagged gold.
+  await as(face);
+  await db.exec(`insert into public.chat_groups(name) values ('Face-checked group')`);
+  const feed = (await db.query(`select user_id, verified from public.feed_profiles`)).rows;
+  equal(feed.some(r => r.user_id === gold && r.verified === true), true);
+  equal(feed.some(r => r.user_id === none), false); // no face check: not shown
+  equal(feed[0].user_id, gold); // gold profiles are boosted to the top
+  // No face check: can't post, and sees no Dates feed.
+  await as(none);
+  await denied(`insert into public.chat_groups(name) values ('Unchecked group')`);
+  equal(Number((await db.query(`select count(*) n from public.feed_profiles`)).rows[0].n), 0);
+
   await db.exec('reset role; set role anon');
   await denied('select * from public.social_preferences');
   await denied('select public.is_social_group_member(null)');

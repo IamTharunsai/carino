@@ -35,6 +35,13 @@ class AppColors {
   /// Hairlines and card borders on white.
   static const Color line = Color(0xFFECE6EA);
 
+  /// Signature "love" gradient: plum into mauve. Main buttons, the Feed tab, celebrations.
+  static const LinearGradient loveGradient = LinearGradient(
+    colors: [Color(0xFF6B2D5C), Color(0xFFB0507A)],
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+  );
+
   /// The verified tick.
   static const Color verifiedGold = Color(0xFFC9A13B);
 

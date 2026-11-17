@@ -40,11 +40,28 @@ class SparkButton extends StatelessWidget {
         ),
       );
     }
-    return ElevatedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon ?? Icons.arrow_forward, size: 18),
-      label: Text(label),
-      iconAlignment: iconAtEnd ? IconAlignment.end : IconAlignment.start,
+    final enabled = onPressed != null;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: enabled ? AppColors.loveGradient : null,
+        color: enabled ? null : AppColors.line,
+        borderRadius: BorderRadius.circular(999),
+        boxShadow: enabled
+            ? const [BoxShadow(color: Color(0x336B2D5C), blurRadius: 14, offset: Offset(0, 6))]
+            : null,
+      ),
+      child: ElevatedButton.icon(
+        onPressed: onPressed,
+        icon: Icon(icon ?? Icons.arrow_forward, size: 18),
+        label: Text(label),
+        iconAlignment: iconAtEnd ? IconAlignment.end : IconAlignment.start,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          disabledBackgroundColor: Colors.transparent,
+          foregroundColor: Colors.white,
+        ),
+      ),
     );
   }
 }

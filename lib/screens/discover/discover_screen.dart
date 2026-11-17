@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../widgets/love_mark.dart';
 import 'people_search_screen.dart';
 import '../../config/app_config.dart';
 import '../../config/env.dart';
@@ -66,7 +67,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     if (_showDrop) {
       return MockData.dailyDrop.where((m) => fitsMe(m) && !_swiped.contains(m.id) && !_gone(m)).toList();
     }
-    return _deck.where((m) {
+    // Gold-tick (ID-checked) profiles come first.
+    return goldFirst(_deck.where((m) {
       if (_gone(m)) return false;
       if (!fitsMe(m)) return false;
       if (_filter != null && m.intention != _filter) return false;
@@ -82,7 +84,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
       if (city != null) return m.city.toLowerCase().contains(city);
       if (!_filters.worldwideDistance && miles != null && miles > _filters.maxDistanceMi) return false;
       return true;
-    }).toList();
+    }).toList(), isGold: (m) => m.verified);
   }
 
   /// S-016: the next drop lands at 18:00 local — computed from the real
@@ -415,7 +417,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.hourglass_empty_outlined, size: 36),
+              const LoveMark(size: 34),
               const SizedBox(height: 12),
               Text(
                   'You\'re caught up',

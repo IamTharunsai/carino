@@ -73,6 +73,7 @@ class UserPrefs {
       ..addAll(sp.getStringList('pinnedChats') ?? const []);
     mockVerified = sp.getBool('mockVerified') ?? false;
     mockSignedIn = sp.getBool('mockSignedIn') ?? false;
+    faceVerified = sp.getBool('faceVerified') ?? false;
     final blocked = sp.getString('ageBlockedUntil');
     ageBlockedUntil = blocked == null ? null : DateTime.tryParse(blocked);
     _sparkDay = sp.getString('sparkDay');
@@ -91,6 +92,7 @@ class UserPrefs {
     await sp.setStringList('pinnedChats', pinnedChats.toList());
     await sp.setBool('mockVerified', mockVerified);
     await sp.setBool('mockSignedIn', mockSignedIn);
+    await sp.setBool('faceVerified', faceVerified);
     if (ageBlockedUntil == null) {
       await sp.remove('ageBlockedUntil');
     } else {
@@ -106,6 +108,13 @@ class UserPrefs {
 
   /// Demo-mode stand-in for a saved session (live: Supabase keeps it).
   bool mockSignedIn = false;
+
+  /// Passed the sign-up face check (live selfie). Gold = [mockVerified] (ID).
+  bool faceVerified = false;
+  Future<void> setFaceVerified(bool v) async {
+    faceVerified = v;
+    await save();
+  }
 
   /// Demo-mode stand-in for the server's verification_records badge.
   bool mockVerified = false;

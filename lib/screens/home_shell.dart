@@ -159,8 +159,16 @@ class _TabButton extends StatelessWidget {
               Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  Icon(selected ? spec.selectedIcon : spec.icon,
-                      color: color, size: 24),
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 220),
+                    curve: Curves.easeOut,
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: selected ? AppColors.blush : Colors.transparent,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Icon(selected ? spec.selectedIcon : spec.icon, color: color, size: 22),
+                  ),
                   if (spec.badge > 0)
                     Positioned(
                       right: -8,
@@ -181,6 +189,10 @@ class _TabButton extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 2),
+              if (selected)
+                const Icon(Icons.favorite_rounded, size: 6, color: AppColors.sparkCoral)
+              else
+                const SizedBox(height: 6),
               Text(spec.label,
                   maxLines: 1,
                   overflow: TextOverflow.fade,

@@ -66,6 +66,21 @@ void main() {
     expect(done, isTrue);
   });
 
+  testWidgets('sign-up face check: selfie only, no ID, marks you face-checked', (t) async {
+    await Services.prefs.setFaceVerified(false);
+    await Services.prefs.setMockVerified(false);
+    var done = false;
+    await show(t, VerificationProviderScreen(
+        faceOnly: true, onComplete: () => done = true, onCancel: () {}, captureSelfie: (_) async => 'video:clip'));
+    expect(find.text('Quick face check · about 10 seconds'), findsOneWidget);
+    expect(find.text('Take photo'), findsNothing); // no ID photos
+    await t.tap(find.text('Start selfie'));
+    await t.pump(const Duration(seconds: 3));
+    expect(done, isTrue);
+    expect(Services.prefs.faceVerified, isTrue);
+    expect(Services.prefs.mockVerified, isFalse); // the gold tick still needs ID
+  });
+
   testWidgets('Settings has a way into the Privacy Centre', (t) async {
     await show(t, const SettingsScreen());
     await t.scrollUntilVisible(find.text('Privacy Centre'), 200, scrollable: find.byType(Scrollable).first);
