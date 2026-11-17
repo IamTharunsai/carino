@@ -26,6 +26,7 @@ dependencies:
   geolocator: ^14.1.2
   camera: ^0.12.2
   google_mlkit_face_detection: ^1.0.3
+  flutter_svg: ^2.4.0
   # --- Remaining production integrations (hosting phase; accounts needed) ---
   # revenuecat (purchases_flutter): ^8.x  # PaymentsService (RevenueCat)
   # Persona / Veriff: native SDKs bridged via platform channels (VerificationService)
@@ -45,9 +46,22 @@ flutter:
     - assets/images/logo.png
     - assets/images/app_icon.png
     - assets/sounds/
+    - assets/icons/
+    - assets/images/people/
   # Brand type (SIL Open Font License, licences in assets/fonts/OFL-*.txt):
   # DM Serif Display for romantic headlines, Poppins for everything else.
   fonts:
+    - family: Manrope
+      fonts:
+        - asset: assets/fonts/Manrope-400.ttf
+        - asset: assets/fonts/Manrope-500.ttf
+          weight: 500
+        - asset: assets/fonts/Manrope-600.ttf
+          weight: 600
+        - asset: assets/fonts/Manrope-700.ttf
+          weight: 700
+        - asset: assets/fonts/Manrope-800.ttf
+          weight: 800
     - family: Poppins
       fonts:
         - asset: assets/fonts/Poppins-Regular.ttf

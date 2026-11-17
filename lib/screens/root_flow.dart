@@ -11,7 +11,7 @@ import 'onboarding/sign_in_screen.dart';
 import 'onboarding/verification_flow_screen.dart';
 import 'onboarding/verification_intro_screen.dart';
 import 'onboarding/waitlist_screen.dart';
-import 'onboarding/welcome_screen.dart';
+import '../features/onboarding/welcome_screen.dart';
 
 /// The first-run flow (blueprint NAV & IA): a linear onboarding stack with
 /// NO tab bar. Under-21 or unverified states can never reach HomeShell —

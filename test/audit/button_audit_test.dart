@@ -41,7 +41,7 @@ import 'package:carino/screens/onboarding/taste_quiz_screen.dart';
 import 'package:carino/screens/onboarding/verification_flow_screen.dart';
 import 'package:carino/screens/onboarding/verification_intro_screen.dart';
 import 'package:carino/screens/onboarding/waitlist_screen.dart';
-import 'package:carino/screens/onboarding/welcome_screen.dart';
+import 'package:carino/features/onboarding/welcome_screen.dart';
 import 'package:carino/screens/stage/stage_screen.dart';
 import 'package:carino/screens/you/delete_account_screen.dart';
 import 'package:carino/screens/you/facets_screen.dart';

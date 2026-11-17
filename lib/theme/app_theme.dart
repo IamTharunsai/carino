@@ -14,7 +14,7 @@ class AppTheme {
   static const double screenPadding = 16;
 
   /// Brand fonts (bundled, OFL). Body/UI = Poppins, headlines = DM Serif.
-  static const String bodyFont = 'Poppins';
+  static const String bodyFont = 'Manrope';
   static const String displayFont = 'DM Serif Display';
 
   static TextTheme _textTheme(Color primary, Color secondary) {
@@ -23,7 +23,7 @@ class AppTheme {
       displaySmall: TextStyle(fontFamily: displayFont, fontSize: 34, fontWeight: FontWeight.w400, color: primary, height: 1.12),
       headlineMedium: TextStyle(fontFamily: displayFont, fontSize: 30, fontWeight: FontWeight.w400, color: primary, height: 1.15),
       headlineSmall: TextStyle(fontFamily: displayFont, fontSize: 24, fontWeight: FontWeight.w400, color: primary, height: 1.2),
-      titleLarge: TextStyle(fontFamily: displayFont, fontSize: 25, fontWeight: FontWeight.w400, color: primary, height: 1.15),
+      titleLarge: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: primary, height: 1.16),
       titleMedium: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: primary),
       bodyLarge: TextStyle(fontSize: 16, color: primary, height: 1.4),
       bodyMedium: TextStyle(fontSize: 14, color: primary, height: 1.4),

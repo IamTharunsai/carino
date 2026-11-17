@@ -18,6 +18,8 @@ Future<void> loadRealFonts() async {
   const poppins = ['Poppins-Regular.ttf', 'Poppins-Medium.ttf', 'Poppins-SemiBold.ttf',
       'Poppins-Bold.ttf', 'Poppins-Italic.ttf'];
   await family('Poppins', 'assets/fonts', poppins);
+  await family('Manrope', 'assets/fonts',
+      ['Manrope-400.ttf', 'Manrope-500.ttf', 'Manrope-600.ttf', 'Manrope-700.ttf', 'Manrope-800.ttf']);
   await family('DM Serif Display', 'assets/fonts',
       ['DMSerifDisplay-Regular.ttf', 'DMSerifDisplay-Italic.ttf']);
 

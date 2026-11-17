@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:carino/screens/onboarding/age_gate_screen.dart';
 import 'package:carino/screens/onboarding/sign_in_screen.dart';
-import 'package:carino/screens/onboarding/welcome_screen.dart';
+import 'package:carino/features/onboarding/welcome_screen.dart';
 import 'package:carino/theme/app_theme.dart';
 import 'package:carino/widgets/glass_card.dart';
 
@@ -73,13 +73,18 @@ void main() {
     expect(back, 1);
   });
 
-  testWidgets('welcome: no 21+ line, create account arrow on the right',
-      (tester) async {
-    await _pump(tester, WelcomeScreen(onContinue: () {}, onSignIn: () {}));
-    expect(find.textContaining('21+'), findsNothing);
-    final createRect = tester.getRect(find.text('Create account'));
-    final arrowRect = tester.getRect(find.byIcon(Icons.arrow_forward_rounded).first);
-    expect(arrowRect.left, greaterThan(createRect.right));
+  testWidgets('welcome matches Figma 01.01: copy, both buttons, legal line', (tester) async {
+    var created = false, signedIn = false;
+    await _pump(tester, WelcomeScreen(onContinue: () => created = true, onSignIn: () => signedIn = true));
+    expect(find.text('A little spark.'), findsOneWidget);
+    expect(find.text('Meet someone.\nMake a memory.'), findsOneWidget);
+    expect(find.text('Real people. Real plans.'), findsOneWidget);
+    // Small phone: the legal line sits below the fold.
+    await tester.dragUntilVisible(find.text('21+ only'), find.byType(ListView), const Offset(0, -200));
+    expect(find.text('21+ only'), findsOneWidget);
+    await tester.tap(find.text('Create an account'));
+    await tester.tap(find.text('I already have an account'));
+    expect(created && signedIn, isTrue);
     expect(tester.takeException(), isNull);
   });
 }

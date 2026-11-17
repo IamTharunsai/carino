@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../data/mock_data.dart';
-import '../theme/app_colors.dart';
 import '../services/services.dart';
-import '../widgets/glass_card.dart';
+import '../design/icons.dart';
+import '../ui/bottom_nav.dart';
 import 'chats/chat_list_screen.dart';
 import 'connect/connect_screen.dart';
 import 'discover/discover_screen.dart';
@@ -65,15 +65,12 @@ class _HomeShellState extends State<HomeShell> {
 
   @override
   Widget build(BuildContext context) {
-    final tabs = <_TabSpec>[
-      // Faces first: the social Feed, then the verified 21+ Dates deck.
-      const _TabSpec(Icons.play_circle_outline, Icons.play_circle, 'Feed'),
-      const _TabSpec(Icons.local_fire_department_outlined,
-          Icons.local_fire_department, 'Dates'),
-      _TabSpec(Icons.chat_bubble_outline, Icons.chat_bubble, 'Chats',
-          badge: _unreadChats),
-      const _TabSpec(Icons.event_outlined, Icons.event, 'Plans'),
-      const _TabSpec(Icons.person_outline, Icons.person, 'You'),
+    final tabs = [
+      const CarinoTab(CarinoIcons.play, 'Feed'),
+      const CarinoTab(CarinoIcons.heart, 'Dates'),
+      CarinoTab(CarinoIcons.chat, 'Chats', badge: _unreadChats),
+      const CarinoTab(CarinoIcons.calendar, 'Plans'),
+      const CarinoTab(CarinoIcons.user, 'You'),
     ];
 
     return Scaffold(
@@ -92,116 +89,13 @@ class _HomeShellState extends State<HomeShell> {
             TickerMode(enabled: i == _index, child: tab),
         ],
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
-        child: GlassContainer(
-          radius: 28,
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              // Equal-width slots: labels never push the bar off-screen.
-              for (var i = 0; i < tabs.length; i++)
-                Expanded(
-                  child: _TabButton(
-                    spec: tabs[i],
-                    selected: _index == i,
-                    onTap: () {
-                      Services.analytics.screen(tabs[i].label);
-                      setState(() => _index = i);
-                    },
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _TabSpec {
-  const _TabSpec(this.icon, this.selectedIcon, this.label, {this.badge = 0});
-  final IconData icon;
-  final IconData selectedIcon;
-  final String label;
-  final int badge;
-}
-
-class _TabButton extends StatelessWidget {
-  const _TabButton({
-    required this.spec,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final _TabSpec spec;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = selected
-        ? AppColors.emberCrimson
-        : Theme.of(context).textTheme.bodySmall?.color;
-    return Semantics(
-      label: '${spec.label} tab${spec.badge > 0 ? ', ${spec.badge} unread' : ''}',
-      button: true,
-      selected: selected,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 220),
-                    curve: Curves.easeOut,
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: selected ? AppColors.blush : Colors.transparent,
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Icon(selected ? spec.selectedIcon : spec.icon, color: color, size: 22),
-                  ),
-                  if (spec.badge > 0)
-                    Positioned(
-                      right: -8,
-                      top: -4,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                        decoration: const BoxDecoration(
-                          color: AppColors.emberCrimson,
-                          borderRadius: BorderRadius.all(Radius.circular(999)),
-                        ),
-                        child: Text(
-                          '${spec.badge}',
-                          style: const TextStyle(
-                              color: AppColors.warmIvory, fontSize: 10),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 2),
-              if (selected)
-                const Icon(Icons.favorite_rounded, size: 6, color: AppColors.sparkCoral)
-              else
-                const SizedBox(height: 6),
-              Text(spec.label,
-                  maxLines: 1,
-                  overflow: TextOverflow.fade,
-                  softWrap: false,
-                  style: TextStyle(fontSize: 11, color: color,
-                      fontWeight: selected ? FontWeight.w600 : FontWeight.w400)),
-            ],
-          ),
-        ),
+      bottomNavigationBar: CarinoBottomNav(
+        tabs: tabs,
+        index: _index,
+        onTap: (i) {
+          Services.analytics.screen(tabs[i].label);
+          setState(() => _index = i);
+        },
       ),
     );
   }
