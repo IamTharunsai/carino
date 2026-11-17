@@ -47,7 +47,7 @@ class SparkButton extends StatelessWidget {
         color: enabled ? null : AppColors.line,
         borderRadius: BorderRadius.circular(999),
         boxShadow: enabled
-            ? const [BoxShadow(color: Color(0x336B2D5C), blurRadius: 14, offset: Offset(0, 6))]
+            ? const [BoxShadow(color: Color(0x296C3BD1), blurRadius: 16, offset: Offset(0, 8))]
             : null,
       ),
       child: ElevatedButton.icon(

@@ -81,7 +81,7 @@ class AppTheme {
       brightness: Brightness.light,
       colorScheme: scheme,
       scaffoldBackgroundColor: AppColors.porcelain,
-      textTheme: _textTheme(AppColors.midnight, const Color(0xFF6E6670)),
+      textTheme: _textTheme(AppColors.midnight, const Color(0xFF5E5470)),
       iconTheme: const IconThemeData(size: 22, color: AppColors.midnight),
       dividerColor: AppColors.line,
       appBarTheme: const AppBarTheme(

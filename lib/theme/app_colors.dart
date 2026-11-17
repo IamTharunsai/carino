@@ -1,49 +1,49 @@
 import 'package:flutter/material.dart';
 
-/// Cariño palette — clean white, near-black ink, romantic plum (not red),
-/// a soft mauve for small highlights and gold for the verified tick.
+/// Cariño palette — "Lavender Dream" (see DESIGN.md): lilac mist, violet,
+/// heart pink, ink, and gold for the verified tick.
 /// Token NAMES are kept from the first palette so every screen updates.
 class AppColors {
   static const Color surfaceLight = Colors.white;
-  static const Color porcelainDeep = Color(0xFFF7F3F5);
+  static const Color porcelainDeep = Color(0xFFEFE8FA);
   AppColors._();
 
   /// Plum — primary buttons, selected states. 9:1 on white.
-  static const Color emberCrimson = Color(0xFF6B2D5C);
+  static const Color emberCrimson = Color(0xFF6C3BD1); // violet
 
   /// Mauve — small highlights, icons, celebrations. 5:1 on white.
-  static const Color sparkCoral = Color(0xFFB0507A);
+  static const Color sparkCoral = Color(0xFFD6266A); // heart (text-safe)
 
   /// Ink — text on light, and the dark-mode / reel background.
-  static const Color midnight = Color(0xFF1C1A1F);
+  static const Color midnight = Color(0xFF241B35); // ink
 
   /// Elevated surfaces on dark: cards, sheets, navigation.
-  static const Color plumCharcoal = Color(0xFF2A2730);
+  static const Color plumCharcoal = Color(0xFF211B30);
 
   /// Primary text on dark.
   static const Color warmIvory = Color(0xFFFFFFFF);
 
   /// Secondary text / quiet labels on dark.
-  static const Color softRose = Color(0xFF9A919B);
+  static const Color softRose = Color(0xFF8A7FA0);
 
   /// Light theme background — clean white (the default theme).
-  static const Color porcelain = Color(0xFFFFFFFF);
+  static const Color porcelain = Color(0xFFF6F2FC); // lilac mist
 
   /// Soft plum tint for selected chips and quiet fills.
-  static const Color blush = Color(0xFFF5EAF0);
+  static const Color blush = Color(0xFFEFE8FA);
 
   /// Hairlines and card borders on white.
-  static const Color line = Color(0xFFECE6EA);
+  static const Color line = Color(0xFFE4DBF3);
 
   /// Signature "love" gradient: plum into mauve. Main buttons, the Feed tab, celebrations.
   static const LinearGradient loveGradient = LinearGradient(
-    colors: [Color(0xFF6B2D5C), Color(0xFFB0507A)],
+    colors: [Color(0xFF6C3BD1), Color(0xFFFF4F8B)],
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
   );
 
   /// The verified tick.
-  static const Color verifiedGold = Color(0xFFC9A13B);
+  static const Color verifiedGold = Color(0xFFB07F17);
 
   // --- Glass tints (DESIGN SYSTEM: cards 55–65% tint, sheets 80%) ---
   static Color glassFillDark(double opacity) =>
